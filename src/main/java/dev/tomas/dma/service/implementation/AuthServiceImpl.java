@@ -1,6 +1,7 @@
 package dev.tomas.dma.service.implementation;
 
 import dev.tomas.dma.dto.AuthResponse;
+import dev.tomas.dma.dto.AuthUserResponse;
 import dev.tomas.dma.dto.UserRegisterRequest;
 import dev.tomas.dma.dto.AuthRequest;
 import dev.tomas.dma.mapper.AuthResponseMapper;
@@ -88,16 +89,21 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
         }
     }
 
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // Try to find by username first, if not found try email
-        // This allows login with EITHER username OR email
-        return authRepo.findByUsername(username)
+    public AuthUserResponse authMe(Authentication authentication) {
+        String username = authentication.getName();
+        UserEntity user = authRepo.findByUsername(username)
                 .or(() -> authRepo.findByEmail(username))
-                .orElseThrow(() -> new UsernameNotFoundException(
-                        "User not found with username or email: " + username
-                ));
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with username or email: " + username));
+
+        AuthUserResponse response = new AuthUserResponse();
+        return AuthResponseMapper.INSTANCE.convertToModel(user);
     }
 
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return authRepo.findByUsername(username)
+                .or(() -> authRepo.findByEmail(username))
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with username or email: " + username));
+    }
 }
 

@@ -20,7 +20,6 @@ import java.util.Currency;
 public class CampaignEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @NotNull
     @Column(name = "id")
     private Integer id;
 
