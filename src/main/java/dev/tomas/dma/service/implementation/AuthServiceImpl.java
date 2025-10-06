@@ -1,7 +1,9 @@
 package dev.tomas.dma.service.implementation;
 
+import dev.tomas.dma.dto.AuthResponse;
 import dev.tomas.dma.dto.UserRegisterRequest;
 import dev.tomas.dma.dto.AuthRequest;
+import dev.tomas.dma.mapper.AuthResponseMapper;
 import dev.tomas.dma.model.entity.UserEntity;
 import dev.tomas.dma.repository.AuthRepo;
 import dev.tomas.dma.service.AuthService;
@@ -37,7 +39,7 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
     }
 
     @Override
-    public String register(UserRegisterRequest registerRequest) {
+    public AuthResponse register(UserRegisterRequest registerRequest) {
 
         if (registerRequest.getEmail() != null && authRepo.findByEmail(registerRequest.getEmail()).isPresent()) {
             throw new RuntimeException("Email already exists");
@@ -58,18 +60,26 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
 
         var createdUser = authRepo.save(entity);
 
-        return jwtService.generateToken(createdUser);
+        AuthResponse response = new AuthResponse();
+        response.setToken(jwtService.generateToken(createdUser));
+        response.setUser(AuthResponseMapper.INSTANCE.convertToModel(createdUser));
+        return response;
     }
 
     @Override
-    public String login(AuthRequest authRequest) {
+    public AuthResponse login(AuthRequest authRequest) {
         try {
             UsernamePasswordAuthenticationToken authRequestToken =
                     new UsernamePasswordAuthenticationToken(authRequest.getUsername() == null ? authRequest.getEmail() : authRequest.getUsername(), authRequest.getPassword());
 
             Authentication authentication = authManager.authenticate(authRequestToken);
             UserEntity user = (UserEntity) authentication.getPrincipal();
-            return jwtService.generateToken(user);
+
+            AuthResponse response = new AuthResponse();
+            response.setToken(jwtService.generateToken(user));
+            response.setUser(AuthResponseMapper.INSTANCE.convertToModel(user));
+
+            return response;
 
         } catch (BadCredentialsException e) {
             throw new RuntimeException("Invalid username/email or password");
@@ -87,11 +97,6 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException(
                         "User not found with username or email: " + username
                 ));
-    }
-
-    @Override
-    public void logout() {
-
     }
 
 }

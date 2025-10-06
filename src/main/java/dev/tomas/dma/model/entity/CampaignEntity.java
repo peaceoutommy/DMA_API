@@ -16,23 +16,29 @@ import java.util.Currency;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data // Getters and setters in 1
-@Table(name="campaign")
+@Table(name = "campaign")
 public class CampaignEntity {
-    @Id @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @NotNull
+    @Column(name = "id")
     private Integer id;
 
     @Size(min = 3, max = 100, message = "Name must be at least 3 characters long")
+    @Column(name = "name")
     private String name;
 
     @NotNull
     @Size(min = 10, max = 2000, message = "Description must be at least 10 characters long")
+    @Column(name = "description")
     private String description;
 
     @NotNull
+    @Column(name = "company_id")
     private Integer companyId;
 
     @NotNull
-    @Min(1) @Max(999999999)
+    @Min(1)
+    @Max(999999999)
     private BigDecimal fundGoal;
 }

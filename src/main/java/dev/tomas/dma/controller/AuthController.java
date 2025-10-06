@@ -1,6 +1,7 @@
 package dev.tomas.dma.controller;
 
 import dev.tomas.dma.dto.AuthRequest;
+import dev.tomas.dma.dto.AuthResponse;
 import dev.tomas.dma.dto.UserRegisterRequest;
 import dev.tomas.dma.service.AuthService;
 import dev.tomas.dma.service.implementation.JWTService;
@@ -18,12 +19,12 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("register")
-    public String register(@RequestBody @Valid UserRegisterRequest registerRequest) {
+    public AuthResponse register(@RequestBody @Valid UserRegisterRequest registerRequest) {
         return authService.register(registerRequest);
     }
 
     @PostMapping("login")
-    public String login(@RequestBody @Valid AuthRequest authRequest) {
+    public AuthResponse login(@RequestBody @Valid AuthRequest authRequest) {
         return authService.login(authRequest);
     }
 }
