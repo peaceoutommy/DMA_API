@@ -3,11 +3,9 @@ package dev.tomas.dma.model;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-@Getter
 @AllArgsConstructor
-public class Company {
+@Getter
+public class CompanyType {
     private Integer id;
-    private String companyName;
-    private String registrationNumber;
-    private String taxId;
+    private String type;
 }

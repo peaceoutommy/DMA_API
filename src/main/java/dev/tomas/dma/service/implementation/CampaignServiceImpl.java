@@ -1,6 +1,7 @@
 package dev.tomas.dma.service.implementation;
 
 import dev.tomas.dma.dto.CampaignCreateRequest;
+import dev.tomas.dma.dto.CampaignGetAllResponseDto;
 import dev.tomas.dma.dto.CampaignUpdateRequest;
 import dev.tomas.dma.mapper.CampaignMapper;
 import dev.tomas.dma.model.Campaign;
@@ -23,12 +24,12 @@ public class CampaignServiceImpl implements CampaignService {
     CampaignRepo campaignRepo;
 
     @Override
-    public List<Campaign> findAll() {
-        List<Campaign> campaigns = new ArrayList<>();
+    public CampaignGetAllResponseDto findAll() {
+        CampaignGetAllResponseDto response = new CampaignGetAllResponseDto();
         for (CampaignEntity entity : campaignRepo.findAll()) {
-            campaigns.add(CampaignMapper.INSTANCE.convertToModel(entity));
+            response.campaigns.add(CampaignMapper.INSTANCE.convertToModel(entity));
         }
-        return campaigns;
+        return response;
     }
 
     @Override

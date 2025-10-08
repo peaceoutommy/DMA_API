@@ -1,6 +1,7 @@
 package dev.tomas.dma.controller;
 
 import dev.tomas.dma.dto.CampaignCreateRequest;
+import dev.tomas.dma.dto.CampaignGetAllResponseDto;
 import dev.tomas.dma.dto.CampaignUpdateRequest;
 import dev.tomas.dma.model.Campaign;
 import dev.tomas.dma.service.CampaignService;
@@ -21,7 +22,7 @@ public class CampaignController {
     CampaignService campaignService;
 
     @GetMapping()
-    public List<Campaign> getAll() {
+    public CampaignGetAllResponseDto getAll() {
         return campaignService.findAll();
     }
 

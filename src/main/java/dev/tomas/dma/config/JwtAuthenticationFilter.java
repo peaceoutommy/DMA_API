@@ -66,7 +66,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                 // Step 10: Set the authentication in Spring Security context
-                // Now Spring knows this user is authenticated for this request
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }

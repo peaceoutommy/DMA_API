@@ -1,13 +1,14 @@
 package dev.tomas.dma.service;
 
 import dev.tomas.dma.dto.CampaignCreateRequest;
+import dev.tomas.dma.dto.CampaignGetAllResponseDto;
 import dev.tomas.dma.dto.CampaignUpdateRequest;
 import dev.tomas.dma.model.Campaign;
 
 import java.util.List;
 
 public interface CampaignService {
-    List<Campaign> findAll();
+    CampaignGetAllResponseDto findAll();
     Campaign findById(Integer id);
     Campaign save(CampaignCreateRequest request);
     Campaign update(CampaignUpdateRequest request);

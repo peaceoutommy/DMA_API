@@ -1,24 +1,24 @@
 package dev.tomas.dma.dto;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
 public class UserRegisterRequest {
-    @NotNull
+    @NotBlank
     private String firstName;
-    @NotNull
+    @NotBlank
     private String lastName;
-    @NotNull
+    @NotBlank
     private String middleNames;
-    @NotNull
+    @NotBlank
     private String username;
-    @NotNull
+    @NotBlank
     private String email;
-    @NotNull
+    @NotBlank
     private String password;
-    @NotNull
+    @NotBlank
     private String phoneNumber;
-    @NotNull
+    @NotBlank
     private String address;
 }

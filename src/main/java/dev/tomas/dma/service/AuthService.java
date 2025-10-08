@@ -12,5 +12,4 @@ public interface AuthService {
     AuthResponse login(AuthRequest authRequest);
     AuthResponse register(UserRegisterRequest registerRequest);
     AuthUserResponse authMe(Authentication authentication);
-    UserDetails loadUserByUsername(String username);
 }

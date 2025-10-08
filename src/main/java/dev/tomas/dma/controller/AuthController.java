@@ -4,13 +4,10 @@ import dev.tomas.dma.dto.AuthRequest;
 import dev.tomas.dma.dto.AuthResponse;
 import dev.tomas.dma.dto.AuthUserResponse;
 import dev.tomas.dma.dto.UserRegisterRequest;
-import dev.tomas.dma.model.entity.UserEntity;
 import dev.tomas.dma.service.AuthService;
-import dev.tomas.dma.service.implementation.JWTService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

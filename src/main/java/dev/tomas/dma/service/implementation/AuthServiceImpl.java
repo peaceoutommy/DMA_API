@@ -8,7 +8,6 @@ import dev.tomas.dma.mapper.AuthResponseMapper;
 import dev.tomas.dma.model.entity.UserEntity;
 import dev.tomas.dma.repository.AuthRepo;
 import dev.tomas.dma.service.AuthService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -49,22 +48,18 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
             throw new RuntimeException("Username already exists");
         }
 
-        UserEntity entity = new UserEntity();
-        entity.setEmail(registerRequest.getEmail());
-        entity.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
-        entity.setPhoneNumber(registerRequest.getPhoneNumber());
-        entity.setAddress(registerRequest.getAddress());
-        entity.setFirstName(registerRequest.getFirstName());
-        entity.setLastName(registerRequest.getLastName());
-        entity.setMiddleNames(registerRequest.getMiddleNames());
-        entity.setUsername(registerRequest.getUsername());
+        UserEntity toSave = new UserEntity();
+        toSave.setEmail(registerRequest.getEmail());
+        toSave.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
+        toSave.setPhoneNumber(registerRequest.getPhoneNumber());
+        toSave.setAddress(registerRequest.getAddress());
+        toSave.setFirstName(registerRequest.getFirstName());
+        toSave.setLastName(registerRequest.getLastName());
+        toSave.setMiddleNames(registerRequest.getMiddleNames());
+        toSave.setUsername(registerRequest.getUsername());
 
-        var createdUser = authRepo.save(entity);
-
-        AuthResponse response = new AuthResponse();
-        response.setToken(jwtService.generateToken(createdUser));
-        response.setUser(AuthResponseMapper.INSTANCE.convertToModel(createdUser));
-        return response;
+        UserEntity createdUser = authRepo.save(toSave);
+        return new AuthResponse(jwtService.generateToken(createdUser), AuthResponseMapper.INSTANCE.convertToModel(createdUser));
     }
 
     @Override
@@ -76,11 +71,7 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
             Authentication authentication = authManager.authenticate(authRequestToken);
             UserEntity user = (UserEntity) authentication.getPrincipal();
 
-            AuthResponse response = new AuthResponse();
-            response.setToken(jwtService.generateToken(user));
-            response.setUser(AuthResponseMapper.INSTANCE.convertToModel(user));
-
-            return response;
+            return new AuthResponse(jwtService.generateToken(user), AuthResponseMapper.INSTANCE.convertToModel(user));
 
         } catch (BadCredentialsException e) {
             throw new RuntimeException("Invalid username/email or password");

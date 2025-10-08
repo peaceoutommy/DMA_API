@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class AuthResponse {
-    public String token;
-    public AuthUserResponse user;
+public class CompanyTypeCreateResponseDto {
+    public Integer id;
+    public String type;
 }
