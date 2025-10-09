@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class CompanyTypeCreateResponseDto {
+public class CompanyTypeDto {
     public Integer id;
     public String type;
 }
