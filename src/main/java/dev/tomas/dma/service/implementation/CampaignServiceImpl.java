@@ -1,8 +1,8 @@
 package dev.tomas.dma.service.implementation;
 
-import dev.tomas.dma.dto.CampaignCreateRequest;
-import dev.tomas.dma.dto.CampaignGetAllResponseDto;
-import dev.tomas.dma.dto.CampaignUpdateRequest;
+import dev.tomas.dma.dto.CampaignCreateReq;
+import dev.tomas.dma.dto.CampaignGetAllRes;
+import dev.tomas.dma.dto.CampaignUpdateReq;
 import dev.tomas.dma.mapper.CampaignMapper;
 import dev.tomas.dma.model.Campaign;
 import dev.tomas.dma.model.entity.CampaignEntity;
@@ -13,8 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -24,8 +22,8 @@ public class CampaignServiceImpl implements CampaignService {
     CampaignRepo campaignRepo;
 
     @Override
-    public CampaignGetAllResponseDto findAll() {
-        CampaignGetAllResponseDto response = new CampaignGetAllResponseDto();
+    public CampaignGetAllRes findAll() {
+        CampaignGetAllRes response = new CampaignGetAllRes();
         for (CampaignEntity entity : campaignRepo.findAll()) {
             response.campaigns.add(CampaignMapper.INSTANCE.convertToModel(entity));
         }
@@ -42,7 +40,7 @@ public class CampaignServiceImpl implements CampaignService {
     }
 
     @Override
-    public Campaign save(CampaignCreateRequest request) {
+    public Campaign save(CampaignCreateReq request) {
         if (Objects.isNull(request.getName()) || request.getName().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Campaign name can't be empty");
         }
@@ -60,7 +58,7 @@ public class CampaignServiceImpl implements CampaignService {
     }
 
     @Override
-    public Campaign update(CampaignUpdateRequest request) {
+    public Campaign update(CampaignUpdateReq request) {
         CampaignEntity original = campaignRepo.findById(request.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Campaign not found"));
 

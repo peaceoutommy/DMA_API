@@ -6,6 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class CompanyTypeGetAllResponseDto {
-    public List<CompanyTypeDto> types = new ArrayList<>();
+public class CompanyTypeGetAllRes {
+    public List<CompanyTypeGetRes> types = new ArrayList<>();
 }

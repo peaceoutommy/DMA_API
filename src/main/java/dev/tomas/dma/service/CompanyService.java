@@ -1,14 +1,16 @@
 package dev.tomas.dma.service;
 
-import dev.tomas.dma.dto.CompanyTypeCreateRequestDto;
-import dev.tomas.dma.dto.CompanyTypeDto;
-import dev.tomas.dma.dto.CompanyTypeGetAllResponseDto;
+import dev.tomas.dma.dto.*;
 
 import java.util.Optional;
 
 public interface CompanyService {
-    Optional <CompanyTypeGetAllResponseDto> getAllTypes();
-    Optional<CompanyTypeDto> getTypeById(Integer id);
-    CompanyTypeDto saveType(CompanyTypeCreateRequestDto request);
+    Optional<CompanyTypeGetAllRes> getAllTypes();
+
+    Optional<CompanyTypeGetRes> getTypeById(Integer id);
+
+    CompanyTypeGetRes saveType(CompanyTypeCreateReq request);
+
+    CompanyCreateRes saveCompany(CompanyCreateReq request);
 
 }

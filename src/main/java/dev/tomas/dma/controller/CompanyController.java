@@ -1,8 +1,6 @@
 package dev.tomas.dma.controller;
 
-import dev.tomas.dma.dto.CompanyTypeCreateRequestDto;
-import dev.tomas.dma.dto.CompanyTypeDto;
-import dev.tomas.dma.dto.CompanyTypeGetAllResponseDto;
+import dev.tomas.dma.dto.*;
 import dev.tomas.dma.service.CompanyService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,20 +15,24 @@ public class CompanyController {
     private final CompanyService companyService;
 
     @GetMapping("types")
-    public Optional<CompanyTypeGetAllResponseDto> getAllTypes(){
+    public Optional<CompanyTypeGetAllRes> getAllTypes(){
         return companyService.getAllTypes();
     }
 
     @GetMapping("types/{id}")
-    public Optional<CompanyTypeDto> getTypeById(@PathVariable Integer id){
+    public Optional<CompanyTypeGetRes> getTypeById(@PathVariable Integer id){
         return companyService.getTypeById(id);
     }
 
     @PostMapping("types")
-    public CompanyTypeDto createType(@Valid @RequestBody CompanyTypeCreateRequestDto request) {
+    public CompanyTypeGetRes createType(@Valid @RequestBody CompanyTypeCreateReq request) {
         return companyService.saveType(request);
     }
 
-
+    // Endpoint for creating Company
+    @PostMapping
+    public CompanyCreateRes createCompany(@Valid @RequestBody CompanyCreateReq request) {
+        return companyService.saveCompany(request);
+    }
 
 }

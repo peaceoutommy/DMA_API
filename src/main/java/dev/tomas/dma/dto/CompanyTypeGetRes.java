@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class CompanyTypeDto {
+public class CompanyTypeGetRes {
     public Integer id;
-    public String type;
+    public String name;
 }
