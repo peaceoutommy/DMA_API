@@ -1,9 +1,9 @@
 package dev.tomas.dma.service.implementation;
 
-import dev.tomas.dma.dto.AuthResponse;
+import dev.tomas.dma.dto.AuthRes;
 import dev.tomas.dma.dto.AuthUserResponse;
-import dev.tomas.dma.dto.UserRegisterRequest;
-import dev.tomas.dma.dto.AuthRequest;
+import dev.tomas.dma.dto.UserRegisterReq;
+import dev.tomas.dma.dto.AuthReq;
 import dev.tomas.dma.mapper.AuthResponseMapper;
 import dev.tomas.dma.model.entity.UserEntity;
 import dev.tomas.dma.repository.AuthRepo;
@@ -39,7 +39,7 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
     }
 
     @Override
-    public AuthResponse register(UserRegisterRequest registerRequest) {
+    public AuthRes register(UserRegisterReq registerRequest) {
 
         if (registerRequest.getEmail() != null && authRepo.findByEmail(registerRequest.getEmail()).isPresent()) {
             throw new RuntimeException("Email already exists");
@@ -59,19 +59,19 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
         toSave.setUsername(registerRequest.getUsername());
 
         UserEntity createdUser = authRepo.save(toSave);
-        return new AuthResponse(jwtService.generateToken(createdUser), AuthResponseMapper.INSTANCE.convertToModel(createdUser));
+        return new AuthRes(jwtService.generateToken(createdUser), AuthResponseMapper.INSTANCE.convertToModel(createdUser));
     }
 
     @Override
-    public AuthResponse login(AuthRequest authRequest) {
+    public AuthRes login(AuthReq authReq) {
         try {
             UsernamePasswordAuthenticationToken authRequestToken =
-                    new UsernamePasswordAuthenticationToken(authRequest.getUsername() == null ? authRequest.getEmail() : authRequest.getUsername(), authRequest.getPassword());
+                    new UsernamePasswordAuthenticationToken(authReq.getUsername() == null ? authReq.getEmail() : authReq.getUsername(), authReq.getPassword());
 
             Authentication authentication = authManager.authenticate(authRequestToken);
             UserEntity user = (UserEntity) authentication.getPrincipal();
 
-            return new AuthResponse(jwtService.generateToken(user), AuthResponseMapper.INSTANCE.convertToModel(user));
+            return new AuthRes(jwtService.generateToken(user), AuthResponseMapper.INSTANCE.convertToModel(user));
 
         } catch (BadCredentialsException e) {
             throw new RuntimeException("Invalid username/email or password");

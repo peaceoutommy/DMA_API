@@ -7,8 +7,8 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class CompanyTypeCreateRequestDto {
+public class CompanyTypeCreateReq {
     @NotBlank
     @Size(min = 1, max = 50, message = "Please provide a company type between 1 and 50 characters")
-    public String type;
+    public String name;
 }

@@ -9,6 +9,6 @@ import java.util.List;
 
 @NoArgsConstructor
 @Data
-public class CampaignGetAllResponseDto {
+public class CampaignGetAllRes {
     public List<Campaign> campaigns = new ArrayList<>();
 }

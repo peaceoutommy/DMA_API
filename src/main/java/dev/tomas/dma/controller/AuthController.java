@@ -1,9 +1,9 @@
 package dev.tomas.dma.controller;
 
-import dev.tomas.dma.dto.AuthRequest;
-import dev.tomas.dma.dto.AuthResponse;
+import dev.tomas.dma.dto.AuthReq;
+import dev.tomas.dma.dto.AuthRes;
 import dev.tomas.dma.dto.AuthUserResponse;
-import dev.tomas.dma.dto.UserRegisterRequest;
+import dev.tomas.dma.dto.UserRegisterReq;
 import dev.tomas.dma.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,13 +17,13 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("register")
-    public AuthResponse register(@RequestBody @Valid UserRegisterRequest registerRequest) {
+    public AuthRes register(@RequestBody @Valid UserRegisterReq registerRequest) {
         return authService.register(registerRequest);
     }
 
     @PostMapping("login")
-    public AuthResponse login(@RequestBody @Valid AuthRequest authRequest) {
-        return authService.login(authRequest);
+    public AuthRes login(@RequestBody @Valid AuthReq authReq) {
+        return authService.login(authReq);
     }
 
     @GetMapping("me")

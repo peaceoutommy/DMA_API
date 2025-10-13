@@ -5,7 +5,7 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 @Data
-public class CampaignUpdateRequest {
+public class CampaignUpdateReq {
     @NotNull
     Integer id;
     @Size(min = 3, max = 100, message = "Name must be at least 3 characters long")
