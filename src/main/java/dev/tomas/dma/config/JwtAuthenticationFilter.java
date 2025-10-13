@@ -2,7 +2,9 @@ package dev.tomas.dma.config;
 
 import dev.tomas.dma.model.entity.UserEntity;
 import dev.tomas.dma.service.implementation.JWTService;
+
 import java.io.IOException;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,6 +33,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     @NotNull HttpServletResponse response,
                                     @NotNull FilterChain chain)
             throws ServletException, IOException {
+
+        String path = request.getServletPath();
+        if (path.equals("/api/auth/login") || path.equals("/api/auth/register")) {
+            chain.doFilter(request, response);
+            return;
+        }
 
         // Step 1: Extract the "Authorization" header from the request
         // Expected format: "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
