@@ -10,7 +10,7 @@ import lombok.Data;
 @Data
 public class CompanyCreateReq {
     @NotBlank
-    private String companyName;
+    private String name;
     @NotBlank
     private String registrationNumber;
     @NotBlank

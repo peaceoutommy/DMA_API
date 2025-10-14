@@ -14,6 +14,16 @@ import java.util.Optional;
 public class CompanyController {
     private final CompanyService companyService;
 
+    @GetMapping
+    public CompanyGetAllRes getAll(){
+        return companyService.getAll();
+    }
+
+    @PostMapping
+    public CompanyCreateRes create(@Valid @RequestBody CompanyCreateReq request) {
+        return companyService.save(request);
+    }
+
     @GetMapping("types")
     public Optional<CompanyTypeGetAllRes> getAllTypes(){
         return companyService.getAllTypes();
@@ -28,11 +38,4 @@ public class CompanyController {
     public CompanyTypeGetRes createType(@Valid @RequestBody CompanyTypeCreateReq request) {
         return companyService.saveType(request);
     }
-
-    // Endpoint for creating Company
-    @PostMapping
-    public CompanyCreateRes createCompany(@Valid @RequestBody CompanyCreateReq request) {
-        return companyService.saveCompany(request);
-    }
-
 }
