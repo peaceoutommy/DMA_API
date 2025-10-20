@@ -1,4 +1,4 @@
-package dev.tomas.dma.model.entity;
+package dev.tomas.dma.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -12,7 +12,7 @@ import java.util.List;
 @Entity
 @Data
 @Table(name = "user")
-public class UserEntity implements UserDetails {
+public class User implements UserDetails {
     @Id @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Integer id;
 

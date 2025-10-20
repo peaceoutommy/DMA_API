@@ -1,6 +1,6 @@
 package dev.tomas.dma;
 
-import dev.tomas.dma.model.entity.CampaignEntity;
+import dev.tomas.dma.entity.Campaign;
 import dev.tomas.dma.repository.CampaignRepo;
 import dev.tomas.dma.service.implementation.CampaignServiceImpl;
 import org.junit.jupiter.api.Test;
@@ -27,7 +27,7 @@ class CampaignServiceTests {
 
     @Test
     void testFindById_found() {
-        CampaignEntity entity = new CampaignEntity();
+        Campaign entity = new Campaign();
         entity.setId(1);
         entity.setName("Test");
         entity.setDescription("Desc");

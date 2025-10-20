@@ -1,4 +1,4 @@
-package dev.tomas.dma.model.entity;
+package dev.tomas.dma.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "companyType")
-public class CompanyTypeEntity {
+public class CompanyType {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Integer id;

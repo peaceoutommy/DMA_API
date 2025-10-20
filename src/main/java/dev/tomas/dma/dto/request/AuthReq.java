@@ -1,11 +1,12 @@
-package dev.tomas.dma.dto;
+package dev.tomas.dma.dto.request;
 
 
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
 import lombok.Getter;
 
-@Getter
+@Data
 public class AuthReq {
     private String username;
     private String email;

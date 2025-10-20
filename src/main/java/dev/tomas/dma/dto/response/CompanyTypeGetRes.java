@@ -1,4 +1,4 @@
-package dev.tomas.dma.dto;
+package dev.tomas.dma.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

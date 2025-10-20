@@ -1,9 +1,9 @@
 package dev.tomas.dma.controller;
 
-import dev.tomas.dma.dto.AuthReq;
-import dev.tomas.dma.dto.AuthRes;
-import dev.tomas.dma.dto.AuthUserResponse;
-import dev.tomas.dma.dto.UserRegisterReq;
+import dev.tomas.dma.dto.request.AuthReq;
+import dev.tomas.dma.dto.response.AuthRes;
+import dev.tomas.dma.dto.response.AuthUserRes;
+import dev.tomas.dma.dto.request.UserRegisterReq;
 import dev.tomas.dma.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +27,7 @@ public class AuthController {
     }
 
     @GetMapping("me")
-    public AuthUserResponse getCurrentUser(Authentication authentication) {
+    public AuthUserRes getCurrentUser(Authentication authentication) {
         return authService.authMe(authentication);
     }
 }

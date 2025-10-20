@@ -1,9 +1,9 @@
 package dev.tomas.dma.controller;
 
-import dev.tomas.dma.dto.CampaignCreateReq;
-import dev.tomas.dma.dto.CampaignGetAllRes;
-import dev.tomas.dma.dto.CampaignUpdateReq;
-import dev.tomas.dma.model.Campaign;
+import dev.tomas.dma.dto.request.CampaignCreateReq;
+import dev.tomas.dma.dto.response.CampaignGetAllRes;
+import dev.tomas.dma.dto.request.CampaignUpdateReq;
+import dev.tomas.dma.dto.common.CampaignDTO;
 import dev.tomas.dma.service.CampaignService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -25,17 +25,17 @@ public class CampaignController {
     }
 
     @GetMapping("/{id}")
-    public Campaign getById(@PathVariable Integer id) {
+    public CampaignDTO getById(@PathVariable Integer id) {
         return campaignService.findById(id);
     }
 
     @PostMapping
-    public Campaign create(@RequestBody @Valid CampaignCreateReq request) {
+    public CampaignDTO create(@RequestBody @Valid CampaignCreateReq request) {
         return campaignService.save(request);
     }
 
     @PutMapping()
-    public Campaign save(@RequestBody @Valid CampaignUpdateReq request) {
+    public CampaignDTO save(@RequestBody @Valid CampaignUpdateReq request) {
         return campaignService.update(request);
     }
 

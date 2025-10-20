@@ -1,12 +1,12 @@
 package dev.tomas.dma.repository;
 
-import dev.tomas.dma.model.entity.UserEntity;
+import dev.tomas.dma.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
-public interface AuthRepo extends JpaRepository<UserEntity, Integer> {
-    Optional<UserEntity> findByEmail(String email);
-    Optional<UserEntity> findByUsername(String username);
-    Optional<UserEntity> findByUsernameOrEmail(String username, String email);
+public interface AuthRepo extends JpaRepository<User, Integer> {
+    Optional<User> findByEmail(String email);
+    Optional<User> findByUsername(String username);
+    Optional<User> findByUsernameOrEmail(String username, String email);
 }

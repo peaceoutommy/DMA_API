@@ -1,6 +1,9 @@
 package dev.tomas.dma.controller;
 
-import dev.tomas.dma.dto.*;
+import dev.tomas.dma.dto.request.AddUserToCompanyReq;
+import dev.tomas.dma.dto.request.CompanyCreateReq;
+import dev.tomas.dma.dto.request.CompanyTypeCreateReq;
+import dev.tomas.dma.dto.response.*;
 import dev.tomas.dma.service.CompanyService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -37,5 +40,10 @@ public class CompanyController {
     @PostMapping("types")
     public CompanyTypeGetRes createType(@Valid @RequestBody CompanyTypeCreateReq request) {
         return companyService.saveType(request);
+    }
+
+    @PostMapping("/users")
+    public Optional<AddUserToCompanyRes> addUserToCompany(@Valid @RequestBody AddUserToCompanyReq request) {
+        return companyService.addUserToCompany(request);
     }
 }

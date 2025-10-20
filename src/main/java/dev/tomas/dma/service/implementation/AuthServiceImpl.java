@@ -1,11 +1,11 @@
 package dev.tomas.dma.service.implementation;
 
-import dev.tomas.dma.dto.AuthRes;
-import dev.tomas.dma.dto.AuthUserResponse;
-import dev.tomas.dma.dto.UserRegisterReq;
-import dev.tomas.dma.dto.AuthReq;
+import dev.tomas.dma.dto.response.AuthRes;
+import dev.tomas.dma.dto.response.AuthUserRes;
+import dev.tomas.dma.dto.request.UserRegisterReq;
+import dev.tomas.dma.dto.request.AuthReq;
+import dev.tomas.dma.entity.User;
 import dev.tomas.dma.mapper.AuthResponseMapper;
-import dev.tomas.dma.model.entity.UserEntity;
 import dev.tomas.dma.repository.AuthRepo;
 import dev.tomas.dma.service.AuthService;
 import org.springframework.context.annotation.Lazy;
@@ -48,7 +48,7 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
             throw new RuntimeException("Username already exists");
         }
 
-        UserEntity toSave = new UserEntity();
+        User toSave = new User();
         toSave.setEmail(registerRequest.getEmail());
         toSave.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
         toSave.setPhoneNumber(registerRequest.getPhoneNumber());
@@ -58,7 +58,7 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
         toSave.setMiddleNames(registerRequest.getMiddleNames());
         toSave.setUsername(registerRequest.getUsername());
 
-        UserEntity createdUser = authRepo.save(toSave);
+        User createdUser = authRepo.save(toSave);
         return new AuthRes(jwtService.generateToken(createdUser), AuthResponseMapper.INSTANCE.convertToModel(createdUser));
     }
 
@@ -69,24 +69,22 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
                     new UsernamePasswordAuthenticationToken(authReq.getUsername() == null ? authReq.getEmail() : authReq.getUsername(), authReq.getPassword());
 
             Authentication authentication = authManager.authenticate(authRequestToken);
-            UserEntity user = (UserEntity) authentication.getPrincipal();
+            User user = (User) authentication.getPrincipal();
 
             return new AuthRes(jwtService.generateToken(user), AuthResponseMapper.INSTANCE.convertToModel(user));
 
         } catch (BadCredentialsException e) {
-            throw new RuntimeException("Invalid username/email or password");
-        } catch (AuthenticationException e) {
-            throw new RuntimeException("Authentication failed: " + e.getMessage());
+            throw new BadCredentialsException("Invalid username/email or password");
         }
     }
 
-    public AuthUserResponse authMe(Authentication authentication) {
+    public AuthUserRes authMe(Authentication authentication) {
         String username = authentication.getName();
-        UserEntity user = authRepo.findByUsername(username)
+        User user = authRepo.findByUsername(username)
                 .or(() -> authRepo.findByEmail(username))
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username or email: " + username));
 
-        AuthUserResponse response = new AuthUserResponse();
+        AuthUserRes response = new AuthUserRes();
         return AuthResponseMapper.INSTANCE.convertToModel(user);
     }
 

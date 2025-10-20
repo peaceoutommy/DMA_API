@@ -1,7 +1,7 @@
 package dev.tomas.dma.mapper;
 
-import dev.tomas.dma.model.CompanyType;
-import dev.tomas.dma.model.entity.CompanyTypeEntity;
+import dev.tomas.dma.dto.common.CompanyTypeDTO;
+import dev.tomas.dma.entity.CompanyType;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
@@ -9,6 +9,6 @@ import org.mapstruct.factory.Mappers;
 public interface CompanyTypeMapper {
     CompanyTypeMapper INSTANCE = Mappers.getMapper(CompanyTypeMapper.class);
 
-    public CompanyType  convertToModel(CompanyTypeEntity companyTypeEntity);
-    public CompanyTypeEntity convertToEntity(CompanyType companyType);
+    public CompanyTypeDTO convertToDTO(CompanyType companyType);
+    public CompanyType convertToEntity(CompanyTypeDTO companyType);
 }

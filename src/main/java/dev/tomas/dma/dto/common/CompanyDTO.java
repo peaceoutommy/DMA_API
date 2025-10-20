@@ -1,14 +1,14 @@
-package dev.tomas.dma.model;
+package dev.tomas.dma.dto.common;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 
-@Getter
 @AllArgsConstructor
-public class Company {
+@Data
+public class CompanyDTO {
     private Integer id;
     private String name;
     private String registrationNumber;
     private String taxId;
-    private CompanyType type;
+    private CompanyTypeDTO type;
 }

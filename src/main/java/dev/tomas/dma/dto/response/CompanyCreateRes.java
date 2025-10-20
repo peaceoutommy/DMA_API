@@ -1,5 +1,6 @@
-package dev.tomas.dma.dto;
+package dev.tomas.dma.dto.response;
 
+import dev.tomas.dma.dto.common.CompanyTypeDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

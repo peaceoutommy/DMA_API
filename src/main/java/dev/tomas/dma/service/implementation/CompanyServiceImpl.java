@@ -1,23 +1,33 @@
 package dev.tomas.dma.service.implementation;
 
-import dev.tomas.dma.dto.*;
-import dev.tomas.dma.model.entity.CompanyEntity;
-import dev.tomas.dma.model.entity.CompanyTypeEntity;
+import dev.tomas.dma.dto.common.CompanyDTO;
+import dev.tomas.dma.dto.common.CompanyTypeDTO;
+import dev.tomas.dma.dto.request.AddUserToCompanyReq;
+import dev.tomas.dma.dto.request.CompanyCreateReq;
+import dev.tomas.dma.dto.request.CompanyTypeCreateReq;
+import dev.tomas.dma.dto.response.*;
+import dev.tomas.dma.entity.Company;
+import dev.tomas.dma.entity.CompanyType;
+import dev.tomas.dma.entity.User;
+import dev.tomas.dma.entity.UserCompanyMembership;
+import dev.tomas.dma.repository.AuthRepo;
 import dev.tomas.dma.repository.CompanyRepo;
 import dev.tomas.dma.repository.CompanyTypeRepo;
+import dev.tomas.dma.repository.UserCompanyMembershipRepo;
 import dev.tomas.dma.service.CompanyService;
 import jakarta.persistence.EntityManager;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -25,14 +35,16 @@ import java.util.Optional;
 public class CompanyServiceImpl implements CompanyService {
     CompanyRepo companyRepo;
     CompanyTypeRepo companyTypeRepo;
+    AuthRepo authRepo;
+    UserCompanyMembershipRepo membershipRepo;
     EntityManager entityManager;
 
     public CompanyGetAllRes getAll() {
         CompanyGetAllRes response = new CompanyGetAllRes();
         List<CompanyDTO> dtos = new ArrayList<>();
 
-        for (CompanyEntity entity : companyRepo.findAll()) {
-            CompanyTypeEntity type = entity.getType();
+        for (Company entity : companyRepo.findAll()) {
+            CompanyType type = entity.getType();
             dtos.add(new CompanyDTO(entity.getId(), entity.getName(), entity.getRegistrationNumber(), entity.getTaxId(), new CompanyTypeDTO(type.getId(), type.getName())));
         }
 
@@ -41,14 +53,14 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     public CompanyCreateRes save(@Valid CompanyCreateReq request) {
-        CompanyEntity toSave = new CompanyEntity();
+        Company toSave = new Company();
         toSave.setName(request.getName());
         toSave.setRegistrationNumber(request.getRegistrationNumber());
         toSave.setTaxId(request.getTaxId());
-        CompanyTypeEntity typeRef = entityManager.getReference(CompanyTypeEntity.class, request.getTypeId());
+        CompanyType typeRef = entityManager.getReference(CompanyType.class, request.getTypeId());
         toSave.setType(typeRef);
 
-        CompanyEntity saved = companyRepo.save(toSave);
+        Company saved = companyRepo.save(toSave);
 
         CompanyTypeDTO typeDTO = new CompanyTypeDTO(saved.getType().getId(), saved.getType().getName());
 
@@ -58,7 +70,7 @@ public class CompanyServiceImpl implements CompanyService {
     public Optional<CompanyTypeGetAllRes> getAllTypes() {
         CompanyTypeGetAllRes response = new CompanyTypeGetAllRes();
 
-        for (CompanyTypeEntity entity : companyTypeRepo.findAll()) {
+        for (CompanyType entity : companyTypeRepo.findAll()) {
             response.types.add(
                     new CompanyTypeGetRes(entity.getId(), entity.getName())
             );
@@ -77,10 +89,38 @@ public class CompanyServiceImpl implements CompanyService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Company type can't be empty");
         }
 
-        CompanyTypeEntity toSave = new CompanyTypeEntity();
+        CompanyType toSave = new CompanyType();
         toSave.setName(request.getName());
-        CompanyTypeEntity saved = companyTypeRepo.save(toSave);
+        CompanyType saved = companyTypeRepo.save(toSave);
 
         return new CompanyTypeGetRes(saved.getId(), saved.getName());
+    }
+
+    @Transactional
+    public Optional<AddUserToCompanyRes> addUserToCompany(@Valid AddUserToCompanyReq request) {
+        // Check if the user submitting the request to add a user to the company has permission
+        Optional<UserCompanyMembership> reqUser = membershipRepo.findByUserIdAndCompanyId(request.getUserId(), request.getCompanyId());
+
+        if (reqUser.isEmpty() || !reqUser.get().getCompany().getId().equals(request.getCompanyId()) || Objects.equals(reqUser.get().getRole(), "OWNER")) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to add users to this company");
+        }
+
+        // Delete previous user role (if any)
+        membershipRepo.deleteByUserId(request.getUserId());
+
+        // Used to ensure that the delete query runs IMMEDIATLY
+        entityManager.flush();
+
+        UserCompanyMembership toSave = new UserCompanyMembership();
+
+        User userRef = entityManager.getReference(User.class, request.getToAddUserId());
+        Company companyRef = entityManager.getReference(Company.class, request.getCompanyId());
+
+        toSave.setUser(userRef);
+        toSave.setCompany(companyRef);
+        toSave.setRole(request.getRole());
+
+        UserCompanyMembership saved = membershipRepo.save(toSave);
+        return Optional.of(new AddUserToCompanyRes(saved.getId(), saved.getUser().getId(), saved.getCompany().getId(), saved.getRole()));
     }
 }

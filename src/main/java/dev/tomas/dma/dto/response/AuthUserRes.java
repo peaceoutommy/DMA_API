@@ -1,9 +1,9 @@
-package dev.tomas.dma.dto;
+package dev.tomas.dma.dto.response;
 
 import lombok.Data;
 
 @Data
-public class AuthUserResponse {
+public class AuthUserRes {
     public Integer id;
     public String username;
     public String email;

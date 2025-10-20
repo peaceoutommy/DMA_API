@@ -1,11 +1,11 @@
 package dev.tomas.dma.service.implementation;
 
-import dev.tomas.dma.dto.CampaignCreateReq;
-import dev.tomas.dma.dto.CampaignGetAllRes;
-import dev.tomas.dma.dto.CampaignUpdateReq;
+import dev.tomas.dma.dto.request.CampaignCreateReq;
+import dev.tomas.dma.dto.response.CampaignGetAllRes;
+import dev.tomas.dma.dto.request.CampaignUpdateReq;
+import dev.tomas.dma.dto.common.CampaignDTO;
 import dev.tomas.dma.mapper.CampaignMapper;
-import dev.tomas.dma.model.Campaign;
-import dev.tomas.dma.model.entity.CampaignEntity;
+import dev.tomas.dma.entity.Campaign;
 import dev.tomas.dma.repository.CampaignRepo;
 import dev.tomas.dma.service.CampaignService;
 import lombok.AllArgsConstructor;
@@ -24,23 +24,24 @@ public class CampaignServiceImpl implements CampaignService {
     @Override
     public CampaignGetAllRes findAll() {
         CampaignGetAllRes response = new CampaignGetAllRes();
-        for (CampaignEntity entity : campaignRepo.findAll()) {
-            response.campaigns.add(CampaignMapper.INSTANCE.convertToModel(entity));
+
+        for (Campaign entity : campaignRepo.findAll()) {
+            response.campaigns.add(CampaignMapper.INSTANCE.convertToDTO(entity));
         }
         return response;
     }
 
     @Override
-    public Campaign findById(Integer id) {
+    public CampaignDTO findById(Integer id) {
         if (campaignRepo.findById(id).isPresent()) {
-            return CampaignMapper.INSTANCE.convertToModel(campaignRepo.findById(id).get());
+            return CampaignMapper.INSTANCE.convertToDTO(campaignRepo.findById(id).get());
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Campaign not found");
         }
     }
 
     @Override
-    public Campaign save(CampaignCreateReq request) {
+    public CampaignDTO save(CampaignCreateReq request) {
         if (Objects.isNull(request.getName()) || request.getName().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Campaign name can't be empty");
         }
@@ -48,18 +49,18 @@ public class CampaignServiceImpl implements CampaignService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Campaign description can't be empty");
         }
 
-        CampaignEntity toSave = new CampaignEntity();
+        Campaign toSave = new Campaign();
         toSave.setName(request.getName());
         toSave.setDescription(request.getDescription());
         toSave.setCompanyId(request.getCompanyId());
         toSave.setFundGoal(request.getFundGoal());
 
-        return CampaignMapper.INSTANCE.convertToModel(campaignRepo.save(toSave));
+        return CampaignMapper.INSTANCE.convertToDTO(campaignRepo.save(toSave));
     }
 
     @Override
-    public Campaign update(CampaignUpdateReq request) {
-        CampaignEntity original = campaignRepo.findById(request.getId())
+    public CampaignDTO update(CampaignUpdateReq request) {
+        Campaign original = campaignRepo.findById(request.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Campaign not found"));
 
         if (request.getName() != null && !request.getName().isEmpty()) {
@@ -75,8 +76,8 @@ public class CampaignServiceImpl implements CampaignService {
             original.setFundGoal(request.getFundGoal());
         }
 
-        CampaignEntity updated = campaignRepo.save(original);
-        return CampaignMapper.INSTANCE.convertToModel(updated);
+        Campaign updated = campaignRepo.save(original);
+        return CampaignMapper.INSTANCE.convertToDTO(updated);
     }
 
     @Override

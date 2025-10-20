@@ -1,5 +1,6 @@
-package dev.tomas.dma.dto;
+package dev.tomas.dma.dto.response;
 
+import dev.tomas.dma.dto.common.CompanyDTO;
 import lombok.Data;
 
 import java.util.ArrayList;

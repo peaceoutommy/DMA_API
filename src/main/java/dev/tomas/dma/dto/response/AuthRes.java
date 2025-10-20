@@ -1,4 +1,4 @@
-package dev.tomas.dma.dto;
+package dev.tomas.dma.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,5 +7,5 @@ import lombok.Data;
 @AllArgsConstructor
 public class AuthRes {
     public String token;
-    public AuthUserResponse user;
+    public AuthUserRes user;
 }

@@ -1,7 +1,7 @@
 package dev.tomas.dma.mapper;
 
-import dev.tomas.dma.model.Campaign;
-import dev.tomas.dma.model.entity.CampaignEntity;
+import dev.tomas.dma.dto.common.CampaignDTO;
+import dev.tomas.dma.entity.Campaign;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
@@ -9,6 +9,6 @@ import org.mapstruct.factory.Mappers;
 public interface CampaignMapper {
     CampaignMapper INSTANCE = Mappers.getMapper(CampaignMapper.class);
 
-    public Campaign convertToModel(CampaignEntity campaignEntity);
-    public CampaignEntity convertToEntity(Campaign campaign);
+    public CampaignDTO convertToDTO(Campaign campaign);
+    public Campaign convertToEntity(CampaignDTO campaign);
 }
