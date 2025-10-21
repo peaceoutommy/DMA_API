@@ -10,6 +10,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -44,5 +46,27 @@ class CampaignServiceTests {
         when(campaignRepo.findById(1)).thenReturn(Optional.empty());
 
         assertThrows(ResponseStatusException.class, () -> campaignService.findById(1));
+    }
+
+    @Test
+    void testFindAll() {
+        Campaign entity = new Campaign();
+        entity.setId(1);
+        entity.setCompanyId(1);
+        entity.setName("Test name");
+        entity.setDescription("Test description");
+        entity.setFundGoal(BigDecimal.valueOf(10000));
+
+        Campaign entity2 = new Campaign();
+        entity2.setId(2);
+        entity2.setCompanyId(1);
+        entity2.setName("Test name2");
+        entity2.setDescription("Test description2");
+        entity2.setFundGoal(BigDecimal.valueOf(9999));
+
+        when(campaignRepo.findAll()).thenReturn(List.of(entity,entity2));
+        var result = campaignService.findAll();
+
+        assertEquals(campaignRepo.findAll(), List.of(entity,entity2));
     }
 }

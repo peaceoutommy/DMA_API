@@ -8,6 +8,7 @@ import dev.tomas.dma.entity.User;
 import dev.tomas.dma.mapper.AuthResponseMapper;
 import dev.tomas.dma.repository.AuthRepo;
 import dev.tomas.dma.service.AuthService;
+import dev.tomas.dma.service.CompanyService;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -24,17 +25,20 @@ import org.springframework.stereotype.Service;
 public class AuthServiceImpl implements AuthService, UserDetailsService {
     private final AuthRepo authRepo;
     private final JWTService jwtService;
+    private final CompanyService companyService;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authManager;
 
     public AuthServiceImpl(AuthRepo authRepo,
                            JWTService jwtService,
                            PasswordEncoder passwordEncoder,
+                           CompanyService companyService,
                            @Lazy AuthenticationManager authManager
     ) {
         this.authRepo = authRepo;
         this.jwtService = jwtService;
         this.passwordEncoder = passwordEncoder;
+        this.companyService = companyService;
         this.authManager = authManager;
     }
 

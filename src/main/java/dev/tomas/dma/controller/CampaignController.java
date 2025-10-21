@@ -6,6 +6,7 @@ import dev.tomas.dma.dto.request.CampaignUpdateReq;
 import dev.tomas.dma.dto.common.CampaignDTO;
 import dev.tomas.dma.service.CampaignService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -40,7 +41,7 @@ public class CampaignController {
     }
 
     @DeleteMapping("/{id}")
-    public Integer delete(@PathVariable Integer id) {
+    public Integer delete(@Positive @PathVariable Integer id) {
         if (Objects.isNull(id)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Campaign id cannot be null");
         }

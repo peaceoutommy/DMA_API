@@ -19,6 +19,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -33,11 +34,10 @@ import java.util.Optional;
 @Service
 @AllArgsConstructor
 public class CompanyServiceImpl implements CompanyService {
-    CompanyRepo companyRepo;
-    CompanyTypeRepo companyTypeRepo;
-    AuthRepo authRepo;
-    UserCompanyMembershipRepo membershipRepo;
-    EntityManager entityManager;
+    private final CompanyRepo companyRepo;
+    private final CompanyTypeRepo companyTypeRepo;
+    private final UserCompanyMembershipRepo membershipRepo;
+    private final EntityManager entityManager;
 
     public CompanyGetAllRes getAll() {
         CompanyGetAllRes response = new CompanyGetAllRes();
@@ -96,6 +96,24 @@ public class CompanyServiceImpl implements CompanyService {
         return new CompanyTypeGetRes(saved.getId(), saved.getName());
     }
 
+    public Optional<CompanyTypeDTO> updateType(@Valid CompanyTypeDTO request) {
+        if (StringUtils.isBlank(request.getName())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Company type can't be empty");
+        }
+        CompanyType existing = companyTypeRepo.findById(request.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Company type not found"));
+
+        existing.setName(request.getName());
+
+        CompanyType saved = companyTypeRepo.save(existing);
+        return Optional.of(new CompanyTypeDTO(saved.getId(), saved.getName()));
+    }
+
+    public Integer deleteType(@Positive Integer id) {
+        companyTypeRepo.deleteById(id);
+        return id;
+    }
+
     @Transactional
     public Optional<AddUserToCompanyRes> addUserToCompany(@Valid AddUserToCompanyReq request) {
         // Check if the user submitting the request to add a user to the company has permission
@@ -122,5 +140,15 @@ public class CompanyServiceImpl implements CompanyService {
 
         UserCompanyMembership saved = membershipRepo.save(toSave);
         return Optional.of(new AddUserToCompanyRes(saved.getId(), saved.getUser().getId(), saved.getCompany().getId(), saved.getRole()));
+    }
+
+    public Optional<MembershipGetRes> getMembershipByUserId(Integer id) {
+        MembershipGetRes response = new MembershipGetRes();
+        var fetched = membershipRepo.findByUserId(id).orElseThrow(IllegalStateException::new);
+
+        response.setCompanyId(fetched.getCompany().getId());
+        response.setRole(fetched.getRole());
+
+        return Optional.of(response);
     }
 }

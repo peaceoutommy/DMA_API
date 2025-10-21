@@ -1,25 +1,31 @@
 package dev.tomas.dma.service.implementation;
 
+import dev.tomas.dma.dto.response.MembershipGetRes;
 import dev.tomas.dma.entity.User;
+import dev.tomas.dma.service.CompanyService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
 import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-@NoArgsConstructor
+@RequiredArgsConstructor
 @Component
 public class JWTService {
     @Value("${jwt.secret}")
     private String secret;
     @Value("${jwt.expiration}")
     private Long expiration;
+    private final CompanyService companyService;
 
     /**
      * Creates a cryptographic signing key from the secret string
@@ -59,7 +65,7 @@ public class JWTService {
      */
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
-                .verifyWith(getSigningKey()) // Verify signature with our secret key
+                .verifyWith(getSigningKey())
                 .build()
                 .parseSignedClaims(token) // Parse the token
                 .getPayload(); // Get the claims (payload)
@@ -78,15 +84,15 @@ public class JWTService {
      */
     public String generateToken(User user) {
         Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, user.getUsername());
-    }
 
-    /**
-     * Generate JWT token with extra custom claims
-     * Example extra claims: roles, permissions, user ID, etc.
-     */
-    public String generateToken(Map<String, Object> extraClaims, User userDetails) {
-        return createToken(extraClaims, userDetails.getUsername());
+        if (user != null) {
+            var membership = companyService.getMembershipByUserId(user.getId());
+            if (membership.isPresent()) {
+                claims.put("Company", membership.get().getCompanyId());
+                claims.put("Role", membership.get().getRole());
+            };
+        }
+        return createToken(claims, user.getUsername());
     }
 
     /**
