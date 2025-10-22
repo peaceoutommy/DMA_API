@@ -25,16 +25,16 @@ public class User implements UserDetails {
     @Column(unique=true, nullable=false)
     private String phoneNumber;
 
-    @Column(unique=true, nullable=false)
+    @Column( nullable=false)
     private String address;
 
-    @Column(unique=true, nullable=false)
+    @Column( nullable=false)
     private String firstName;
 
-    @Column(unique=true, nullable=false)
+    @Column( nullable=false)
     private String lastName;
 
-    @Column(unique=true, nullable=false)
+    @Column()
     private String middleNames;
 
     @Column(unique=true, nullable=false)
