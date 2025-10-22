@@ -85,7 +85,7 @@ public class JWTService {
     public String generateToken(User user) {
         Map<String, Object> claims = new HashMap<>();
 
-        if (user != null) {
+        if (user != null && user.getId() != null) {
             var membership = companyService.getMembershipByUserId(user.getId());
             if (membership.isPresent()) {
                 claims.put("Company", membership.get().getCompanyId());

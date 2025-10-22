@@ -144,10 +144,14 @@ public class CompanyServiceImpl implements CompanyService {
 
     public Optional<MembershipGetRes> getMembershipByUserId(Integer id) {
         MembershipGetRes response = new MembershipGetRes();
-        var fetched = membershipRepo.findByUserId(id).orElseThrow(IllegalStateException::new);
+        var fetched = membershipRepo.findByUserId(id);
 
-        response.setCompanyId(fetched.getCompany().getId());
-        response.setRole(fetched.getRole());
+        if (fetched.isEmpty()) {
+            return Optional.empty();
+        }
+
+        response.setCompanyId(fetched.get().getCompany().getId());
+        response.setRole(fetched.get().getRole());
 
         return Optional.of(response);
     }
