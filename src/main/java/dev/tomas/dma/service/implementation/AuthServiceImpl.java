@@ -4,6 +4,7 @@ import dev.tomas.dma.dto.response.AuthRes;
 import dev.tomas.dma.dto.response.AuthUserRes;
 import dev.tomas.dma.dto.request.UserRegisterReq;
 import dev.tomas.dma.dto.request.AuthReq;
+import dev.tomas.dma.dto.response.MembershipGetRes;
 import dev.tomas.dma.entity.User;
 import dev.tomas.dma.mapper.AuthResponseMapper;
 import dev.tomas.dma.repository.AuthRepo;
@@ -20,6 +21,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public class AuthServiceImpl implements AuthService, UserDetailsService {
@@ -88,8 +91,18 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
                 .or(() -> authRepo.findByEmail(username))
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username or email: " + username));
 
-        AuthUserRes response = new AuthUserRes();
-        return AuthResponseMapper.INSTANCE.convertToModel(user);
+        Optional<MembershipGetRes> membership = companyService.getMembershipByUserId(user.getId());
+
+        AuthUserRes res = new AuthUserRes();
+        res.setId(user.getId());
+        res.setEmail(user.getEmail());
+        res.setUsername(user.getUsername());
+        res.setFirstName(user.getFirstName());
+        res.setLastName(user.getLastName());
+        res.setCompanyId(membership.get().getCompanyId());
+        res.setRole(membership.get().getRole());
+
+        return res;
     }
 
     @Override
