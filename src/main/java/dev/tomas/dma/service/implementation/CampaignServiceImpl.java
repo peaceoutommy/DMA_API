@@ -7,6 +7,7 @@ import dev.tomas.dma.dto.common.CampaignDTO;
 import dev.tomas.dma.mapper.CampaignMapper;
 import dev.tomas.dma.entity.Campaign;
 import dev.tomas.dma.repository.CampaignRepo;
+import dev.tomas.dma.repository.CompanyRepo;
 import dev.tomas.dma.service.CampaignService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,7 +20,8 @@ import java.util.Objects;
 @AllArgsConstructor
 
 public class CampaignServiceImpl implements CampaignService {
-    CampaignRepo campaignRepo;
+    private final CampaignRepo campaignRepo;
+    private final CompanyRepo companyRepo;
 
     @Override
     public CampaignGetAllRes findAll() {
@@ -52,7 +54,7 @@ public class CampaignServiceImpl implements CampaignService {
         Campaign toSave = new Campaign();
         toSave.setName(request.getName());
         toSave.setDescription(request.getDescription());
-        toSave.setCompanyId(request.getCompanyId());
+        toSave.setCompany(companyRepo.getReferenceById(request.getCompanyId()));
         toSave.setFundGoal(request.getFundGoal());
 
         return CampaignMapper.INSTANCE.convertToDTO(campaignRepo.save(toSave));
@@ -70,7 +72,7 @@ public class CampaignServiceImpl implements CampaignService {
             original.setDescription(request.getDescription());
         }
         if (request.getCompanyId() != null) {
-            original.setCompanyId(request.getCompanyId());
+            original.setCompany(companyRepo.getReferenceById(request.getCompanyId()));
         }
         if (request.getFundGoal() != null) {
             original.setFundGoal(request.getFundGoal());

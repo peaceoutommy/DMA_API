@@ -30,10 +30,10 @@ public class Campaign {
     @Size(min = 10, max = 2000, message = "Description must be at least 10 characters long")
     @Column(name = "description")
     private String description;
-
-    @NotNull
-    @Column(name = "company_id")
-    private Integer companyId;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id", nullable = false)
+    private Company company;
 
     @NotNull
     @Min(1)

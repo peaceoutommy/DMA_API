@@ -12,12 +12,15 @@ public class UserCompanyMembership {
     private Integer id;
 
     @OneToOne
-    @JoinColumn(name = "userId", unique = true)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "companyId", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id")
     private Company company;
 
-    private String role;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "role_id")
+    private CompanyRole role;
+
 }

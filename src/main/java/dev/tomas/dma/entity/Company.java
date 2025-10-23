@@ -19,10 +19,16 @@ public class Company {
     private String registrationNumber;
     private String taxId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "companyTypeId", referencedColumnName = "id")
-    private CompanyType type;
+    @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Campaign> campaigns = new ArrayList<>();
 
-    @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<CompanyRole> roles = new ArrayList<>();
+
+    @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<UserCompanyMembership> memberships = new ArrayList<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_type_id", nullable = false)
+    private CompanyType type;
 }

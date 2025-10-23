@@ -7,10 +7,13 @@ import dev.tomas.dma.dto.request.AuthReq;
 import dev.tomas.dma.dto.response.MembershipGetRes;
 import dev.tomas.dma.entity.User;
 import dev.tomas.dma.mapper.AuthResponseMapper;
+import dev.tomas.dma.model.UserCompanyMembershipModel;
+import dev.tomas.dma.model.UserModel;
 import dev.tomas.dma.repository.AuthRepo;
 import dev.tomas.dma.service.AuthService;
 import dev.tomas.dma.service.CompanyService;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -49,10 +52,10 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
     public AuthRes register(UserRegisterReq registerRequest) {
 
         if (registerRequest.getEmail() != null && authRepo.findByEmail(registerRequest.getEmail()).isPresent()) {
-            throw new RuntimeException("Email already exists");
+            throw new DuplicateKeyException("Email already exists");
         }
         if (registerRequest.getUsername() != null && authRepo.findByUsername(registerRequest.getUsername()).isPresent()) {
-            throw new RuntimeException("Username already exists");
+            throw new DuplicateKeyException("Username already exists");
         }
 
         User toSave = new User();
@@ -66,7 +69,9 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
         toSave.setUsername(registerRequest.getUsername());
 
         User createdUser = authRepo.save(toSave);
-        return new AuthRes(jwtService.generateToken(createdUser), AuthResponseMapper.INSTANCE.convertToModel(createdUser));
+        UserModel user = new UserModel(createdUser);
+
+        return new AuthRes(jwtService.generateToken(user), AuthResponseMapper.INSTANCE.convertToDTO(user));
     }
 
     @Override
@@ -76,9 +81,25 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
                     new UsernamePasswordAuthenticationToken(authReq.getUsername() == null ? authReq.getEmail() : authReq.getUsername(), authReq.getPassword());
 
             Authentication authentication = authManager.authenticate(authRequestToken);
-            User user = (User) authentication.getPrincipal();
+            UserModel user = (UserModel) authentication.getPrincipal();
 
-            return new AuthRes(jwtService.generateToken(user), AuthResponseMapper.INSTANCE.convertToModel(user));
+            Optional<UserCompanyMembershipModel> membership = companyService.getMembershipByUserId(user.getId());
+
+            if (membership.isPresent()) {
+                user.setCompanyId(membership.get().getCompanyId());
+                user.setCompanyRole(membership.get().getCompanyRole());
+            }
+
+            AuthUserRes res = new AuthUserRes();
+            res.setId(user.getId());
+            res.setEmail(user.getEmail());
+            res.setUsername(user.getUsername());
+            res.setFirstName(user.getFirstName());
+            res.setLastName(user.getLastName());
+            res.setCompanyId(user.getCompanyId());
+            res.setCompanyRole(user.getCompanyRole());
+
+            return new AuthRes(jwtService.generateToken(user), res);
 
         } catch (BadCredentialsException e) {
             throw new BadCredentialsException("Invalid username/email or password");
@@ -86,12 +107,13 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
     }
 
     public AuthUserRes authMe(Authentication authentication) {
-        String username = authentication.getName();
-        User user = authRepo.findByUsername(username)
-                .or(() -> authRepo.findByEmail(username))
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with username or email: " + username));
+        UserModel user = (UserModel) authentication.getPrincipal();
+        Optional<UserCompanyMembershipModel> membership = companyService.getMembershipByUserId(user.getId());
 
-        Optional<MembershipGetRes> membership = companyService.getMembershipByUserId(user.getId());
+        if (membership.isPresent()) {
+            user.setCompanyId(membership.get().getCompanyId());
+            user.setCompanyRole(membership.get().getCompanyRole());
+        }
 
         AuthUserRes res = new AuthUserRes();
         res.setId(user.getId());
@@ -99,17 +121,18 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
         res.setUsername(user.getUsername());
         res.setFirstName(user.getFirstName());
         res.setLastName(user.getLastName());
-        res.setCompanyId(membership.get().getCompanyId());
-        res.setRole(membership.get().getRole());
+        res.setCompanyId(user.getCompanyId());
+        res.setCompanyRole(user.getCompanyRole());
 
         return res;
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return authRepo.findByUsername(username)
-                .or(() -> authRepo.findByEmail(username))
+        User userEntity = authRepo.findByUsername(username).or(() -> authRepo.findByEmail(username))
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username or email: " + username));
+        UserModel user = new UserModel(userEntity);
+        return user;
     }
 }
 

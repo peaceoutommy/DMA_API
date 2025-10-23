@@ -10,6 +10,7 @@ import dev.tomas.dma.entity.Company;
 import dev.tomas.dma.entity.CompanyType;
 import dev.tomas.dma.entity.User;
 import dev.tomas.dma.entity.UserCompanyMembership;
+import dev.tomas.dma.model.UserCompanyMembershipModel;
 import dev.tomas.dma.repository.AuthRepo;
 import dev.tomas.dma.repository.CompanyRepo;
 import dev.tomas.dma.repository.CompanyTypeRepo;
@@ -71,7 +72,7 @@ public class CompanyServiceImpl implements CompanyService {
         CompanyTypeGetAllRes response = new CompanyTypeGetAllRes();
 
         for (CompanyType entity : companyTypeRepo.findAll()) {
-            response.types.add(
+            response.getTypes().add(
                     new CompanyTypeGetRes(entity.getId(), entity.getName())
             );
         }
@@ -116,43 +117,19 @@ public class CompanyServiceImpl implements CompanyService {
 
     @Transactional
     public Optional<AddUserToCompanyRes> addUserToCompany(@Valid AddUserToCompanyReq request) {
-        // Check if the user submitting the request to add a user to the company has permission
-        Optional<UserCompanyMembership> reqUser = membershipRepo.findByUserIdAndCompanyId(request.getUserId(), request.getCompanyId());
-
-        if (reqUser.isEmpty() || !reqUser.get().getCompany().getId().equals(request.getCompanyId()) || Objects.equals(reqUser.get().getRole(), "OWNER")) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to add users to this company");
-        }
-
-        // Delete previous user role (if any)
-        membershipRepo.deleteByUserId(request.getUserId());
-
-        // Used to ensure that the delete query runs IMMEDIATLY
-        entityManager.flush();
-
-        UserCompanyMembership toSave = new UserCompanyMembership();
-
-        User userRef = entityManager.getReference(User.class, request.getToAddUserId());
-        Company companyRef = entityManager.getReference(Company.class, request.getCompanyId());
-
-        toSave.setUser(userRef);
-        toSave.setCompany(companyRef);
-        toSave.setRole(request.getRole());
-
-        UserCompanyMembership saved = membershipRepo.save(toSave);
-        return Optional.of(new AddUserToCompanyRes(saved.getId(), saved.getUser().getId(), saved.getCompany().getId(), saved.getRole()));
+        return null;
     }
 
-    public Optional<MembershipGetRes> getMembershipByUserId(Integer id) {
-        MembershipGetRes response = new MembershipGetRes();
-        var fetched = membershipRepo.findByUserId(id);
+    public Optional<UserCompanyMembershipModel> getMembershipByUserId(Integer id) {
+        Optional<UserCompanyMembership> fetched = membershipRepo.findByUserId(id);
 
         if (fetched.isEmpty()) {
             return Optional.empty();
         }
+        UserCompanyMembershipModel membership = new UserCompanyMembershipModel();
+        membership.setCompanyId(fetched.get().getId());
+        membership.setCompanyRole(fetched.get().getRole().getName());
 
-        response.setCompanyId(fetched.get().getCompany().getId());
-        response.setRole(fetched.get().getRole());
-
-        return Optional.of(response);
+        return Optional.of(membership);
     }
 }

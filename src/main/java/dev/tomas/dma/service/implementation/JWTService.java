@@ -2,6 +2,7 @@ package dev.tomas.dma.service.implementation;
 
 import dev.tomas.dma.dto.response.MembershipGetRes;
 import dev.tomas.dma.entity.User;
+import dev.tomas.dma.model.UserModel;
 import dev.tomas.dma.service.CompanyService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -82,14 +83,14 @@ public class JWTService {
      * Generate JWT token with no extra claims
      * Just username and standard claims (issued at, expiration)
      */
-    public String generateToken(User user) {
+    public String generateToken(UserModel user) {
         Map<String, Object> claims = new HashMap<>();
 
         if (user != null && user.getId() != null) {
             var membership = companyService.getMembershipByUserId(user.getId());
             if (membership.isPresent()) {
                 claims.put("Company", membership.get().getCompanyId());
-                claims.put("Role", membership.get().getRole());
+                claims.put("Role", membership.get().getCompanyRole());
             };
         }
         return createToken(claims, user.getUsername());
@@ -118,7 +119,7 @@ public class JWTService {
      * 1. Username in token matches the user
      * 2. Token hasn't expired
      */
-    public Boolean validateToken(String token, User user) {
+    public Boolean validateToken(String token, UserModel user) {
         final String username = extractUsername(token);
         return (username.equals(user.getUsername()) && !isTokenExpired(token));
     }

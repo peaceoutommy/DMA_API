@@ -12,6 +12,6 @@ public class CompanyTypeDTO {
     @Positive
     private Integer id;
     @NotBlank
-    @Size(min = 3, max = 100, message = "Company type must have 3 characters minimum")
+    @Size(min = 3, max = 100, message = "Company type be between 3 and 100 characters")
     private String name;
 }

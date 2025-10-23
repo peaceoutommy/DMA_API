@@ -1,6 +1,7 @@
 package dev.tomas.dma.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,8 +14,8 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "companyType")
-public class CompanyType {
+@Table(name = "companyRole")
+public class CompanyRole {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column
@@ -23,6 +24,10 @@ public class CompanyType {
     @Size(min = 3, max = 100)
     private String name;
 
-    @OneToMany(mappedBy = "type", orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<Company> companies = new ArrayList<>();
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id", nullable = false)
+    private Company company;
+
+    @OneToMany(mappedBy = "role", fetch = FetchType.LAZY)
+    private List<UserCompanyMembership> memberships = new ArrayList<>();
 }

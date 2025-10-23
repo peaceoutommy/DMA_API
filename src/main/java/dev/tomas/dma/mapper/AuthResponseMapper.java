@@ -2,6 +2,7 @@ package dev.tomas.dma.mapper;
 
 import dev.tomas.dma.dto.response.AuthUserRes;
 import dev.tomas.dma.entity.User;
+import dev.tomas.dma.model.UserModel;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
@@ -9,5 +10,5 @@ import org.mapstruct.factory.Mappers;
 public interface AuthResponseMapper {
     public AuthResponseMapper INSTANCE = Mappers.getMapper(AuthResponseMapper.class);
 
-    public AuthUserRes convertToModel(User user);
+    public AuthUserRes convertToDTO(UserModel user);
 }
