@@ -6,6 +6,7 @@ import dev.tomas.dma.dto.request.UserRegisterReq;
 import dev.tomas.dma.dto.request.AuthReq;
 import dev.tomas.dma.dto.response.MembershipGetRes;
 import dev.tomas.dma.entity.User;
+import dev.tomas.dma.enums.UserRole;
 import dev.tomas.dma.mapper.AuthResponseMapper;
 import dev.tomas.dma.model.UserCompanyMembershipModel;
 import dev.tomas.dma.model.UserModel;
@@ -49,24 +50,30 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
     }
 
     @Override
-    public AuthRes register(UserRegisterReq registerRequest) {
+    public AuthRes register(UserRegisterReq request) {
 
-        if (registerRequest.getEmail() != null && authRepo.findByEmail(registerRequest.getEmail()).isPresent()) {
+        if (request.getEmail() != null && authRepo.findByEmail(request.getEmail()).isPresent()) {
             throw new DuplicateKeyException("Email already exists");
         }
-        if (registerRequest.getUsername() != null && authRepo.findByUsername(registerRequest.getUsername()).isPresent()) {
+        if (request.getUsername() != null && authRepo.findByUsername(request.getUsername()).isPresent()) {
             throw new DuplicateKeyException("Username already exists");
         }
 
         User toSave = new User();
-        toSave.setEmail(registerRequest.getEmail());
-        toSave.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
-        toSave.setPhoneNumber(registerRequest.getPhoneNumber());
-        toSave.setAddress(registerRequest.getAddress());
-        toSave.setFirstName(registerRequest.getFirstName());
-        toSave.setLastName(registerRequest.getLastName());
-        toSave.setMiddleNames(registerRequest.getMiddleNames());
-        toSave.setUsername(registerRequest.getUsername());
+        toSave.setEmail(request.getEmail());
+        toSave.setPassword(passwordEncoder.encode(request.getPassword()));
+        toSave.setPhoneNumber(request.getPhoneNumber());
+        toSave.setAddress(request.getAddress());
+        toSave.setFirstName(request.getFirstName());
+        toSave.setLastName(request.getLastName());
+        toSave.setMiddleNames(request.getMiddleNames());
+        toSave.setUsername(request.getUsername());
+
+        if (request.getCompanyAccount()) {
+            toSave.setRole(UserRole.COMPANY_ACCOUNT);
+        } else {
+            toSave.setRole(UserRole.DONOR);
+        }
 
         User createdUser = authRepo.save(toSave);
         UserModel user = new UserModel(createdUser);
@@ -98,6 +105,7 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
             res.setLastName(user.getLastName());
             res.setCompanyId(user.getCompanyId());
             res.setCompanyRole(user.getCompanyRole());
+            res.setRole(user.getRole().toString());
 
             return new AuthRes(jwtService.generateToken(user), res);
 
@@ -123,6 +131,7 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
         res.setLastName(user.getLastName());
         res.setCompanyId(user.getCompanyId());
         res.setCompanyRole(user.getCompanyRole());
+        res.setRole(user.getRole().toString());
 
         return res;
     }

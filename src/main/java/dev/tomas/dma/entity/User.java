@@ -1,5 +1,6 @@
 package dev.tomas.dma.entity;
 
+import dev.tomas.dma.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -35,6 +36,10 @@ public class User {
     @Column(unique = true, nullable = false)
     private String username;
 
-    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UserRole role = UserRole.DONOR;
+
+    @OneToOne(mappedBy = "user")
     private UserCompanyMembership membership;
 }

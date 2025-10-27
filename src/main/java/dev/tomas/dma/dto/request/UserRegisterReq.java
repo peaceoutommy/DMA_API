@@ -21,4 +21,5 @@ public class UserRegisterReq {
     private String phoneNumber;
     @NotBlank
     private String address;
+    private Boolean companyAccount;
 }

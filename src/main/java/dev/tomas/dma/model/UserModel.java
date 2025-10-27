@@ -1,6 +1,7 @@
 package dev.tomas.dma.model;
 
 import dev.tomas.dma.entity.User;
+import dev.tomas.dma.enums.UserRole;
 import lombok.Data;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
@@ -30,7 +31,7 @@ public class UserModel implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+        return List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
     }
 
     @Override
@@ -78,4 +79,6 @@ public class UserModel implements UserDetails {
     public String getLastName() {
         return user.getLastName();
     }
+
+    public UserRole getRole() {return user.getRole();}
 }
