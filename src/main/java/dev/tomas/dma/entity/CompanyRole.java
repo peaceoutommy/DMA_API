@@ -14,7 +14,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "companyRole")
+@Table(name = "company_role")
 public class CompanyRole {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,6 +28,14 @@ public class CompanyRole {
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;
 
-    @OneToMany(mappedBy = "role", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "companyRole", fetch = FetchType.LAZY)
     private List<UserCompanyMembership> memberships = new ArrayList<>();
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "company_role_permission_mapping",
+            joinColumns = @JoinColumn(name = "company_role_id"),
+            inverseJoinColumns = @JoinColumn(name = "company_role_permission_id")
+    )
+    private List<CompanyRolePermission> permissions = new ArrayList<>();
 }

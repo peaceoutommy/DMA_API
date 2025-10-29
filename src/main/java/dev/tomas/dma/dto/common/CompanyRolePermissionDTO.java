@@ -4,11 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
-public class CompanyRoleDTO {
+public class CompanyRolePermissionDTO {
     private Integer id;
     private String name;
-    private Integer companyId;
+    private String type;
+    private String description;
 }

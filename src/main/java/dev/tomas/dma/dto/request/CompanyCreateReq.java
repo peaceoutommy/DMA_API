@@ -17,7 +17,7 @@ public class CompanyCreateReq {
     @Size(min = 5, max = 20, message = "Registration number must be at least 5 characters")
     private String registrationNumber;
     @NotBlank
-    @Size(min = 8, max = 30, message = "Tax number must be at least 5 characters")
+    @Size(min = 8, max = 30, message = "Tax number must be at least 8 characters")
     private String taxId;
     @NotNull
     @Positive

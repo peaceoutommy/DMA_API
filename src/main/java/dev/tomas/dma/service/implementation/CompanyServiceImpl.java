@@ -128,7 +128,7 @@ public class CompanyServiceImpl implements CompanyService {
         }
         UserCompanyMembershipModel membership = new UserCompanyMembershipModel();
         membership.setCompanyId(fetched.get().getId());
-        membership.setCompanyRole(fetched.get().getRole().getName());
+        membership.setCompanyRole(fetched.get().getCompanyRole().getName());
 
         return Optional.of(membership);
     }

@@ -9,5 +9,4 @@ import org.mapstruct.factory.Mappers;
 public interface UserCompanyMembershipMapper {
     UserCompanyMembershipMapper INSTANCE = Mappers.getMapper(UserCompanyMembershipMapper.class);
 
-    public UserCompanyMembershipModel entityToModel(UserCompanyMembership membership);
 }

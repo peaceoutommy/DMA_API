@@ -20,7 +20,7 @@ public class UserCompanyMembership {
     private Company company;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "role_id")
-    private CompanyRole role;
+    @JoinColumn(name = "company_role_id")
+    private CompanyRole companyRole;
 
 }
