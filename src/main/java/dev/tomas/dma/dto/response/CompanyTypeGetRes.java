@@ -8,4 +8,5 @@ import lombok.Data;
 public class CompanyTypeGetRes {
     public Integer id;
     public String name;
+    public String description;
 }

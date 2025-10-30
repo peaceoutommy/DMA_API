@@ -1,5 +1,6 @@
 package dev.tomas.dma.entity;
 
+import dev.tomas.dma.enums.PermissionType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -20,7 +21,7 @@ public class CompanyRolePermission {
     @Size(min = 3, max = 100)
     private String name;
     @Column
-    private String type;
+    private PermissionType type;
     @Column
     @Size(max = 500)
     private String description;

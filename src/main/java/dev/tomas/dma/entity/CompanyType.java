@@ -23,6 +23,10 @@ public class CompanyType {
     @Size(min = 3, max = 100)
     private String name;
 
+    @Column
+    @Size(max = 500)
+    private String description;
+
     @OneToMany(mappedBy = "type", orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Company> companies = new ArrayList<>();
 }

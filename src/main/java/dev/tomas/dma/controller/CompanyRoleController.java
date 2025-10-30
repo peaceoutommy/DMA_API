@@ -2,10 +2,7 @@ package dev.tomas.dma.controller;
 
 import dev.tomas.dma.dto.request.CompanyPermissionCreateReq;
 import dev.tomas.dma.dto.request.CompanyRoleCreateReq;
-import dev.tomas.dma.dto.response.CompanyPermissionCreateRes;
-import dev.tomas.dma.dto.response.CompanyRoleCreateRes;
-import dev.tomas.dma.dto.response.CompanyRoleGetAllRes;
-import dev.tomas.dma.dto.response.CompanyRolePermissionGetAllRes;
+import dev.tomas.dma.dto.response.*;
 import dev.tomas.dma.service.CompanyRoleService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -42,5 +39,10 @@ public class CompanyRoleController {
     @PostMapping("/permission")
     public Optional<CompanyPermissionCreateRes> createPermission(@RequestBody @Valid CompanyPermissionCreateReq request) {
         return companyRoleService.createPermission(request);
+    }
+
+    @GetMapping("/permission/types")
+    public Optional<PermissionTypeGetAllRes> getPermissionTypes() {
+        return companyRoleService.getAllPermissionTypes();
     }
 }

@@ -46,7 +46,7 @@ public class CompanyServiceImpl implements CompanyService {
 
         for (Company entity : companyRepo.findAll()) {
             CompanyType type = entity.getType();
-            dtos.add(new CompanyDTO(entity.getId(), entity.getName(), entity.getRegistrationNumber(), entity.getTaxId(), new CompanyTypeDTO(type.getId(), type.getName())));
+            dtos.add(new CompanyDTO(entity.getId(), entity.getName(), entity.getRegistrationNumber(), entity.getTaxId(), new CompanyTypeDTO(type.getId(), type.getName(), type.getDescription())));
         }
 
         response.setCompanies(dtos);
@@ -63,7 +63,7 @@ public class CompanyServiceImpl implements CompanyService {
 
         Company saved = companyRepo.save(toSave);
 
-        CompanyTypeDTO typeDTO = new CompanyTypeDTO(saved.getType().getId(), saved.getType().getName());
+        CompanyTypeDTO typeDTO = new CompanyTypeDTO(saved.getType().getId(), saved.getType().getName(), saved.getType().getDescription());
 
         return new CompanyCreateRes(saved.getId(), saved.getName(), saved.getRegistrationNumber(), saved.getTaxId(), typeDTO);
     }
@@ -73,7 +73,7 @@ public class CompanyServiceImpl implements CompanyService {
 
         for (CompanyType entity : companyTypeRepo.findAll()) {
             response.getTypes().add(
-                    new CompanyTypeGetRes(entity.getId(), entity.getName())
+                    new CompanyTypeGetRes(entity.getId(), entity.getName(), entity.getDescription())
             );
         }
         return Optional.of(response);
@@ -81,25 +81,31 @@ public class CompanyServiceImpl implements CompanyService {
 
     public Optional<CompanyTypeGetRes> getTypeById(@Positive Integer id) {
         return companyTypeRepo.findById(id)
-                .map(entity -> new CompanyTypeGetRes(entity.getId(), entity.getName()));
+                .map(entity -> new CompanyTypeGetRes(entity.getId(), entity.getName(), entity.getDescription()));
     }
 
 
     public CompanyTypeGetRes saveType(@Valid CompanyTypeCreateReq request) {
         if (StringUtils.isBlank(request.getName())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Company type can't be empty");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Company type name can't be empty");
+        }
+        if (StringUtils.isBlank(request.getDescription())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Company type description can't be empty");
         }
 
         CompanyType toSave = new CompanyType();
         toSave.setName(request.getName());
         CompanyType saved = companyTypeRepo.save(toSave);
 
-        return new CompanyTypeGetRes(saved.getId(), saved.getName());
+        return new CompanyTypeGetRes(saved.getId(), saved.getName(), saved.getDescription());
     }
 
     public Optional<CompanyTypeDTO> updateType(@Valid CompanyTypeDTO request) {
         if (StringUtils.isBlank(request.getName())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Company type can't be empty");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Company type name can't be empty");
+        }
+        if (StringUtils.isBlank(request.getDescription())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Company type description can't be empty");
         }
         CompanyType existing = companyTypeRepo.findById(request.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Company type not found"));
@@ -107,7 +113,7 @@ public class CompanyServiceImpl implements CompanyService {
         existing.setName(request.getName());
 
         CompanyType saved = companyTypeRepo.save(existing);
-        return Optional.of(new CompanyTypeDTO(saved.getId(), saved.getName()));
+        return Optional.of(new CompanyTypeDTO(saved.getId(), saved.getName(), saved.getDescription()));
     }
 
     public Integer deleteType(@Positive Integer id) {
