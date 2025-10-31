@@ -72,18 +72,41 @@ public class CompanyRoleServiceImpl implements CompanyRoleService {
         toSave.setName(request.getName());
         toSave.setType(PermissionType.valueOf(request.getType()));
         toSave.setDescription(request.getDescription());
-        companyRolePermissionRepo.save(toSave);
+
+        CompanyRolePermission entity =  companyRolePermissionRepo.save(toSave);
 
         CompanyPermissionCreateRes response = new CompanyPermissionCreateRes();
-        response.setId(toSave.getId());
-        response.setName(toSave.getName());
-        response.setDescription(toSave.getDescription());
+        response.setId(entity.getId());
+        response.setName(entity.getName());
+        response.setDescription(entity.getDescription());
         return Optional.of(response);
+    }
+
+    public Optional<CompanyRolePermissionDTO> updatePermission(@Valid CompanyRolePermissionDTO request) {
+        CompanyRolePermission toSave = new CompanyRolePermission();
+        toSave.setId(request.getId());
+        toSave.setName(request.getName());
+        toSave.setType(PermissionType.valueOf(request.getType()));
+        toSave.setDescription(request.getDescription());
+
+        CompanyRolePermission entity = companyRolePermissionRepo.save(toSave);
+
+        CompanyRolePermissionDTO response = new CompanyRolePermissionDTO();
+        response.setId(entity.getId());
+        response.setName(entity.getName());
+        response.setDescription(entity.getDescription());
+        return Optional.of(response);
+    }
+
+    public Integer deletePermission(Integer id) {
+        companyRolePermissionRepo.deleteById(id);
+        return id;
     }
 
     public Optional<PermissionTypeGetAllRes> getAllPermissionTypes() {
         PermissionTypeGetAllRes response = new PermissionTypeGetAllRes();
         response.setTypes(Arrays.stream(PermissionType.values()).map(PermissionType::name).toList());
+        System.out.println(response.getTypes());
         return Optional.of(response);
     }
 }

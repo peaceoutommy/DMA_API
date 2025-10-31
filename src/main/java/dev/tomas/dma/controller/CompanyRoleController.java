@@ -1,5 +1,6 @@
 package dev.tomas.dma.controller;
 
+import dev.tomas.dma.dto.common.CompanyRolePermissionDTO;
 import dev.tomas.dma.dto.request.CompanyPermissionCreateReq;
 import dev.tomas.dma.dto.request.CompanyRoleCreateReq;
 import dev.tomas.dma.dto.response.*;
@@ -26,6 +27,8 @@ public class CompanyRoleController {
         return companyRoleService.create(request);
     }
 
+    @PutMapping
+
     @DeleteMapping("/{id}")
     public Integer delete(@PathVariable Integer id) {
         return companyRoleService.delete(id);
@@ -41,7 +44,17 @@ public class CompanyRoleController {
         return companyRoleService.createPermission(request);
     }
 
-    @GetMapping("/permission/types")
+    @PutMapping("/permission")
+    public Optional<CompanyRolePermissionDTO> updatePermission(@RequestBody @Valid CompanyRolePermissionDTO request) {
+        return companyRoleService.updatePermission(request);
+    }
+
+    @DeleteMapping("/permission/{id}")
+    public Integer deletePermission(@PathVariable Integer id) {
+        return companyRoleService.deletePermission(id);
+    }
+
+    @GetMapping("/permissions/types")
     public Optional<PermissionTypeGetAllRes> getPermissionTypes() {
         return companyRoleService.getAllPermissionTypes();
     }

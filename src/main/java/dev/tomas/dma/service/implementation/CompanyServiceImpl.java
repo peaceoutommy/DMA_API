@@ -95,6 +95,7 @@ public class CompanyServiceImpl implements CompanyService {
 
         CompanyType toSave = new CompanyType();
         toSave.setName(request.getName());
+        toSave.setDescription(request.getDescription());
         CompanyType saved = companyTypeRepo.save(toSave);
 
         return new CompanyTypeGetRes(saved.getId(), saved.getName(), saved.getDescription());
@@ -111,6 +112,7 @@ public class CompanyServiceImpl implements CompanyService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Company type not found"));
 
         existing.setName(request.getName());
+        existing.setDescription(request.getDescription());
 
         CompanyType saved = companyTypeRepo.save(existing);
         return Optional.of(new CompanyTypeDTO(saved.getId(), saved.getName(), saved.getDescription()));
