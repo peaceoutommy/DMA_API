@@ -13,6 +13,7 @@ import dev.tomas.dma.repository.CompanyRoleRepo;
 import dev.tomas.dma.repository.UserCompanyMembershipRepo;
 import dev.tomas.dma.service.CompanyRoleService;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.apache.catalina.mapper.Mapper;
@@ -96,9 +97,26 @@ public class CompanyRoleServiceImpl implements CompanyRoleService {
         return permissions;
     }
 
+    @Transactional
     public Integer delete(Integer id) {
-        companyRoleRepo.deleteById(id);
+        deleteRoleDependencies(id);
         return id;
+    }
+
+    protected void deleteRoleDependencies(Integer roleId){
+        List<UserCompanyMembership> memberships = membershipRepo.findByCompanyRoleId(roleId);
+        CompanyRole role = companyRoleRepo.findById(roleId)
+                .orElseThrow(() -> new EntityNotFoundException("Role not found with id: " + roleId));
+
+        if (!memberships.isEmpty()) {
+            throw new IllegalStateException(
+                    "Cannot delete role. " + memberships.size() + " user(s) are assigned to this role"
+            );
+        }
+
+        role.setPermissions(null);
+        companyRoleRepo.save(role);
+        companyRoleRepo.delete(role);
     }
 
     public Optional<CompanyRolePermissionGetAllRes> getAllPermissions() {

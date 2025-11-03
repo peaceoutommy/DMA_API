@@ -4,6 +4,7 @@ import dev.tomas.dma.entity.UserCompanyMembership;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -13,4 +14,6 @@ public interface UserCompanyMembershipRepo extends JpaRepository<UserCompanyMemb
     Optional<UserCompanyMembership> findByUserIdAndCompanyId(Integer userId, Integer companyId);
 
     Optional<UserCompanyMembership> findByUserId(Integer userId);
+
+    List<UserCompanyMembership> findByCompanyRoleId(Integer roleId);
 }

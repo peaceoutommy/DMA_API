@@ -27,8 +27,6 @@ public class CompanyRoleController {
         return companyRoleService.create(request);
     }
 
-    @PutMapping
-
     @DeleteMapping("/{id}")
     public Integer delete(@PathVariable Integer id) {
         return companyRoleService.delete(id);
