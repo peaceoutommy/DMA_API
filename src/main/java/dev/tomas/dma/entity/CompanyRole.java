@@ -24,14 +24,14 @@ public class CompanyRole {
     @Size(min = 3, max = 100)
     private String name;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne()
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;
 
-    @OneToMany(mappedBy = "companyRole", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "companyRole")
     private List<UserCompanyMembership> memberships = new ArrayList<>();
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "company_role_permission_mapping",
             joinColumns = @JoinColumn(name = "company_role_id"),

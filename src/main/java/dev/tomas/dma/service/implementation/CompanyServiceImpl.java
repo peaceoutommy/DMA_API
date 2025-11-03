@@ -7,20 +7,19 @@ import dev.tomas.dma.dto.request.CompanyCreateReq;
 import dev.tomas.dma.dto.request.CompanyTypeCreateReq;
 import dev.tomas.dma.dto.response.*;
 import dev.tomas.dma.entity.Company;
+import dev.tomas.dma.entity.CompanyRole;
 import dev.tomas.dma.entity.CompanyType;
-import dev.tomas.dma.entity.User;
 import dev.tomas.dma.entity.UserCompanyMembership;
-import dev.tomas.dma.model.UserCompanyMembershipModel;
-import dev.tomas.dma.repository.AuthRepo;
+import dev.tomas.dma.mapper.CompanyMapper;
 import dev.tomas.dma.repository.CompanyRepo;
 import dev.tomas.dma.repository.CompanyTypeRepo;
 import dev.tomas.dma.repository.UserCompanyMembershipRepo;
+import dev.tomas.dma.service.CompanyRoleService;
 import dev.tomas.dma.service.CompanyService;
 import jakarta.persistence.EntityManager;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -29,16 +28,19 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @Service
 @AllArgsConstructor
 public class CompanyServiceImpl implements CompanyService {
+    private final CompanyRoleService companyRoleService;
     private final CompanyRepo companyRepo;
     private final CompanyTypeRepo companyTypeRepo;
     private final UserCompanyMembershipRepo membershipRepo;
+    private final CompanyRoleServiceImpl roleService;
     private final EntityManager entityManager;
+    private final CompanyMapper companyMapper;
+
 
     public CompanyGetAllRes getAll() {
         CompanyGetAllRes response = new CompanyGetAllRes();
@@ -53,19 +55,39 @@ public class CompanyServiceImpl implements CompanyService {
         return response;
     }
 
-    public CompanyCreateRes save(@Valid CompanyCreateReq request) {
-        Company toSave = new Company();
-        toSave.setName(request.getName());
-        toSave.setRegistrationNumber(request.getRegistrationNumber());
-        toSave.setTaxId(request.getTaxId());
-        CompanyType typeRef = entityManager.getReference(CompanyType.class, request.getTypeId());
-        toSave.setType(typeRef);
+    public CompanyDTO save(@Valid CompanyCreateReq request) {
+        Company companyToSave = new Company();
+        companyToSave.setName(request.getName());
+        companyToSave.setRegistrationNumber(request.getRegistrationNumber());
+        companyToSave.setTaxId(request.getTaxId());
+        CompanyType type = new CompanyType();
+        type.setId(request.getTypeId());
+        companyToSave.setType(type);
 
-        Company saved = companyRepo.save(toSave);
+        Company company = createCompany(companyToSave, request.getUserId());
+        return companyMapper.toDto(company);
+        // create company
+        // create role owner
+        // add permissions to role owner
+        // link role with user
+    }
 
-        CompanyTypeDTO typeDTO = new CompanyTypeDTO(saved.getType().getId(), saved.getType().getName(), saved.getType().getDescription());
+    @Transactional
+    protected Company createCompany(Company company, Integer userId) {
+        if (company.getType() == null || company.getType().getId() == null) {
+            throw new IllegalArgumentException("Company type ID cannot be null");
+        }
 
-        return new CompanyCreateRes(saved.getId(), saved.getName(), saved.getRegistrationNumber(), saved.getTaxId(), typeDTO);
+        company.setType(entityManager.getReference(CompanyType.class, company.getType().getId()));
+        Company savedCompany = companyRepo.save(company);
+
+        CompanyRole role = new CompanyRole();
+        role.setCompany(savedCompany);
+        role.setName("Owner");
+        role.setPermissions(roleService.getAllPermissionsEntity());
+        roleService.saveRoleEntity(role, userId);
+
+        return savedCompany;
     }
 
     public Optional<CompanyTypeGetAllRes> getAllTypes() {
@@ -128,16 +150,7 @@ public class CompanyServiceImpl implements CompanyService {
         return null;
     }
 
-    public Optional<UserCompanyMembershipModel> getMembershipByUserId(Integer id) {
-        Optional<UserCompanyMembership> fetched = membershipRepo.findByUserId(id);
-
-        if (fetched.isEmpty()) {
-            return Optional.empty();
-        }
-        UserCompanyMembershipModel membership = new UserCompanyMembershipModel();
-        membership.setCompanyId(fetched.get().getId());
-        membership.setCompanyRole(fetched.get().getCompanyRole().getName());
-
-        return Optional.of(membership);
+    public Optional<UserCompanyMembership> getMembershipByUserId(Integer id) {
+        return membershipRepo.findByUserId(id);
     }
 }

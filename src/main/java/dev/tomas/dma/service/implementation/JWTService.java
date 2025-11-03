@@ -1,14 +1,10 @@
 package dev.tomas.dma.service.implementation;
 
-import dev.tomas.dma.dto.response.MembershipGetRes;
 import dev.tomas.dma.entity.User;
-import dev.tomas.dma.model.UserModel;
 import dev.tomas.dma.service.CompanyService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -83,13 +79,13 @@ public class JWTService {
      * Generate JWT token with no extra claims
      * Just username and standard claims (issued at, expiration)
      */
-    public String generateToken(UserModel user) {
+    public String generateToken(User user) {
         Map<String, Object> claims = new HashMap<>();
 
         if (user != null && user.getId() != null) {
             var membership = companyService.getMembershipByUserId(user.getId());
             if (membership.isPresent()) {
-                claims.put("Company", membership.get().getCompanyId());
+                claims.put("Company", membership.get().getCompany().getId());
                 claims.put("Role", membership.get().getCompanyRole());
             };
         }
@@ -119,7 +115,7 @@ public class JWTService {
      * 1. Username in token matches the user
      * 2. Token hasn't expired
      */
-    public Boolean validateToken(String token, UserModel user) {
+    public Boolean validateToken(String token, User user) {
         final String username = extractUsername(token);
         return (username.equals(user.getUsername()) && !isTokenExpired(token));
     }

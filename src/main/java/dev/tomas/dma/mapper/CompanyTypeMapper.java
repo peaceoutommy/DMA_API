@@ -5,10 +5,8 @@ import dev.tomas.dma.entity.CompanyType;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface CompanyTypeMapper {
-    CompanyTypeMapper INSTANCE = Mappers.getMapper(CompanyTypeMapper.class);
-
     public CompanyTypeDTO convertToDTO(CompanyType companyType);
     public CompanyType convertToEntity(CompanyTypeDTO companyType);
 }

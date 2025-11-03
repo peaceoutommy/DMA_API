@@ -1,5 +1,6 @@
 package dev.tomas.dma.controller;
 
+import dev.tomas.dma.dto.common.CompanyDTO;
 import dev.tomas.dma.dto.common.CompanyTypeDTO;
 import dev.tomas.dma.dto.request.AddUserToCompanyReq;
 import dev.tomas.dma.dto.request.CompanyCreateReq;
@@ -28,7 +29,7 @@ public class CompanyController {
     }
 
     @PostMapping
-    public CompanyCreateRes create(@Valid @RequestBody CompanyCreateReq request) {
+    public CompanyDTO create(@Valid @RequestBody CompanyCreateReq request) {
         return companyService.save(request);
     }
 

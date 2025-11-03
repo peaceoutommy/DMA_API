@@ -1,7 +1,6 @@
 package dev.tomas.dma.config;
 
 import dev.tomas.dma.entity.User;
-import dev.tomas.dma.model.UserModel;
 import dev.tomas.dma.service.implementation.JWTService;
 
 import java.io.IOException;
@@ -63,7 +62,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // Step 5: If username exists AND user is not already authenticated in this request
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             // Step 6: Load the full user details from database using UserDetailsService
-            UserModel user = (UserModel) userDetailsService.loadUserByUsername(username);
+            User user = (User) userDetailsService.loadUserByUsername(username);
 
             // Step 7: Validate that the token is valid (not expired, matches the user)
             if (jwtService.validateToken(jwt, user)) {

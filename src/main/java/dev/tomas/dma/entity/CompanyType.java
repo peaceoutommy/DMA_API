@@ -27,6 +27,6 @@ public class CompanyType {
     @Size(max = 500)
     private String description;
 
-    @OneToMany(mappedBy = "type", orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "type", orphanRemoval = true)
     private List<Company> companies = new ArrayList<>();
 }

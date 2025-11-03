@@ -31,7 +31,7 @@ public class Campaign {
     @Column(name = "description")
     private String description;
     
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne()
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;
 

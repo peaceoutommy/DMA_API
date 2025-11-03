@@ -10,6 +10,9 @@ import lombok.Data;
 @AllArgsConstructor
 @Data
 public class CompanyCreateReq {
+    @NotNull
+    @Positive(message = "UserId must be defined")
+    private Integer userId;
     @NotBlank
     @Size(min = 3, max = 100, message = "Company name must be at least 3 characters")
     private String name;
