@@ -7,6 +7,7 @@ import dev.tomas.dma.dto.response.*;
 import dev.tomas.dma.service.CompanyRoleService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
@@ -18,12 +19,12 @@ public class CompanyRoleController {
     private final CompanyRoleService companyRoleService;
 
     @GetMapping("/{companyId}")
-    public Optional<CompanyRoleGetAllRes> getAllByCompanyId(@PathVariable Integer companyId) {
+    public ResponseEntity<CompanyRoleGetAllRes> getAllByCompanyId(@PathVariable Integer companyId) {
         return companyRoleService.getAllByCompanyId(companyId);
     }
 
     @PostMapping
-    public Optional<CompanyRoleCreateRes> create(@RequestBody @Valid CompanyRoleCreateReq request) {
+    public ResponseEntity<CompanyRoleCreateRes> create(@RequestBody @Valid CompanyRoleCreateReq request) {
         return companyRoleService.create(request);
     }
 
@@ -33,17 +34,17 @@ public class CompanyRoleController {
     }
 
     @GetMapping("/permissions")
-    public Optional<CompanyRolePermissionGetAllRes> getPermissions() {
+    public ResponseEntity<CompanyRolePermissionGetAllRes> getPermissions() {
         return companyRoleService.getAllPermissions();
     }
 
     @PostMapping("/permission")
-    public Optional<CompanyPermissionCreateRes> createPermission(@RequestBody @Valid CompanyPermissionCreateReq request) {
+    public ResponseEntity<CompanyPermissionCreateRes> createPermission(@RequestBody @Valid CompanyPermissionCreateReq request) {
         return companyRoleService.createPermission(request);
     }
 
     @PutMapping("/permission")
-    public Optional<CompanyRolePermissionDTO> updatePermission(@RequestBody @Valid CompanyRolePermissionDTO request) {
+    public ResponseEntity<CompanyRolePermissionDTO> updatePermission(@RequestBody @Valid CompanyRolePermissionDTO request) {
         return companyRoleService.updatePermission(request);
     }
 
@@ -53,7 +54,7 @@ public class CompanyRoleController {
     }
 
     @GetMapping("/permissions/types")
-    public Optional<PermissionTypeGetAllRes> getPermissionTypes() {
+    public ResponseEntity<PermissionTypeGetAllRes> getPermissionTypes() {
         return companyRoleService.getAllPermissionTypes();
     }
 }

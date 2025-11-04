@@ -14,26 +14,25 @@ import dev.tomas.dma.mapper.CompanyMapper;
 import dev.tomas.dma.repository.CompanyRepo;
 import dev.tomas.dma.repository.CompanyTypeRepo;
 import dev.tomas.dma.repository.UserCompanyMembershipRepo;
-import dev.tomas.dma.service.CompanyRoleService;
 import dev.tomas.dma.service.CompanyService;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @AllArgsConstructor
 public class CompanyServiceImpl implements CompanyService {
-    private final CompanyRoleService companyRoleService;
     private final CompanyRepo companyRepo;
     private final CompanyTypeRepo companyTypeRepo;
     private final UserCompanyMembershipRepo membershipRepo;
@@ -42,7 +41,7 @@ public class CompanyServiceImpl implements CompanyService {
     private final CompanyMapper companyMapper;
 
 
-    public CompanyGetAllRes getAll() {
+    public ResponseEntity<CompanyGetAllRes> getAll() {
         CompanyGetAllRes response = new CompanyGetAllRes();
         List<CompanyDTO> dtos = new ArrayList<>();
 
@@ -52,10 +51,10 @@ public class CompanyServiceImpl implements CompanyService {
         }
 
         response.setCompanies(dtos);
-        return response;
+        return ResponseEntity.ok(response);
     }
 
-    public CompanyDTO save(@Valid CompanyCreateReq request) {
+    public ResponseEntity<CompanyDTO> save(@Valid CompanyCreateReq request) {
         Company companyToSave = new Company();
         companyToSave.setName(request.getName());
         companyToSave.setRegistrationNumber(request.getRegistrationNumber());
@@ -65,11 +64,7 @@ public class CompanyServiceImpl implements CompanyService {
         companyToSave.setType(type);
 
         Company company = createCompany(companyToSave, request.getUserId());
-        return companyMapper.toDto(company);
-        // create company
-        // create role owner
-        // add permissions to role owner
-        // link role with user
+        return ResponseEntity.ok(companyMapper.toDto(company));
     }
 
     @Transactional
@@ -90,7 +85,7 @@ public class CompanyServiceImpl implements CompanyService {
         return savedCompany;
     }
 
-    public Optional<CompanyTypeGetAllRes> getAllTypes() {
+    public ResponseEntity<CompanyTypeGetAllRes> getAllTypes() {
         CompanyTypeGetAllRes response = new CompanyTypeGetAllRes();
 
         for (CompanyType entity : companyTypeRepo.findAll()) {
@@ -98,16 +93,17 @@ public class CompanyServiceImpl implements CompanyService {
                     new CompanyTypeGetRes(entity.getId(), entity.getName(), entity.getDescription())
             );
         }
-        return Optional.of(response);
+        return ResponseEntity.ok(response);
     }
 
-    public Optional<CompanyTypeGetRes> getTypeById(@Positive Integer id) {
-        return companyTypeRepo.findById(id)
-                .map(entity -> new CompanyTypeGetRes(entity.getId(), entity.getName(), entity.getDescription()));
+    public ResponseEntity<CompanyTypeGetRes> getTypeById(@Positive Integer id) {
+        CompanyType entity = companyTypeRepo.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Company type not found with id: " + id));
+        return ResponseEntity.ok(new CompanyTypeGetRes(entity.getId(), entity.getName(), entity.getDescription()));
     }
 
 
-    public CompanyTypeGetRes saveType(@Valid CompanyTypeCreateReq request) {
+    public ResponseEntity<CompanyTypeGetRes> saveType(@Valid CompanyTypeCreateReq request) {
         if (StringUtils.isBlank(request.getName())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Company type name can't be empty");
         }
@@ -120,24 +116,24 @@ public class CompanyServiceImpl implements CompanyService {
         toSave.setDescription(request.getDescription());
         CompanyType saved = companyTypeRepo.save(toSave);
 
-        return new CompanyTypeGetRes(saved.getId(), saved.getName(), saved.getDescription());
+        return ResponseEntity.ok(new CompanyTypeGetRes(saved.getId(), saved.getName(), saved.getDescription()));
     }
 
-    public Optional<CompanyTypeDTO> updateType(@Valid CompanyTypeDTO request) {
+    public ResponseEntity<CompanyTypeDTO> updateType(@Valid CompanyTypeDTO request) {
         if (StringUtils.isBlank(request.getName())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Company type name can't be empty");
+            throw new IllegalArgumentException("Company type name can't be empty");
         }
         if (StringUtils.isBlank(request.getDescription())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Company type description can't be empty");
+            throw new IllegalArgumentException("Company type description can't be empty");
         }
         CompanyType existing = companyTypeRepo.findById(request.getId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Company type not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Company type not found with id: " + request.getId()));
 
         existing.setName(request.getName());
         existing.setDescription(request.getDescription());
 
         CompanyType saved = companyTypeRepo.save(existing);
-        return Optional.of(new CompanyTypeDTO(saved.getId(), saved.getName(), saved.getDescription()));
+        return ResponseEntity.ok(new CompanyTypeDTO(saved.getId(), saved.getName(), saved.getDescription()));
     }
 
     public Integer deleteType(@Positive Integer id) {
@@ -146,11 +142,16 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     @Transactional
-    public Optional<AddUserToCompanyRes> addUserToCompany(@Valid AddUserToCompanyReq request) {
-        return null;
+    public ResponseEntity<AddUserToCompanyRes> addUserToCompany(@Valid AddUserToCompanyReq request) {
+        return ResponseEntity.ok(null);
     }
 
-    public Optional<UserCompanyMembership> getMembershipByUserId(Integer id) {
-        return membershipRepo.findByUserId(id);
+    protected UserCompanyMembership getMembershipByUserId(Integer id) {
+        return membershipRepo.findByUserId(id)
+                .orElseThrow(() -> new EntityNotFoundException("Membership not found with id: " + id));
+    }
+
+    protected Company findCompanyEntityById(Integer id) {
+        return companyRepo.findById(id).orElseThrow(() -> new EntityNotFoundException("Company not found with  id: " + id));
     }
 }

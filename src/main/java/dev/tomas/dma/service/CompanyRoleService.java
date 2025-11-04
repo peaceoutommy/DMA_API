@@ -5,17 +5,18 @@ import dev.tomas.dma.dto.request.CompanyPermissionCreateReq;
 import dev.tomas.dma.dto.request.CompanyRoleCreateReq;
 import dev.tomas.dma.dto.response.*;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 
 import java.util.Optional;
 
 public interface CompanyRoleService {
-    Optional<CompanyRoleGetAllRes> getAllByCompanyId(Integer companyId);
-    Optional<CompanyRoleCreateRes> create(@Valid CompanyRoleCreateReq request);
+    ResponseEntity<CompanyRoleGetAllRes> getAllByCompanyId(Integer companyId);
+    ResponseEntity<CompanyRoleCreateRes> create(@Valid CompanyRoleCreateReq request);
     Integer delete(Integer id);
 
-    Optional<CompanyRolePermissionGetAllRes> getAllPermissions();
-    Optional<CompanyPermissionCreateRes> createPermission(@Valid CompanyPermissionCreateReq request);
-    Optional<CompanyRolePermissionDTO> updatePermission(@Valid CompanyRolePermissionDTO request);
+    ResponseEntity<CompanyRolePermissionGetAllRes> getAllPermissions();
+    ResponseEntity<CompanyPermissionCreateRes> createPermission(@Valid CompanyPermissionCreateReq request);
+    ResponseEntity<CompanyRolePermissionDTO> updatePermission(@Valid CompanyRolePermissionDTO request);
     Integer deletePermission(Integer id);
-    Optional<PermissionTypeGetAllRes> getAllPermissionTypes();
+    ResponseEntity<PermissionTypeGetAllRes> getAllPermissionTypes();
 }

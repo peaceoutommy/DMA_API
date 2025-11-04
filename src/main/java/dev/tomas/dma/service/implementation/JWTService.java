@@ -5,6 +5,7 @@ import dev.tomas.dma.service.CompanyService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -22,7 +23,7 @@ public class JWTService {
     private String secret;
     @Value("${jwt.expiration}")
     private Long expiration;
-    private final CompanyService companyService;
+    private final CompanyServiceImpl companyService;
 
     /**
      * Creates a cryptographic signing key from the secret string
@@ -80,14 +81,16 @@ public class JWTService {
      * Just username and standard claims (issued at, expiration)
      */
     public String generateToken(User user) {
+        if (user == null) {
+            throw new IllegalArgumentException("User can't be null");
+        }
         Map<String, Object> claims = new HashMap<>();
 
-        if (user != null && user.getId() != null) {
-            var membership = companyService.getMembershipByUserId(user.getId());
-            if (membership.isPresent()) {
-                claims.put("Company", membership.get().getCompany().getId());
-                claims.put("Role", membership.get().getCompanyRole());
-            };
+        var membership = companyService.getMembershipByUserId(user.getId());
+        if (membership != null) {
+            claims.put("Company", membership.getCompany().getId());
+            claims.put("Role", membership.getCompanyRole());
+
         }
         return createToken(claims, user.getUsername());
     }

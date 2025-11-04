@@ -13,6 +13,7 @@ import dev.tomas.dma.service.AuthService;
 import dev.tomas.dma.service.CompanyService;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -29,7 +30,7 @@ import java.util.Optional;
 public class AuthServiceImpl implements AuthService, UserDetailsService {
     private final AuthRepo authRepo;
     private final JWTService jwtService;
-    private final CompanyService companyService;
+    private final CompanyServiceImpl companyService;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authManager;
 
@@ -42,7 +43,7 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
         this.authRepo = authRepo;
         this.jwtService = jwtService;
         this.passwordEncoder = passwordEncoder;
-        this.companyService = companyService;
+        this.companyService = (CompanyServiceImpl) companyService;
         this.authManager = authManager;
     }
 
@@ -86,9 +87,11 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
             Authentication authentication = authManager.authenticate(authRequestToken);
             User user = (User) authentication.getPrincipal();
 
-            Optional<UserCompanyMembership> membership = companyService.getMembershipByUserId(user.getId());
+            UserCompanyMembership membership = companyService.getMembershipByUserId(user.getId());
 
-            membership.ifPresent(user::setMembership);
+            if (membership != null) {
+                user.setMembership(membership);
+            }
 
             AuthUserRes res = new AuthUserRes();
 
@@ -97,7 +100,7 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
             res.setUsername(user.getUsername());
             res.setFirstName(user.getFirstName());
             res.setLastName(user.getLastName());
-            if(membership.isPresent()) {
+            if (membership != null) {
                 res.setCompanyId(user.getMembership().getCompany().getId());
                 res.setCompanyRole(user.getMembership().getCompanyRole().getName());
             }
@@ -112,9 +115,11 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
 
     public AuthUserRes authMe(Authentication authentication) {
         User user = (User) authentication.getPrincipal();
-        Optional<UserCompanyMembership> membership = companyService.getMembershipByUserId(user.getId());
+        UserCompanyMembership membership = companyService.getMembershipByUserId(user.getId());
 
-        membership.ifPresent(user::setMembership);
+        if (membership != null) {
+            user.setMembership(membership);
+        }
 
         AuthUserRes res = new AuthUserRes();
         res.setId(user.getId());
@@ -122,7 +127,7 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
         res.setUsername(user.getUsername());
         res.setFirstName(user.getFirstName());
         res.setLastName(user.getLastName());
-        if(membership.isPresent()) {
+        if (membership != null) {
             res.setCompanyId(user.getMembership().getCompany().getId());
             res.setCompanyRole(user.getMembership().getCompanyRole().getName());
         }

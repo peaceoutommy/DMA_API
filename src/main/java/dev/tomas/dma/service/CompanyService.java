@@ -8,26 +8,26 @@ import dev.tomas.dma.dto.request.CompanyTypeCreateReq;
 import dev.tomas.dma.dto.response.*;
 import dev.tomas.dma.entity.UserCompanyMembership;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.Optional;
 
 public interface CompanyService {
-    CompanyGetAllRes getAll();
+    ResponseEntity<CompanyGetAllRes> getAll();
 
-    CompanyDTO save(CompanyCreateReq request);
+    ResponseEntity<CompanyDTO> save(CompanyCreateReq request);
 
-    Optional<CompanyTypeGetAllRes> getAllTypes();
+    ResponseEntity<CompanyTypeGetAllRes> getAllTypes();
 
-    Optional<CompanyTypeGetRes> getTypeById(Integer id);
+    ResponseEntity<CompanyTypeGetRes> getTypeById(Integer id);
 
-    CompanyTypeGetRes saveType(CompanyTypeCreateReq request);
+    ResponseEntity<CompanyTypeGetRes> saveType(CompanyTypeCreateReq request);
 
-    Optional<CompanyTypeDTO> updateType(CompanyTypeDTO request);
+    ResponseEntity<CompanyTypeDTO> updateType(CompanyTypeDTO request);
 
     Integer deleteType(Integer id);
 
-    Optional<AddUserToCompanyRes> addUserToCompany(@Valid @RequestBody AddUserToCompanyReq request);
+    ResponseEntity<AddUserToCompanyRes> addUserToCompany(@Valid @RequestBody AddUserToCompanyReq request);
 
-    Optional<UserCompanyMembership> getMembershipByUserId(Integer userId);
 }
