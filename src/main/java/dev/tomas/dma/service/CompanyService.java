@@ -6,12 +6,13 @@ import dev.tomas.dma.dto.request.AddUserToCompanyReq;
 import dev.tomas.dma.dto.request.CompanyCreateReq;
 import dev.tomas.dma.dto.request.CompanyTypeCreateReq;
 import dev.tomas.dma.dto.response.*;
-import dev.tomas.dma.entity.UserCompanyMembership;
+import dev.tomas.dma.entity.Company;
+import dev.tomas.dma.entity.User;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import java.util.Optional;
+import java.util.List;
 
 public interface CompanyService {
     ResponseEntity<CompanyGetAllRes> getAll();
@@ -28,6 +29,7 @@ public interface CompanyService {
 
     Integer deleteType(Integer id);
 
-    ResponseEntity<AddUserToCompanyRes> addUserToCompany(@Valid @RequestBody AddUserToCompanyReq request);
+    // Internal methods
+    Company findCompanyEntityById(Integer id);
 
 }

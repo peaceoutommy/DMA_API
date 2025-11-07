@@ -7,6 +7,6 @@ import org.mapstruct.factory.Mappers;
 
 @Mapper(componentModel = "spring")
 public interface CompanyTypeMapper {
-    public CompanyTypeDTO convertToDTO(CompanyType companyType);
-    public CompanyType convertToEntity(CompanyTypeDTO companyType);
+    CompanyTypeDTO convertToDTO(CompanyType companyType);
+    CompanyType convertToEntity(CompanyTypeDTO companyType);
 }

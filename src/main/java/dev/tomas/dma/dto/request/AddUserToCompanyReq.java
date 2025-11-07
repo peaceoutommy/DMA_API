@@ -7,11 +7,11 @@ import lombok.Data;
 @Data
 public class AddUserToCompanyReq {
     @Positive
+    @NotBlank
     private Integer userId;
     @Positive
-    private Integer toAddUserId;
-    @Positive
+    @NotBlank
     private Integer companyId;
     @NotBlank
-    private String role;
+    private Integer roleId;
 }

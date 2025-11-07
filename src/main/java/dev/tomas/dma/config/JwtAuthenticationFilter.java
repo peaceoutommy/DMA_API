@@ -1,7 +1,8 @@
 package dev.tomas.dma.config;
 
 import dev.tomas.dma.entity.User;
-import dev.tomas.dma.service.implementation.JWTService;
+import dev.tomas.dma.service.JWTService;
+import dev.tomas.dma.service.implementation.JWTServiceImpl;
 
 import java.io.IOException;
 

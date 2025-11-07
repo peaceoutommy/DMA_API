@@ -5,9 +5,9 @@ import dev.tomas.dma.dto.request.UserRegisterReq;
 import dev.tomas.dma.dto.response.AuthRes;
 import dev.tomas.dma.dto.response.AuthUserRes;
 import dev.tomas.dma.entity.User;
-import dev.tomas.dma.repository.AuthRepo;
+import dev.tomas.dma.repository.UserRepo;
 import dev.tomas.dma.service.implementation.AuthServiceImpl;
-import dev.tomas.dma.service.implementation.JWTService;
+import dev.tomas.dma.service.implementation.JWTServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,10 +32,10 @@ import static org.mockito.Mockito.*;
 class AuthServiceTests {
 
     @Mock
-    private AuthRepo authRepo;
+    private UserRepo userRepo;
 
     @Mock
-    private JWTService jwtService;
+    private JWTServiceImpl jwtServiceImpl;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -82,42 +82,42 @@ class AuthServiceTests {
 
     @Test
     void testRegister_success() {
-        when(authRepo.findByEmail(registerRequest.getEmail())).thenReturn(Optional.empty());
-        when(authRepo.findByUsername(registerRequest.getUsername())).thenReturn(Optional.empty());
+        when(userRepo.findByEmail(registerRequest.getEmail())).thenReturn(Optional.empty());
+        when(userRepo.findByUsername(registerRequest.getUsername())).thenReturn(Optional.empty());
         when(passwordEncoder.encode(registerRequest.getPassword())).thenReturn("encodedPassword");
-        when(authRepo.save(any(User.class))).thenReturn(testUser);
-        when(jwtService.generateToken(testUser)).thenReturn("jwt-token");
+        when(userRepo.save(any(User.class))).thenReturn(testUser);
+        when(jwtServiceImpl.generateToken(testUser)).thenReturn("jwt-token");
 
         AuthRes result = authService.register(registerRequest);
 
         assertNotNull(result);
         assertEquals("jwt-token", result.getToken());
         assertNotNull(result.getUser());
-        verify(authRepo).save(any(User.class));
+        verify(userRepo).save(any(User.class));
         verify(passwordEncoder).encode(registerRequest.getPassword());
     }
 
     @Test
     void testRegister_emailAlreadyExists() {
-        when(authRepo.findByEmail(registerRequest.getEmail())).thenReturn(Optional.of(testUser));
+        when(userRepo.findByEmail(registerRequest.getEmail())).thenReturn(Optional.of(testUser));
 
         RuntimeException exception = assertThrows(RuntimeException.class,
                 () -> authService.register(registerRequest));
 
         assertEquals("Email already exists", exception.getMessage());
-        verify(authRepo, never()).save(any(User.class));
+        verify(userRepo, never()).save(any(User.class));
     }
 
     @Test
     void testRegister_usernameAlreadyExists() {
-        when(authRepo.findByEmail(registerRequest.getEmail())).thenReturn(Optional.empty());
-        when(authRepo.findByUsername(registerRequest.getUsername())).thenReturn(Optional.of(testUser));
+        when(userRepo.findByEmail(registerRequest.getEmail())).thenReturn(Optional.empty());
+        when(userRepo.findByUsername(registerRequest.getUsername())).thenReturn(Optional.of(testUser));
 
         RuntimeException exception = assertThrows(RuntimeException.class,
                 () -> authService.register(registerRequest));
 
         assertEquals("Username already exists", exception.getMessage());
-        verify(authRepo, never()).save(any(User.class));
+        verify(userRepo, never()).save(any(User.class));
     }
 
 
@@ -126,7 +126,7 @@ class AuthServiceTests {
         when(authManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenReturn(authentication);
         when(authentication.getPrincipal()).thenReturn(testUser);
-        when(jwtService.generateToken(testUser)).thenReturn("jwt-token");
+        when(jwtServiceImpl.generateToken(testUser)).thenReturn("jwt-token");
 
         AuthRes result = authService.login(authReq);
 
@@ -144,7 +144,7 @@ class AuthServiceTests {
         when(authManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenReturn(authentication);
         when(authentication.getPrincipal()).thenReturn(testUser);
-        when(jwtService.generateToken(testUser)).thenReturn("jwt-token");
+        when(jwtServiceImpl.generateToken(testUser)).thenReturn("jwt-token");
 
         AuthRes result = authService.login(authReq);
 
@@ -179,32 +179,32 @@ class AuthServiceTests {
     @Test
     void testAuthMe_foundByUsername() {
         when(authentication.getName()).thenReturn("testuser");
-        when(authRepo.findByUsername("testuser")).thenReturn(Optional.of(testUser));
+        when(userRepo.findByUsername("testuser")).thenReturn(Optional.of(testUser));
 
         AuthUserRes result = authService.authMe(authentication);
 
         assertNotNull(result);
-        verify(authRepo).findByUsername("testuser");
+        verify(userRepo).findByUsername("testuser");
     }
 
     @Test
     void testAuthMe_foundByEmail() {
         when(authentication.getName()).thenReturn("test@example.com");
-        when(authRepo.findByUsername("test@example.com")).thenReturn(Optional.empty());
-        when(authRepo.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
+        when(userRepo.findByUsername("test@example.com")).thenReturn(Optional.empty());
+        when(userRepo.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
 
         AuthUserRes result = authService.authMe(authentication);
 
         assertNotNull(result);
-        verify(authRepo).findByUsername("test@example.com");
-        verify(authRepo).findByEmail("test@example.com");
+        verify(userRepo).findByUsername("test@example.com");
+        verify(userRepo).findByEmail("test@example.com");
     }
 
     @Test
     void testAuthMe_userNotFound() {
         when(authentication.getName()).thenReturn("nonexistent");
-        when(authRepo.findByUsername("nonexistent")).thenReturn(Optional.empty());
-        when(authRepo.findByEmail("nonexistent")).thenReturn(Optional.empty());
+        when(userRepo.findByUsername("nonexistent")).thenReturn(Optional.empty());
+        when(userRepo.findByEmail("nonexistent")).thenReturn(Optional.empty());
 
         assertThrows(UsernameNotFoundException.class,
                 () -> authService.authMe(authentication));
@@ -213,32 +213,32 @@ class AuthServiceTests {
 
     @Test
     void testLoadUserByUsername_foundByUsername() {
-        when(authRepo.findByUsername("testuser")).thenReturn(Optional.of(testUser));
+        when(userRepo.findByUsername("testuser")).thenReturn(Optional.of(testUser));
 
         UserDetails result = authService.loadUserByUsername("testuser");
 
         assertNotNull(result);
         assertEquals(testUser, result);
-        verify(authRepo).findByUsername("testuser");
+        verify(userRepo).findByUsername("testuser");
     }
 
     @Test
     void testLoadUserByUsername_foundByEmail() {
-        when(authRepo.findByUsername("test@example.com")).thenReturn(Optional.empty());
-        when(authRepo.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
+        when(userRepo.findByUsername("test@example.com")).thenReturn(Optional.empty());
+        when(userRepo.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
 
         UserDetails result = authService.loadUserByUsername("test@example.com");
 
         assertNotNull(result);
         assertEquals(testUser, result);
-        verify(authRepo).findByUsername("test@example.com");
-        verify(authRepo).findByEmail("test@example.com");
+        verify(userRepo).findByUsername("test@example.com");
+        verify(userRepo).findByEmail("test@example.com");
     }
 
     @Test
     void testLoadUserByUsername_notFound() {
-        when(authRepo.findByUsername("nonexistent")).thenReturn(Optional.empty());
-        when(authRepo.findByEmail("nonexistent")).thenReturn(Optional.empty());
+        when(userRepo.findByUsername("nonexistent")).thenReturn(Optional.empty());
+        when(userRepo.findByEmail("nonexistent")).thenReturn(Optional.empty());
 
         assertThrows(UsernameNotFoundException.class,
                 () -> authService.loadUserByUsername("nonexistent"));

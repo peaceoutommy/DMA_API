@@ -3,6 +3,8 @@ package dev.tomas.dma.entity;
 import dev.tomas.dma.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,7 +14,8 @@ import java.util.Collection;
 import java.util.List;
 
 @Entity
-@Data
+@Setter
+@Getter
 @Table(name = "user")
 public class User implements UserDetails {
 
@@ -44,15 +47,20 @@ public class User implements UserDetails {
     @Column(unique = true, nullable = false)
     private String username;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private UserRole role = UserRole.DONOR;
+    @ManyToOne
+    @JoinColumn(name = "company_role_id")
+    private CompanyRole companyRole;
 
-    @OneToOne(mappedBy = "user")
-    private UserCompanyMembership membership;
+    @ManyToOne
+    @JoinColumn(name = "company_id")
+    private Company company;
 
     @Column(nullable = false)
     private boolean enabled = true;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UserRole role = UserRole.DONOR;
 
     // UserDetails Methods
 
@@ -64,9 +72,7 @@ public class User implements UserDetails {
         authorities.add(new SimpleGrantedAuthority("ROLE_" + role.name()));
 
         // Add company permissions if member
-        if (membership != null && membership.getCompanyRole() != null) {
-            CompanyRole companyRole = membership.getCompanyRole();
-
+        if (companyRole != null ) {
             if (companyRole.getPermissions() != null) {
                 companyRole.getPermissions().forEach(permission ->
                         authorities.add(new SimpleGrantedAuthority("PERMISSION_" + permission.getName()))

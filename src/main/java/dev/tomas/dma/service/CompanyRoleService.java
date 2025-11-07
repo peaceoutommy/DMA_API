@@ -4,10 +4,12 @@ import dev.tomas.dma.dto.common.CompanyRolePermissionDTO;
 import dev.tomas.dma.dto.request.CompanyPermissionCreateReq;
 import dev.tomas.dma.dto.request.CompanyRoleCreateReq;
 import dev.tomas.dma.dto.response.*;
+import dev.tomas.dma.entity.CompanyRole;
+import dev.tomas.dma.entity.CompanyPermission;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 
-import java.util.Optional;
+import java.util.List;
 
 public interface CompanyRoleService {
     ResponseEntity<CompanyRoleGetAllRes> getAllByCompanyId(Integer companyId);
@@ -19,4 +21,7 @@ public interface CompanyRoleService {
     ResponseEntity<CompanyRolePermissionDTO> updatePermission(@Valid CompanyRolePermissionDTO request);
     Integer deletePermission(Integer id);
     ResponseEntity<PermissionTypeGetAllRes> getAllPermissionTypes();
+
+    // Internal methods
+    List<CompanyPermission> getAllPermissionsEntity();
 }

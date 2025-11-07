@@ -1,11 +1,10 @@
 package dev.tomas.dma.service.implementation;
 
 import dev.tomas.dma.entity.User;
-import dev.tomas.dma.service.CompanyService;
+import dev.tomas.dma.service.JWTService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -14,16 +13,16 @@ import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 @RequiredArgsConstructor
 @Component
-public class JWTService {
+public class JWTServiceImpl implements JWTService {
     @Value("${jwt.secret}")
     private String secret;
     @Value("${jwt.expiration}")
     private Long expiration;
-    private final CompanyServiceImpl companyService;
 
     /**
      * Creates a cryptographic signing key from the secret string
@@ -86,10 +85,9 @@ public class JWTService {
         }
         Map<String, Object> claims = new HashMap<>();
 
-        var membership = companyService.getMembershipByUserId(user.getId());
-        if (membership != null) {
-            claims.put("Company", membership.getCompany().getId());
-            claims.put("Role", membership.getCompanyRole());
+        if (user.getCompanyRole() != null) {
+            claims.put("Company", user.getCompany().getId());
+            claims.put("Role", user.getCompanyRole().getName());
 
         }
         return createToken(claims, user.getUsername());

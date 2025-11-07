@@ -2,10 +2,13 @@ package dev.tomas.dma.controller;
 
 import dev.tomas.dma.dto.common.CompanyDTO;
 import dev.tomas.dma.dto.common.CompanyTypeDTO;
+import dev.tomas.dma.dto.common.UserDTO;
 import dev.tomas.dma.dto.request.AddUserToCompanyReq;
 import dev.tomas.dma.dto.request.CompanyCreateReq;
 import dev.tomas.dma.dto.request.CompanyTypeCreateReq;
 import dev.tomas.dma.dto.response.*;
+import dev.tomas.dma.entity.User;
+import dev.tomas.dma.service.CompanyEmployeeService;
 import dev.tomas.dma.service.CompanyService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -15,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -23,6 +27,7 @@ import java.util.Optional;
 @RequestMapping("/api/companies")
 public class CompanyController {
     private final CompanyService companyService;
+    private final CompanyEmployeeService companyEmployeeService;
 
     @GetMapping
     public ResponseEntity<CompanyGetAllRes> getAll() {
@@ -62,8 +67,13 @@ public class CompanyController {
         return companyService.deleteType(id);
     }
 
-    @PostMapping("/users")
-    public ResponseEntity<AddUserToCompanyRes> addUserToCompany(@Valid @RequestBody AddUserToCompanyReq request) {
-        return companyService.addUserToCompany(request);
+    @PostMapping("/{companyId}/{userId}")
+    public ResponseEntity<UserDTO> addUserToCompany(@Valid @RequestBody AddUserToCompanyReq request) {
+        return companyEmployeeService.addUserToCompany(request);
+    }
+
+    @GetMapping("/{companyId}/employees")
+    public ResponseEntity<List<UserDTO>> getEmployeesByCompany(@PathVariable Integer companyId) {
+        return companyEmployeeService.getEmployeesByCompany(companyId);
     }
 }

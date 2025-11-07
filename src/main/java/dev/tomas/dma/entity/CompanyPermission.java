@@ -3,16 +3,18 @@ package dev.tomas.dma.entity;
 import dev.tomas.dma.enums.PermissionType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
-@Data
+@Setter
+@Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "company_role_permission")
-public class CompanyRolePermission {
+@Table(name = "company_permission")
+public class CompanyPermission {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column
@@ -25,4 +27,7 @@ public class CompanyRolePermission {
     @Column
     @Size(max = 500)
     private String description;
+
+    @ManyToMany(mappedBy = "permissions")
+    private List<CompanyRole> companyRoles = new ArrayList<>();
 }

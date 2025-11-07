@@ -8,15 +8,15 @@ import dev.tomas.dma.dto.response.*;
 import dev.tomas.dma.entity.*;
 import dev.tomas.dma.enums.PermissionType;
 import dev.tomas.dma.mapper.CompanyRolePermissionMapper;
+import dev.tomas.dma.repository.CompanyRepo;
 import dev.tomas.dma.repository.CompanyRolePermissionRepo;
 import dev.tomas.dma.repository.CompanyRoleRepo;
-import dev.tomas.dma.repository.UserCompanyMembershipRepo;
+import dev.tomas.dma.repository.UserRepo;
 import dev.tomas.dma.service.CompanyRoleService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.apache.catalina.mapper.Mapper;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -25,18 +25,14 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 @AllArgsConstructor
 @Service
 public class CompanyRoleServiceImpl implements CompanyRoleService {
     private final CompanyRoleRepo companyRoleRepo;
     private final CompanyRolePermissionRepo companyRolePermissionRepo;
-    private final UserCompanyMembershipRepo membershipRepo;
+    private final CompanyRepo  companyRepo;
     private final CompanyRolePermissionMapper permissionMapper;
-    private final EntityManager entityManager;
-
-    private final CompanyServiceImpl companyService;
 
     public ResponseEntity<CompanyRoleGetAllRes> getAllByCompanyId(Integer companyId) {
         CompanyRoleGetAllRes response = new CompanyRoleGetAllRes();
@@ -61,11 +57,13 @@ public class CompanyRoleServiceImpl implements CompanyRoleService {
         return ResponseEntity.ok(response);
     }
 
-    protected CompanyRole saveRoleEntity(CompanyRoleCreateReq request) {
+    public CompanyRole saveRoleEntity(CompanyRoleCreateReq request) {
         if (request.getCompanyId() == null) {
             throw new IllegalArgumentException("Company ID cannot be null");
         }
-        Company company = companyService.findCompanyEntityById(request.getCompanyId());
+
+        Company company = companyRepo.findById(request.getCompanyId())
+                .orElseThrow(() -> new EntityNotFoundException("Company not found with id: " + request.getCompanyId()));
 
         CompanyRole toSave = new CompanyRole();
         toSave.setName(request.getName());
@@ -73,60 +71,38 @@ public class CompanyRoleServiceImpl implements CompanyRoleService {
 
         if (request.getPermissions() != null) {
             for (CompanyRolePermissionDTO dto : request.getPermissions()) {
-                CompanyRolePermission entity = permissionMapper.toEntity(dto);
+                CompanyPermission entity = permissionMapper.toEntity(dto);
                 toSave.getPermissions().add(entity);
             }
         }
         return companyRoleRepo.save(toSave);
     }
 
-    @Transactional
-    protected CompanyRole saveRoleEntity(CompanyRole role, Integer userId) {
-        CompanyRole savedRole = companyRoleRepo.save(role);
-
-        UserCompanyMembership membership = new UserCompanyMembership();
-        membership.setUser(entityManager.getReference(User.class, userId));
-        membership.setCompany(savedRole.getCompany());
-        membership.setCompanyRole(savedRole);
-        membershipRepo.save(membership);
-
-        return savedRole;
-    }
-
-    protected List<CompanyRolePermission> getAllPermissionsEntity() {
-        List<CompanyRolePermission> permissions = new ArrayList<>();
-        for (CompanyRolePermission entity : companyRolePermissionRepo.findAll()) {
-            permissions.add(entity);
-        }
-        return permissions;
+    public List<CompanyPermission> getAllPermissionsEntity() {
+        return new ArrayList<>(companyRolePermissionRepo.findAll());
     }
 
     @Transactional
-    public Integer delete(Integer id) {
-        deleteRoleDependencies(id);
-        return id;
-    }
-
-    protected void deleteRoleDependencies(Integer roleId) {
-        List<UserCompanyMembership> memberships = membershipRepo.findByCompanyRoleId(roleId);
+    public Integer delete(Integer roleId) {
         CompanyRole role = companyRoleRepo.findById(roleId)
                 .orElseThrow(() -> new EntityNotFoundException("Role not found with id: " + roleId));
 
-        if (!memberships.isEmpty()) {
+        if (!role.getUsers().isEmpty()) {
             throw new IllegalStateException(
-                    "Cannot delete role. " + memberships.size() + " user(s) are assigned to this role"
+                    "Cannot delete role. " + role.getUsers().size() + " user(s) are assigned to this role"
             );
         }
 
         role.setPermissions(null);
         companyRoleRepo.save(role);
         companyRoleRepo.delete(role);
+        return roleId;
     }
 
     public ResponseEntity<CompanyRolePermissionGetAllRes> getAllPermissions() {
         CompanyRolePermissionGetAllRes response = new CompanyRolePermissionGetAllRes();
 
-        for (CompanyRolePermission entity : companyRolePermissionRepo.findAll()) {
+        for (CompanyPermission entity : companyRolePermissionRepo.findAll()) {
             CompanyRolePermissionDTO dto = new CompanyRolePermissionDTO(entity.getId(), entity.getName(), entity.getType().toString(), entity.getDescription());
             response.getPermissions().add(dto);
         }
@@ -135,12 +111,12 @@ public class CompanyRoleServiceImpl implements CompanyRoleService {
     }
 
     public ResponseEntity<CompanyPermissionCreateRes> createPermission(@Valid CompanyPermissionCreateReq request) {
-        CompanyRolePermission toSave = new CompanyRolePermission();
+        CompanyPermission toSave = new CompanyPermission();
         toSave.setName(request.getName());
         toSave.setType(PermissionType.valueOf(request.getType()));
         toSave.setDescription(request.getDescription());
 
-        CompanyRolePermission entity = companyRolePermissionRepo.save(toSave);
+        CompanyPermission entity = companyRolePermissionRepo.save(toSave);
 
         CompanyPermissionCreateRes response = new CompanyPermissionCreateRes();
         response.setId(entity.getId());
@@ -150,15 +126,14 @@ public class CompanyRoleServiceImpl implements CompanyRoleService {
     }
 
     public ResponseEntity<CompanyRolePermissionDTO> updatePermission(@Valid CompanyRolePermissionDTO request) {
-        CompanyRolePermission toUpdate = companyRolePermissionRepo.findById(request.getId())
+        CompanyPermission toUpdate = companyRolePermissionRepo.findById(request.getId())
                 .orElseThrow(() -> new EntityNotFoundException("Permission not found with id: " + request.getId()));
 
         toUpdate.setName(request.getName());
         toUpdate.setType(PermissionType.valueOf(request.getType()));
         toUpdate.setDescription(request.getDescription());
 
-
-        CompanyRolePermission entity = companyRolePermissionRepo.save(toUpdate);
+        CompanyPermission entity = companyRolePermissionRepo.save(toUpdate);
 
         CompanyRolePermissionDTO response = new CompanyRolePermissionDTO();
         response.setId(entity.getId());

@@ -1,17 +1,15 @@
 package dev.tomas.dma.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Data
+@Setter
+@Getter
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "company_role")
@@ -29,13 +27,12 @@ public class CompanyRole {
     private Company company;
 
     @OneToMany(mappedBy = "companyRole")
-    private List<UserCompanyMembership> memberships = new ArrayList<>();
+    private List<User> users = new ArrayList<>();
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "company_role_permission_mapping",
+    @JoinTable(name = "company_role_permission",
             joinColumns = @JoinColumn(name = "company_role_id"),
-            inverseJoinColumns = @JoinColumn(name = "company_role_permission_id")
+            inverseJoinColumns = @JoinColumn(name = "company_permission_id")
     )
-    private List<CompanyRolePermission> permissions = new ArrayList<>();
+    private List<CompanyPermission> permissions = new ArrayList<>();
 }

@@ -2,13 +2,16 @@ package dev.tomas.dma.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @NoArgsConstructor
-@Data
+@Setter
+@Getter
 @Entity
 @Table(name = "company")
 public class Company {
@@ -29,7 +32,7 @@ public class Company {
     private List<CompanyRole> roles = new ArrayList<>();
 
     @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserCompanyMembership> memberships = new ArrayList<>();
+    private List<User> users = new ArrayList<>();
 
     @ManyToOne()
     @JoinColumn(name = "company_type_id", nullable = false)

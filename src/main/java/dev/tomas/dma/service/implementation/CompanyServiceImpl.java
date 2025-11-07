@@ -9,13 +9,14 @@ import dev.tomas.dma.dto.response.*;
 import dev.tomas.dma.entity.Company;
 import dev.tomas.dma.entity.CompanyRole;
 import dev.tomas.dma.entity.CompanyType;
-import dev.tomas.dma.entity.UserCompanyMembership;
+import dev.tomas.dma.entity.User;
 import dev.tomas.dma.mapper.CompanyMapper;
 import dev.tomas.dma.repository.CompanyRepo;
+import dev.tomas.dma.repository.CompanyRoleRepo;
 import dev.tomas.dma.repository.CompanyTypeRepo;
-import dev.tomas.dma.repository.UserCompanyMembershipRepo;
+import dev.tomas.dma.repository.UserRepo;
+import dev.tomas.dma.service.CompanyRoleService;
 import dev.tomas.dma.service.CompanyService;
-import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -29,17 +30,17 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @AllArgsConstructor
 public class CompanyServiceImpl implements CompanyService {
     private final CompanyRepo companyRepo;
     private final CompanyTypeRepo companyTypeRepo;
-    private final UserCompanyMembershipRepo membershipRepo;
-    private final CompanyRoleServiceImpl roleService;
-    private final EntityManager entityManager;
+    private final CompanyRoleRepo  companyRoleRepo;
+    private final CompanyRoleService roleService;
+    private final UserRepo userRepo;
     private final CompanyMapper companyMapper;
-
 
     public ResponseEntity<CompanyGetAllRes> getAll() {
         CompanyGetAllRes response = new CompanyGetAllRes();
@@ -54,35 +55,29 @@ public class CompanyServiceImpl implements CompanyService {
         return ResponseEntity.ok(response);
     }
 
+    @Transactional
     public ResponseEntity<CompanyDTO> save(@Valid CompanyCreateReq request) {
+        CompanyType type = companyTypeRepo.findById(request.getTypeId()).orElseThrow(() -> new EntityNotFoundException("Type not found with id: " + request.getTypeId()));
+        User user = userRepo.findById(request.getUserId()).orElseThrow(() -> new EntityNotFoundException("User not found with id: " + request.getUserId()));
+
         Company companyToSave = new Company();
         companyToSave.setName(request.getName());
         companyToSave.setRegistrationNumber(request.getRegistrationNumber());
         companyToSave.setTaxId(request.getTaxId());
-        CompanyType type = new CompanyType();
-        type.setId(request.getTypeId());
         companyToSave.setType(type);
+        Company savedCompany = companyRepo.save(companyToSave);
 
-        Company company = createCompany(companyToSave, request.getUserId());
-        return ResponseEntity.ok(companyMapper.toDto(company));
-    }
+        // Create employee and owner role
+        List<CompanyRole> roles = createDefaultRoles(savedCompany);
 
-    @Transactional
-    protected Company createCompany(Company company, Integer userId) {
-        if (company.getType() == null || company.getType().getId() == null) {
-            throw new IllegalArgumentException("Company type ID cannot be null");
-        }
+        CompanyRole ownerRole = roles.stream()
+                .filter(role -> "Owner".equals(role.getName()))
+                .findFirst()
+                .orElseThrow(() -> new EntityNotFoundException("Role not found with name: 'Owner'"));
 
-        company.setType(entityManager.getReference(CompanyType.class, company.getType().getId()));
-        Company savedCompany = companyRepo.save(company);
-
-        CompanyRole role = new CompanyRole();
-        role.setCompany(savedCompany);
-        role.setName("Owner");
-        role.setPermissions(roleService.getAllPermissionsEntity());
-        roleService.saveRoleEntity(role, userId);
-
-        return savedCompany;
+        user.setCompanyRole(ownerRole);
+        userRepo.save(user);
+        return ResponseEntity.ok(companyMapper.toDto(savedCompany));
     }
 
     public ResponseEntity<CompanyTypeGetAllRes> getAllTypes() {
@@ -141,17 +136,26 @@ public class CompanyServiceImpl implements CompanyService {
         return id;
     }
 
-    @Transactional
-    public ResponseEntity<AddUserToCompanyRes> addUserToCompany(@Valid AddUserToCompanyReq request) {
-        return ResponseEntity.ok(null);
+    public Company findCompanyEntityById(Integer id) {
+        return companyRepo.findById(id).orElseThrow(() -> new EntityNotFoundException("Company not found with id: " + id));
     }
 
-    protected UserCompanyMembership getMembershipByUserId(Integer id) {
-        return membershipRepo.findByUserId(id)
-                .orElseThrow(() -> new EntityNotFoundException("Membership not found with id: " + id));
-    }
+    protected List<CompanyRole> createDefaultRoles(Company company) {
+        List<CompanyRole> roles = new ArrayList<>();
 
-    protected Company findCompanyEntityById(Integer id) {
-        return companyRepo.findById(id).orElseThrow(() -> new EntityNotFoundException("Company not found with  id: " + id));
+        CompanyRole employee = new CompanyRole();
+        employee.setCompany(company);
+        employee.setName("Employee");
+        CompanyRole savedEmployeeRole = companyRoleRepo.save(employee);
+
+        CompanyRole owner = new CompanyRole();
+        owner.setCompany(company);
+        owner.setName("Owner");
+        owner.setPermissions(roleService.getAllPermissionsEntity());
+        CompanyRole savedOwnerRole = companyRoleRepo.save(owner);
+
+        roles.add(savedEmployeeRole);
+        roles.add(savedOwnerRole);
+        return roles;
     }
 }

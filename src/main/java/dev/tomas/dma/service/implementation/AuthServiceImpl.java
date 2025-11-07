@@ -5,15 +5,13 @@ import dev.tomas.dma.dto.response.AuthUserRes;
 import dev.tomas.dma.dto.request.UserRegisterReq;
 import dev.tomas.dma.dto.request.AuthReq;
 import dev.tomas.dma.entity.User;
-import dev.tomas.dma.entity.UserCompanyMembership;
 import dev.tomas.dma.enums.UserRole;
 import dev.tomas.dma.mapper.AuthResponseMapper;
-import dev.tomas.dma.repository.AuthRepo;
+import dev.tomas.dma.repository.UserRepo;
 import dev.tomas.dma.service.AuthService;
-import dev.tomas.dma.service.CompanyService;
+import dev.tomas.dma.service.JWTService;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,36 +22,31 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 @Service
 public class AuthServiceImpl implements AuthService, UserDetailsService {
-    private final AuthRepo authRepo;
+    private final UserRepo userRepo;
     private final JWTService jwtService;
-    private final CompanyServiceImpl companyService;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authManager;
 
-    public AuthServiceImpl(AuthRepo authRepo,
+    public AuthServiceImpl(UserRepo userRepo,
                            JWTService jwtService,
                            PasswordEncoder passwordEncoder,
-                           CompanyService companyService,
                            @Lazy AuthenticationManager authManager
     ) {
-        this.authRepo = authRepo;
+        this.userRepo = userRepo;
         this.jwtService = jwtService;
         this.passwordEncoder = passwordEncoder;
-        this.companyService = (CompanyServiceImpl) companyService;
         this.authManager = authManager;
     }
 
     @Override
     public AuthRes register(UserRegisterReq request) {
 
-        if (request.getEmail() != null && authRepo.findByEmail(request.getEmail()).isPresent()) {
+        if (request.getEmail() != null && userRepo.findByEmail(request.getEmail()).isPresent()) {
             throw new DuplicateKeyException("Email already exists");
         }
-        if (request.getUsername() != null && authRepo.findByUsername(request.getUsername()).isPresent()) {
+        if (request.getUsername() != null && userRepo.findByUsername(request.getUsername()).isPresent()) {
             throw new DuplicateKeyException("Username already exists");
         }
 
@@ -73,7 +66,7 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
             toSave.setRole(UserRole.DONOR);
         }
 
-        User user = authRepo.save(toSave);
+        User user = userRepo.save(toSave);
 
         return new AuthRes(jwtService.generateToken(user), AuthResponseMapper.INSTANCE.convertToDTO(user));
     }
@@ -86,13 +79,6 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
 
             Authentication authentication = authManager.authenticate(authRequestToken);
             User user = (User) authentication.getPrincipal();
-
-            UserCompanyMembership membership = companyService.getMembershipByUserId(user.getId());
-
-            if (membership != null) {
-                user.setMembership(membership);
-            }
-
             AuthUserRes res = new AuthUserRes();
 
             res.setId(user.getId());
@@ -100,9 +86,9 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
             res.setUsername(user.getUsername());
             res.setFirstName(user.getFirstName());
             res.setLastName(user.getLastName());
-            if (membership != null) {
-                res.setCompanyId(user.getMembership().getCompany().getId());
-                res.setCompanyRole(user.getMembership().getCompanyRole().getName());
+            if (user.getCompanyRole() != null) {
+                res.setCompanyId(user.getCompanyRole().getCompany().getId());
+                res.setCompanyRole(user.getCompanyRole().getName());
             }
             res.setRole(user.getRole().toString());
 
@@ -115,21 +101,16 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
 
     public AuthUserRes authMe(Authentication authentication) {
         User user = (User) authentication.getPrincipal();
-        UserCompanyMembership membership = companyService.getMembershipByUserId(user.getId());
-
-        if (membership != null) {
-            user.setMembership(membership);
-        }
-
         AuthUserRes res = new AuthUserRes();
+
         res.setId(user.getId());
         res.setEmail(user.getEmail());
         res.setUsername(user.getUsername());
         res.setFirstName(user.getFirstName());
         res.setLastName(user.getLastName());
-        if (membership != null) {
-            res.setCompanyId(user.getMembership().getCompany().getId());
-            res.setCompanyRole(user.getMembership().getCompanyRole().getName());
+        if (user.getCompanyRole() != null) {
+            res.setCompanyId(user.getCompanyRole().getCompany().getId());
+            res.setCompanyRole(user.getCompanyRole().getName());
         }
         res.setRole(user.getRole().toString());
 
@@ -138,7 +119,7 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return authRepo.findByUsername(username).or(() -> authRepo.findByEmail(username))
+        return userRepo.findByUsername(username).or(() -> userRepo.findByEmail(username))
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username or email: " + username));
     }
 }
