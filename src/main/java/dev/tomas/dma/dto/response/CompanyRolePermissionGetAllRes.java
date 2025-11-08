@@ -1,6 +1,6 @@
 package dev.tomas.dma.dto.response;
 
-import dev.tomas.dma.dto.common.CompanyRolePermissionDTO;
+import dev.tomas.dma.dto.common.CompanyPermissionDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,5 +12,5 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CompanyRolePermissionGetAllRes {
-    private List<CompanyRolePermissionDTO> permissions = new ArrayList<>();
+    private List<CompanyPermissionDTO> permissions = new ArrayList<>();
 }

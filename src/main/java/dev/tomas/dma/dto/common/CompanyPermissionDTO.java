@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CompanyRolePermissionDTO {
+public class CompanyPermissionDTO {
     private Integer id;
     private String name;
     private String type;

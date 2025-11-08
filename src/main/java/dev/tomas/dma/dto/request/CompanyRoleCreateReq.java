@@ -1,6 +1,6 @@
 package dev.tomas.dma.dto.request;
 
-import dev.tomas.dma.dto.common.CompanyRolePermissionDTO;
+import dev.tomas.dma.dto.common.CompanyPermissionDTO;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
@@ -18,5 +18,5 @@ public class CompanyRoleCreateReq {
     @Size(min = 1, max = 100, message = "Please provide a company role name between 1 and 50 characters")
     private String name;
     @Nullable
-    private List<CompanyRolePermissionDTO> permissions = new ArrayList<>();
+    private List<Integer> permissionIds = new ArrayList<>();
 }

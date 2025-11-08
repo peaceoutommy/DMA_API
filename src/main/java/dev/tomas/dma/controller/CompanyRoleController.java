@@ -1,6 +1,7 @@
 package dev.tomas.dma.controller;
 
-import dev.tomas.dma.dto.common.CompanyRolePermissionDTO;
+import dev.tomas.dma.dto.common.CompanyPermissionDTO;
+import dev.tomas.dma.dto.common.CompanyRoleDTO;
 import dev.tomas.dma.dto.request.CompanyPermissionCreateReq;
 import dev.tomas.dma.dto.request.CompanyRoleCreateReq;
 import dev.tomas.dma.dto.response.*;
@@ -9,8 +10,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,7 +23,7 @@ public class CompanyRoleController {
     }
 
     @PostMapping
-    public ResponseEntity<CompanyRoleCreateRes> create(@RequestBody @Valid CompanyRoleCreateReq request) {
+    public ResponseEntity<CompanyRoleDTO> create(@RequestBody @Valid CompanyRoleCreateReq request) {
         return companyRoleService.create(request);
     }
 
@@ -44,7 +43,7 @@ public class CompanyRoleController {
     }
 
     @PutMapping("/permission")
-    public ResponseEntity<CompanyRolePermissionDTO> updatePermission(@RequestBody @Valid CompanyRolePermissionDTO request) {
+    public ResponseEntity<CompanyPermissionDTO> updatePermission(@RequestBody @Valid CompanyPermissionDTO request) {
         return companyRoleService.updatePermission(request);
     }
 
