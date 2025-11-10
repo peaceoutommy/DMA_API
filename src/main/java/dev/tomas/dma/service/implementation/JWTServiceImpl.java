@@ -85,7 +85,7 @@ public class JWTServiceImpl implements JWTService {
         }
         Map<String, Object> claims = new HashMap<>();
 
-        if (user.getCompanyRole() != null) {
+        if (user.getCompanyRole() != null && user.getCompany() != null) {
             claims.put("Company", user.getCompany().getId());
             claims.put("Role", user.getCompanyRole().getName());
 

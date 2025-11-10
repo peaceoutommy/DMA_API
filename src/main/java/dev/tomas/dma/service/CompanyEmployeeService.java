@@ -9,6 +9,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import java.util.List;
 
 public interface CompanyEmployeeService {
-    ResponseEntity<List<UserDTO>> getEmployeesByCompany(Integer companyId);
-    ResponseEntity<UserDTO> addUserToCompany(@Valid @RequestBody AddUserToCompanyReq request);
+    List<UserDTO> getEmployeesByCompany(Integer companyId);
+    UserDTO addUserToCompany(@Valid @RequestBody AddUserToCompanyReq request);
 }

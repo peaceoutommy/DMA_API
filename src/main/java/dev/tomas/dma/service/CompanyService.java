@@ -15,17 +15,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import java.util.List;
 
 public interface CompanyService {
-    ResponseEntity<CompanyGetAllRes> getAll();
+    CompanyGetAllRes getAll();
 
-    ResponseEntity<CompanyDTO> save(CompanyCreateReq request);
+    CompanyDTO save(CompanyCreateReq request);
 
-    ResponseEntity<CompanyTypeGetAllRes> getAllTypes();
+    CompanyTypeGetAllRes getAllTypes();
 
-    ResponseEntity<CompanyTypeGetRes> getTypeById(Integer id);
+    CompanyTypeGetRes getTypeById(Integer id);
 
-    ResponseEntity<CompanyTypeGetRes> saveType(CompanyTypeCreateReq request);
+    CompanyTypeGetRes saveType(CompanyTypeCreateReq request);
 
-    ResponseEntity<CompanyTypeDTO> updateType(CompanyTypeDTO request);
+    CompanyTypeDTO updateType(CompanyTypeDTO request);
 
     Integer deleteType(Integer id);
 

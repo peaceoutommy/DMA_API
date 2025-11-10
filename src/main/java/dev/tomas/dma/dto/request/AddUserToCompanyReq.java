@@ -9,10 +9,11 @@ import lombok.Data;
 public class AddUserToCompanyReq {
     @Positive
     @NotNull
-    private Integer userId;
+    private Integer employeeId;
     @Positive
     @NotNull
     private Integer companyId;
-    @NotBlank
+    @Positive
+    @NotNull
     private Integer roleId;
 }

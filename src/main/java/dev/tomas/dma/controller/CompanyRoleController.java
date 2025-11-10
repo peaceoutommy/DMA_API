@@ -20,12 +20,12 @@ public class CompanyRoleController {
 
     @GetMapping("/{companyId}")
     public ResponseEntity<CompanyRoleGetAllRes> getAllByCompanyId(@PathVariable Integer companyId) {
-        return companyRoleService.getAllByCompanyId(companyId);
+        return ResponseEntity.ok(companyRoleService.getAllByCompanyId(companyId));
     }
 
     @PostMapping
     public ResponseEntity<CompanyRoleDTO> create(@RequestBody @Valid CompanyRoleCreateReq request) {
-        return companyRoleService.create(request);
+        return ResponseEntity.ok(companyRoleService.create(request));
     }
 
     @PutMapping
@@ -40,17 +40,17 @@ public class CompanyRoleController {
 
     @GetMapping("/permissions")
     public ResponseEntity<CompanyRolePermissionGetAllRes> getPermissions() {
-        return companyRoleService.getAllPermissions();
+        return ResponseEntity.ok(companyRoleService.getAllPermissions());
     }
 
     @PostMapping("/permission")
     public ResponseEntity<CompanyPermissionCreateRes> createPermission(@RequestBody @Valid CompanyPermissionCreateReq request) {
-        return companyRoleService.createPermission(request);
+        return ResponseEntity.ok(companyRoleService.createPermission(request));
     }
 
     @PutMapping("/permission")
     public ResponseEntity<CompanyPermissionDTO> updatePermission(@RequestBody @Valid CompanyPermissionDTO request) {
-        return companyRoleService.updatePermission(request);
+        return ResponseEntity.ok(companyRoleService.updatePermission(request));
     }
 
     @DeleteMapping("/permission/{id}")
@@ -60,6 +60,6 @@ public class CompanyRoleController {
 
     @GetMapping("/permissions/types")
     public ResponseEntity<PermissionTypeGetAllRes> getPermissionTypes() {
-        return companyRoleService.getAllPermissionTypes();
+        return ResponseEntity.ok(companyRoleService.getAllPermissionTypes());
     }
 }

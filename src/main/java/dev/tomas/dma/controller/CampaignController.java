@@ -23,30 +23,30 @@ public class CampaignController {
 
     @GetMapping()
     public ResponseEntity<CampaignGetAllRes> getAll() {
-        return campaignService.findAll();
+        return ResponseEntity.ok(campaignService.findAll());
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<CampaignDTO> getById(@PathVariable Integer id) {
 
-        return campaignService.findById(id);
+        return ResponseEntity.ok(campaignService.findById(id));
     }
 
     @PostMapping
     public ResponseEntity<CampaignDTO> create(@RequestBody @Valid CampaignCreateReq request) {
-        return campaignService.save(request);
+        return ResponseEntity.ok(campaignService.save(request));
     }
 
     @PutMapping()
     public ResponseEntity<CampaignDTO> save(@RequestBody @Valid CampaignUpdateReq request) {
-        return campaignService.update(request);
+        return ResponseEntity.ok(campaignService.update(request));
     }
 
     @DeleteMapping("/{id}")
-    public Integer delete(@Positive @PathVariable Integer id) {
+    public ResponseEntity<Integer> delete(@Positive @PathVariable Integer id) {
         if (Objects.isNull(id)) {
             throw new IllegalArgumentException("Campaign id cannot be null");
         }
-        return campaignService.deleteById(id);
+        return ResponseEntity.ok(campaignService.deleteById(id));
     }
 }

@@ -13,16 +13,16 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 public interface CompanyRoleService {
-    ResponseEntity<CompanyRoleGetAllRes> getAllByCompanyId(Integer companyId);
-    ResponseEntity<CompanyRoleDTO> create(CompanyRoleCreateReq request);
+    CompanyRoleGetAllRes getAllByCompanyId(Integer companyId);
+    CompanyRoleDTO create(CompanyRoleCreateReq request);
     CompanyRoleDTO update(CompanyRoleUpdateReq request);
     Integer delete(Integer id);
 
-    ResponseEntity<CompanyRolePermissionGetAllRes> getAllPermissions();
-    ResponseEntity<CompanyPermissionCreateRes> createPermission(CompanyPermissionCreateReq request);
-    ResponseEntity<CompanyPermissionDTO> updatePermission(CompanyPermissionDTO request);
+    CompanyRolePermissionGetAllRes getAllPermissions();
+    CompanyPermissionCreateRes createPermission(CompanyPermissionCreateReq request);
+    CompanyPermissionDTO updatePermission(CompanyPermissionDTO request);
     Integer deletePermission(Integer id);
-    ResponseEntity<PermissionTypeGetAllRes> getAllPermissionTypes();
+    PermissionTypeGetAllRes getAllPermissionTypes();
 
     // Internal methods
     List<CompanyPermission> getAllPermissionsEntity();

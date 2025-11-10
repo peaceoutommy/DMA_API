@@ -31,25 +31,29 @@ public class CompanyEmployeeServiceImpl implements CompanyEmployeeService {
     private final CompanyRepo companyRepo;
     private final CompanyEmployeeRepo  companyEmployeeRepo;
 
-    public ResponseEntity<List<UserDTO>> getEmployeesByCompany(Integer companyId) {
+    public List<UserDTO> getEmployeesByCompany(Integer companyId) {
         List<User> entityList = new ArrayList<>(companyEmployeeRepo.findAllUsersByCompanyId(companyId));
 
         List<UserDTO> dtoList = new ArrayList<>();
         for (User user : entityList) {
             dtoList.add(userMapper.toDTO(user));
         }
-        return ResponseEntity.ok(dtoList);
+        return dtoList;
     }
 
     @Transactional
-    public ResponseEntity<UserDTO> addUserToCompany(@Valid @RequestBody AddUserToCompanyReq request){
-        User user = userRepo.findById(request.getUserId()).orElseThrow(() -> new EntityNotFoundException("User not found with id: " + request.getUserId()));
-        Company company = companyRepo.getReferenceById(request.getCompanyId());
-        CompanyRole role = companyRoleRepo.getReferenceById(request.getRoleId());
+    public UserDTO addUserToCompany(@Valid @RequestBody AddUserToCompanyReq request){
+        User user = userRepo.findById(request.getEmployeeId()).orElseThrow(() -> new EntityNotFoundException("User not found with id: " + request.getEmployeeId()));
+        Company company = companyRepo.findById(request.getCompanyId()).orElseThrow(()  -> new EntityNotFoundException("Company not found with id: " + request.getCompanyId()));
+        CompanyRole role = companyRoleRepo.findById(request.getRoleId()).orElseThrow(() -> new EntityNotFoundException("Company role not found with id: " + request.getRoleId()));
+
+        if(user.getCompany().getId().equals(request.getCompanyId())) {
+            throw new IllegalStateException("The user already belongs to the company with id: " + request.getCompanyId());
+        }
 
         user.setCompany(company);
         user.setCompanyRole(role);
-        userRepo.save(user);
-        return ResponseEntity.ok(userMapper.toDTO(user));
+        User saved = userRepo.save(user);
+        return userMapper.toDTO(saved);
     }
 }

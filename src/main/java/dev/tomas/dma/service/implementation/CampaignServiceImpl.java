@@ -27,23 +27,23 @@ public class CampaignServiceImpl implements CampaignService {
     private final CompanyRepo companyRepo;
 
     @Override
-    public ResponseEntity<CampaignGetAllRes> findAll() {
+    public CampaignGetAllRes findAll() {
         CampaignGetAllRes response = new CampaignGetAllRes();
 
         for (Campaign entity : campaignRepo.findAll()) {
             response.campaigns.add(CampaignMapper.INSTANCE.convertToDTO(entity));
         }
-        return ResponseEntity.ok(response);
+        return response;
     }
 
     @Override
-    public ResponseEntity<CampaignDTO> findById(Integer id) {
+    public CampaignDTO findById(Integer id) {
         Campaign entity = campaignRepo.findById(id).orElseThrow(() -> new EntityNotFoundException("Campaign not found with id: " + id));
-        return ResponseEntity.ok(CampaignMapper.INSTANCE.convertToDTO(entity));
+        return CampaignMapper.INSTANCE.convertToDTO(entity);
     }
 
     @Override
-    public ResponseEntity<CampaignDTO> save(CampaignCreateReq request) {
+    public CampaignDTO save(CampaignCreateReq request) {
         if (Objects.isNull(request.getName()) || request.getName().isEmpty()) {
             throw new IllegalArgumentException("Campaign name can't be empty");
         }
@@ -57,11 +57,11 @@ public class CampaignServiceImpl implements CampaignService {
         toSave.setCompany(companyRepo.getReferenceById(request.getCompanyId()));
         toSave.setFundGoal(request.getFundGoal());
 
-        return ResponseEntity.ok(CampaignMapper.INSTANCE.convertToDTO(campaignRepo.save(toSave)));
+        return CampaignMapper.INSTANCE.convertToDTO(campaignRepo.save(toSave));
     }
 
     @Override
-    public ResponseEntity<CampaignDTO> update(CampaignUpdateReq request) {
+    public CampaignDTO update(CampaignUpdateReq request) {
         Campaign original = campaignRepo.findById(request.getId())
                 .orElseThrow(() -> new EntityNotFoundException("Campaign not found with id: " + request.getId()));
 
@@ -79,7 +79,7 @@ public class CampaignServiceImpl implements CampaignService {
         }
 
         Campaign updated = campaignRepo.save(original);
-        return ResponseEntity.ok(CampaignMapper.INSTANCE.convertToDTO(updated));
+        return CampaignMapper.INSTANCE.convertToDTO(updated);
     }
 
     @Override

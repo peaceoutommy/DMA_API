@@ -35,7 +35,7 @@ public class CompanyRoleServiceImpl implements CompanyRoleService {
     private final CompanyPermissionMapper permissionMapper;
     private final CompanyRoleMapper roleMapper;
 
-    public ResponseEntity<CompanyRoleGetAllRes> getAllByCompanyId(Integer companyId) {
+    public CompanyRoleGetAllRes getAllByCompanyId(Integer companyId) {
         CompanyRoleGetAllRes response = new CompanyRoleGetAllRes();
 
         for (CompanyRole entity : companyRoleRepo.findAllByCompanyId(companyId)) {
@@ -46,10 +46,10 @@ public class CompanyRoleServiceImpl implements CompanyRoleService {
             roleDto.setPermissions(permissionMapper.toDtos(entity.getPermissions()));
             response.getRoles().add(roleDto);
         }
-        return ResponseEntity.ok(response);
+        return response;
     }
 
-    public ResponseEntity<CompanyRoleDTO> create(CompanyRoleCreateReq request) {
+    public CompanyRoleDTO create(CompanyRoleCreateReq request) {
         if (companyRoleRepo.findByCompanyIdAndName(request.getCompanyId(), request.getName()) != null) {
             throw new DuplicateKeyException("Role with name '" + request.getName() + "' already exists for this company");
         }
@@ -70,7 +70,7 @@ public class CompanyRoleServiceImpl implements CompanyRoleService {
 
         CompanyRole saved = companyRoleRepo.save(toSave);
         CompanyRoleDTO dto = roleMapper.toDTO(saved);
-        return ResponseEntity.ok(dto);
+        return dto;
     }
 
     public CompanyRoleDTO update(CompanyRoleUpdateReq request) {
@@ -106,7 +106,7 @@ public class CompanyRoleServiceImpl implements CompanyRoleService {
         return roleId;
     }
 
-    public ResponseEntity<CompanyRolePermissionGetAllRes> getAllPermissions() {
+    public CompanyRolePermissionGetAllRes getAllPermissions() {
         CompanyRolePermissionGetAllRes response = new CompanyRolePermissionGetAllRes();
 
         for (CompanyPermission entity : companyPermissionRepo.findAll()) {
@@ -114,10 +114,10 @@ public class CompanyRoleServiceImpl implements CompanyRoleService {
             response.getPermissions().add(dto);
         }
 
-        return ResponseEntity.ok(response);
+        return response;
     }
 
-    public ResponseEntity<CompanyPermissionCreateRes> createPermission(@Valid CompanyPermissionCreateReq request) {
+    public CompanyPermissionCreateRes createPermission(@Valid CompanyPermissionCreateReq request) {
         CompanyPermission toSave = new CompanyPermission();
         toSave.setName(request.getName());
         toSave.setType(PermissionType.valueOf(request.getType()));
@@ -129,10 +129,10 @@ public class CompanyRoleServiceImpl implements CompanyRoleService {
         response.setId(entity.getId());
         response.setName(entity.getName());
         response.setDescription(entity.getDescription());
-        return ResponseEntity.ok(response);
+        return response;
     }
 
-    public ResponseEntity<CompanyPermissionDTO> updatePermission(@Valid CompanyPermissionDTO request) {
+    public CompanyPermissionDTO updatePermission(@Valid CompanyPermissionDTO request) {
         CompanyPermission toUpdate = companyPermissionRepo.findById(request.getId())
                 .orElseThrow(() -> new EntityNotFoundException("Permission not found with id: " + request.getId()));
 
@@ -146,7 +146,7 @@ public class CompanyRoleServiceImpl implements CompanyRoleService {
         response.setId(entity.getId());
         response.setName(entity.getName());
         response.setDescription(entity.getDescription());
-        return ResponseEntity.ok(response);
+        return response;
     }
 
     public Integer deletePermission(Integer id) {
@@ -154,9 +154,9 @@ public class CompanyRoleServiceImpl implements CompanyRoleService {
         return id;
     }
 
-    public ResponseEntity<PermissionTypeGetAllRes> getAllPermissionTypes() {
+    public PermissionTypeGetAllRes getAllPermissionTypes() {
         PermissionTypeGetAllRes response = new PermissionTypeGetAllRes();
         response.setTypes(Arrays.stream(PermissionType.values()).map(PermissionType::name).toList());
-        return ResponseEntity.ok(response);
+        return response;
     }
 }

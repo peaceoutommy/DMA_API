@@ -27,36 +27,35 @@ import java.util.Optional;
 @RequestMapping("/api/companies")
 public class CompanyController {
     private final CompanyService companyService;
-    private final CompanyEmployeeService companyEmployeeService;
 
     @GetMapping
     public ResponseEntity<CompanyGetAllRes> getAll() {
-        return companyService.getAll();
+        return ResponseEntity.ok(companyService.getAll());
     }
 
     @PostMapping
     public ResponseEntity<CompanyDTO> create(@Valid @RequestBody CompanyCreateReq request) {
-        return companyService.save(request);
+        return ResponseEntity.ok(companyService.save(request));
     }
 
     @GetMapping("types")
     public ResponseEntity<CompanyTypeGetAllRes> getAllTypes() {
-        return companyService.getAllTypes();
+        return ResponseEntity.ok(companyService.getAllTypes());
     }
 
     @GetMapping("types/{id}")
     public ResponseEntity<CompanyTypeGetRes> getTypeById(@PathVariable Integer id) {
-        return companyService.getTypeById(id);
+        return ResponseEntity.ok(companyService.getTypeById(id));
     }
 
     @PostMapping("types")
     public ResponseEntity<CompanyTypeGetRes> createType(@Valid @RequestBody CompanyTypeCreateReq request) {
-        return companyService.saveType(request);
+        return ResponseEntity.ok(companyService.saveType(request));
     }
 
     @PutMapping("types")
     public ResponseEntity<CompanyTypeDTO> updateType(@Valid @RequestBody CompanyTypeDTO request) {
-        return companyService.updateType(request);
+        return ResponseEntity.ok(companyService.updateType(request));
     }
 
     @DeleteMapping("types/{id}")
@@ -65,15 +64,5 @@ public class CompanyController {
             throw new IllegalArgumentException("Company type id cannot be null");
         }
         return companyService.deleteType(id);
-    }
-
-    @PostMapping("/{companyId}/{userId}")
-    public ResponseEntity<UserDTO> addUserToCompany(@Valid @RequestBody AddUserToCompanyReq request) {
-        return companyEmployeeService.addUserToCompany(request);
-    }
-
-    @GetMapping("/{companyId}/employees")
-    public ResponseEntity<List<UserDTO>> getEmployeesByCompany(@PathVariable Integer companyId) {
-        return companyEmployeeService.getEmployeesByCompany(companyId);
     }
 }

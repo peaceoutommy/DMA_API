@@ -7,13 +7,13 @@ import dev.tomas.dma.dto.common.CampaignDTO;
 import org.springframework.http.ResponseEntity;
 
 public interface CampaignService {
-    ResponseEntity<CampaignGetAllRes> findAll();
+    CampaignGetAllRes findAll();
 
-    ResponseEntity<CampaignDTO> findById(Integer id);
+    CampaignDTO findById(Integer id);
 
-    ResponseEntity<CampaignDTO> save(CampaignCreateReq request);
+    CampaignDTO save(CampaignCreateReq request);
 
-    ResponseEntity<CampaignDTO> update(CampaignUpdateReq request);
+    CampaignDTO update(CampaignUpdateReq request);
 
     Integer deleteById(Integer id);
 }
