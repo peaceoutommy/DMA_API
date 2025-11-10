@@ -4,6 +4,7 @@ import dev.tomas.dma.dto.common.CompanyPermissionDTO;
 import dev.tomas.dma.dto.common.CompanyRoleDTO;
 import dev.tomas.dma.dto.request.CompanyPermissionCreateReq;
 import dev.tomas.dma.dto.request.CompanyRoleCreateReq;
+import dev.tomas.dma.dto.request.CompanyRoleUpdateReq;
 import dev.tomas.dma.dto.response.*;
 import dev.tomas.dma.entity.*;
 import dev.tomas.dma.enums.PermissionType;
@@ -70,6 +71,18 @@ public class CompanyRoleServiceImpl implements CompanyRoleService {
         CompanyRole saved = companyRoleRepo.save(toSave);
         CompanyRoleDTO dto = roleMapper.toDTO(saved);
         return ResponseEntity.ok(dto);
+    }
+
+    public CompanyRoleDTO update(CompanyRoleUpdateReq request) {
+        CompanyRole toSave = companyRoleRepo.findById(request.getId()).orElseThrow(() -> new EntityNotFoundException("Company role not found with id: " + request.getId()));
+
+        toSave.setName(request.getName());
+        if (request.getPermissionIds() != null) {
+            toSave.setPermissions(companyPermissionRepo.findAllById(request.getPermissionIds()));
+        }
+
+        CompanyRole saved = companyRoleRepo.save(toSave);
+        return roleMapper.toDTO(saved);
     }
 
     public List<CompanyPermission> getAllPermissionsEntity() {

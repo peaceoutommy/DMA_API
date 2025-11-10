@@ -4,6 +4,7 @@ import dev.tomas.dma.dto.common.CompanyPermissionDTO;
 import dev.tomas.dma.dto.common.CompanyRoleDTO;
 import dev.tomas.dma.dto.request.CompanyPermissionCreateReq;
 import dev.tomas.dma.dto.request.CompanyRoleCreateReq;
+import dev.tomas.dma.dto.request.CompanyRoleUpdateReq;
 import dev.tomas.dma.dto.response.*;
 import dev.tomas.dma.service.CompanyRoleService;
 import jakarta.validation.Valid;
@@ -25,6 +26,11 @@ public class CompanyRoleController {
     @PostMapping
     public ResponseEntity<CompanyRoleDTO> create(@RequestBody @Valid CompanyRoleCreateReq request) {
         return companyRoleService.create(request);
+    }
+
+    @PutMapping
+    public ResponseEntity<CompanyRoleDTO> update(@RequestBody @Valid CompanyRoleUpdateReq request) {
+        return ResponseEntity.ok(companyRoleService.update(request));
     }
 
     @DeleteMapping("/{id}")
