@@ -17,6 +17,8 @@ import java.util.List;
 public interface CompanyService {
     CompanyGetAllRes getAll();
 
+    CompanyDTO getById(Integer id);
+
     CompanyDTO save(CompanyCreateReq request);
 
     CompanyTypeGetAllRes getAllTypes();

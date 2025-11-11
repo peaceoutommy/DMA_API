@@ -9,6 +9,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -46,6 +47,9 @@ public class User implements UserDetails {
 
     @Column(unique = true, nullable = false)
     private String username;
+
+    @Column(name = "balance")
+    private BigDecimal balance;
 
     @ManyToOne
     @JoinColumn(name = "company_role_id")

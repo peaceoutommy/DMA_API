@@ -1,8 +1,10 @@
 package dev.tomas.dma.dto.common;
 
+import dev.tomas.dma.enums.CampaignStatus;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Data
 public class CampaignDTO {
@@ -10,5 +12,9 @@ public class CampaignDTO {
     private String name;
     private String description;
     private BigDecimal fundGoal;
+    private BigDecimal raisedFunds;
+    private LocalDate startDate;
+    private LocalDate endDate;
+    private CampaignStatus status;
     private Integer companyId;
 }

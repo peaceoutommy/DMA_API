@@ -4,6 +4,8 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+
 @Data
 public class CampaignCreateReq {
     @NotNull
@@ -16,6 +18,9 @@ public class CampaignCreateReq {
 
     @NotNull
     private Integer companyId;
+
+    private LocalDate startDate;
+    private LocalDate endDate;
 
     @NotNull
     @Min(1) @Max(999999999)

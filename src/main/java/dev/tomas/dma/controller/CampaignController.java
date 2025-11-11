@@ -10,6 +10,7 @@ import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -32,14 +33,22 @@ public class CampaignController {
         return ResponseEntity.ok(campaignService.findById(id));
     }
 
+    @PreAuthorize("hasAuthority('PERMISSION_Create campaign')")
     @PostMapping
     public ResponseEntity<CampaignDTO> create(@RequestBody @Valid CampaignCreateReq request) {
         return ResponseEntity.ok(campaignService.save(request));
     }
 
+    @PreAuthorize("hasAuthority('PERMISSION_Update campaign')")
     @PutMapping()
     public ResponseEntity<CampaignDTO> save(@RequestBody @Valid CampaignUpdateReq request) {
         return ResponseEntity.ok(campaignService.update(request));
+    }
+
+    @PreAuthorize("hasAuthority('PERMISSION_Archive campaign')")
+    @PostMapping("/archive/{id}")
+    public ResponseEntity<CampaignDTO> archive(@PathVariable Integer id) {
+        return ResponseEntity.ok(campaignService.archive(id));
     }
 
     @DeleteMapping("/{id}")

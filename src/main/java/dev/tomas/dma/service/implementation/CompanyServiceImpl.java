@@ -34,7 +34,7 @@ import java.util.List;
 public class CompanyServiceImpl implements CompanyService {
     private final CompanyRepo companyRepo;
     private final CompanyTypeRepo companyTypeRepo;
-    private final CompanyRoleRepo  companyRoleRepo;
+    private final CompanyRoleRepo companyRoleRepo;
     private final CompanyRoleService roleService;
     private final UserRepo userRepo;
     private final CompanyMapper companyMapper;
@@ -52,6 +52,9 @@ public class CompanyServiceImpl implements CompanyService {
         return response;
     }
 
+    public CompanyDTO getById(Integer id) {
+        return companyMapper.toDto(companyRepo.findById(id).orElseThrow(() -> new EntityNotFoundException("Company with id %d not found" + id)));
+    }
 
     @Transactional
     public CompanyDTO save(@Valid CompanyCreateReq request) {

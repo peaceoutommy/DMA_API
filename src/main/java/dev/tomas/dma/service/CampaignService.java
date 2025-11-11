@@ -15,5 +15,7 @@ public interface CampaignService {
 
     CampaignDTO update(CampaignUpdateReq request);
 
+    CampaignDTO archive(Integer id);
+
     Integer deleteById(Integer id);
 }

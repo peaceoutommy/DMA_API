@@ -5,10 +5,8 @@ import dev.tomas.dma.entity.Campaign;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface CampaignMapper {
-    CampaignMapper INSTANCE = Mappers.getMapper(CampaignMapper.class);
-
     public CampaignDTO convertToDTO(Campaign campaign);
     public Campaign convertToEntity(CampaignDTO campaign);
 }

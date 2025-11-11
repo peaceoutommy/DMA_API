@@ -33,6 +33,11 @@ public class CompanyController {
         return ResponseEntity.ok(companyService.getAll());
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<CompanyDTO> getById(@PathVariable Integer id ){
+        return ResponseEntity.ok(companyService.getById(id));
+    }
+
     @PostMapping
     public ResponseEntity<CompanyDTO> create(@Valid @RequestBody CompanyCreateReq request) {
         return ResponseEntity.ok(companyService.save(request));

@@ -3,6 +3,8 @@ package dev.tomas.dma.dto.common;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Setter
 @Getter
 public class UserDTO {
@@ -17,4 +19,5 @@ public class UserDTO {
     private Integer companyId;
     private Integer companyRoleId;
     private String companyRoleName;
+    private BigDecimal balance;
 }

@@ -4,6 +4,7 @@ import dev.tomas.dma.dto.request.CampaignCreateReq;
 import dev.tomas.dma.dto.response.CampaignGetAllRes;
 import dev.tomas.dma.dto.request.CampaignUpdateReq;
 import dev.tomas.dma.dto.common.CampaignDTO;
+import dev.tomas.dma.enums.CampaignStatus;
 import dev.tomas.dma.mapper.CampaignMapper;
 import dev.tomas.dma.entity.Campaign;
 import dev.tomas.dma.repository.CampaignRepo;
@@ -25,13 +26,14 @@ import java.util.Objects;
 public class CampaignServiceImpl implements CampaignService {
     private final CampaignRepo campaignRepo;
     private final CompanyRepo companyRepo;
+    private final CampaignMapper campaignMapper;
 
     @Override
     public CampaignGetAllRes findAll() {
         CampaignGetAllRes response = new CampaignGetAllRes();
 
         for (Campaign entity : campaignRepo.findAll()) {
-            response.campaigns.add(CampaignMapper.INSTANCE.convertToDTO(entity));
+            response.campaigns.add(campaignMapper.convertToDTO(entity));
         }
         return response;
     }
@@ -39,7 +41,7 @@ public class CampaignServiceImpl implements CampaignService {
     @Override
     public CampaignDTO findById(Integer id) {
         Campaign entity = campaignRepo.findById(id).orElseThrow(() -> new EntityNotFoundException("Campaign not found with id: " + id));
-        return CampaignMapper.INSTANCE.convertToDTO(entity);
+        return campaignMapper.convertToDTO(entity);
     }
 
     @Override
@@ -56,8 +58,15 @@ public class CampaignServiceImpl implements CampaignService {
         toSave.setDescription(request.getDescription());
         toSave.setCompany(companyRepo.getReferenceById(request.getCompanyId()));
         toSave.setFundGoal(request.getFundGoal());
+        toSave.setStatus(CampaignStatus.PENDING);
+        if (request.getStartDate() != null) {
+            toSave.setStartDate(request.getStartDate());
+        }
+        if (request.getEndDate() != null) {
+            toSave.setEndDate(request.getEndDate());
+        }
 
-        return CampaignMapper.INSTANCE.convertToDTO(campaignRepo.save(toSave));
+        return campaignMapper.convertToDTO(campaignRepo.save(toSave));
     }
 
     @Override
@@ -65,21 +74,20 @@ public class CampaignServiceImpl implements CampaignService {
         Campaign original = campaignRepo.findById(request.getId())
                 .orElseThrow(() -> new EntityNotFoundException("Campaign not found with id: " + request.getId()));
 
-        if (request.getName() != null && !request.getName().isEmpty()) {
-            original.setName(request.getName());
-        }
-        if (request.getDescription() != null && !request.getDescription().isEmpty()) {
-            original.setDescription(request.getDescription());
-        }
-        if (request.getCompanyId() != null) {
-            original.setCompany(companyRepo.getReferenceById(request.getCompanyId()));
-        }
-        if (request.getFundGoal() != null) {
-            original.setFundGoal(request.getFundGoal());
-        }
+        original.setName(request.getName());
+        original.setDescription(request.getDescription());
+        original.setFundGoal(request.getFundGoal());
+        original.setStartDate(request.getStartDate());
+        original.setEndDate(request.getEndDate());
+        original.setStatus(request.getStatus());
 
-        Campaign updated = campaignRepo.save(original);
-        return CampaignMapper.INSTANCE.convertToDTO(updated);
+        return campaignMapper.convertToDTO(campaignRepo.save(original));
+    }
+
+    public CampaignDTO archive(Integer id) {
+        Campaign campaign = campaignRepo.findById(id).orElseThrow(() -> new EntityNotFoundException("Campaign not found with id: " + id));
+        campaign.setStatus(CampaignStatus.ARCHIVED);
+        return campaignMapper.convertToDTO(campaignRepo.save(campaign));
     }
 
     @Override

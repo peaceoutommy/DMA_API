@@ -1,9 +1,12 @@
 package dev.tomas.dma.dto.request;
 
+import dev.tomas.dma.enums.CampaignStatus;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+
 @Data
 public class CampaignUpdateReq {
     @NotNull
@@ -21,5 +24,9 @@ public class CampaignUpdateReq {
     @NotNull
     @Min(1) @Max(999999999)
     private BigDecimal fundGoal;
+
+    private LocalDate startDate;
+    private LocalDate endDate;
+    private CampaignStatus status;
 
 }
