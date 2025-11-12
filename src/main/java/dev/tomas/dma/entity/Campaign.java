@@ -10,6 +10,8 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @NoArgsConstructor
@@ -54,4 +56,7 @@ public class Campaign {
 
     @Column(name = "raised_funds")
     private BigDecimal raisedFunds;
+
+    @OneToMany(mappedBy = "campaign")
+    private List<CampaignImage> images = new ArrayList<>();
 }

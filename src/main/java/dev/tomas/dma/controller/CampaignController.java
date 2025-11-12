@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -34,8 +35,8 @@ public class CampaignController {
     }
 
     @PreAuthorize("hasAuthority('PERMISSION_Create campaign')")
-    @PostMapping
-    public ResponseEntity<CampaignDTO> create(@RequestBody @Valid CampaignCreateReq request) {
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<CampaignDTO> create(@Valid @ModelAttribute CampaignCreateReq request) {
         return ResponseEntity.ok(campaignService.save(request));
     }
 

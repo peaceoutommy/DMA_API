@@ -5,6 +5,8 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 public class CampaignDTO {
@@ -17,4 +19,5 @@ public class CampaignDTO {
     private LocalDate endDate;
     private CampaignStatus status;
     private Integer companyId;
+    private List<String> images = new ArrayList<>();
 }

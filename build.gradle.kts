@@ -48,8 +48,8 @@ dependencies {
     annotationProcessor("org.mapstruct:mapstruct-processor:1.6.3")
 
     implementation("at.favre.lib:bcrypt:0.10.2")
+    implementation("com.cloudinary:cloudinary-http44:1.39.0")
 
-    // JJWT for JWT token handling
     implementation("io.jsonwebtoken:jjwt-api:0.12.6")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")

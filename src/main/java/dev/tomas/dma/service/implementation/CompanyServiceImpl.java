@@ -16,6 +16,7 @@ import dev.tomas.dma.repository.CompanyTypeRepo;
 import dev.tomas.dma.repository.UserRepo;
 import dev.tomas.dma.service.CompanyRoleService;
 import dev.tomas.dma.service.CompanyService;
+import dev.tomas.dma.service.MediaService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -36,6 +37,7 @@ public class CompanyServiceImpl implements CompanyService {
     private final CompanyTypeRepo companyTypeRepo;
     private final CompanyRoleRepo companyRoleRepo;
     private final CompanyRoleService roleService;
+    private final MediaService mediaService;
     private final UserRepo userRepo;
     private final CompanyMapper companyMapper;
 
@@ -68,6 +70,8 @@ public class CompanyServiceImpl implements CompanyService {
         companyToSave.setType(type);
         Company savedCompany = companyRepo.save(companyToSave);
 
+        mediaService.createFolder(savedCompany.getId().toString());
+
         // Create employee and owner role
         List<CompanyRole> roles = createDefaultRoles(savedCompany);
 
@@ -77,6 +81,7 @@ public class CompanyServiceImpl implements CompanyService {
                 .orElseThrow(() -> new EntityNotFoundException("Role not found with name: 'Owner'"));
 
         user.setCompanyRole(ownerRole);
+        user.setCompany(savedCompany);
         userRepo.save(user);
         return companyMapper.toDto(savedCompany);
     }
