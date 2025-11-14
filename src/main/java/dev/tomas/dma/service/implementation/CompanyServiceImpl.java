@@ -55,7 +55,7 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     public CompanyDTO getById(Integer id) {
-        return companyMapper.toDto(companyRepo.findById(id).orElseThrow(() -> new EntityNotFoundException("Company with id %d not found" + id)));
+        return companyMapper.toDto(companyRepo.findById(id).orElseThrow(() -> new EntityNotFoundException("Company not found with id" + id)));
     }
 
     @Transactional
@@ -146,7 +146,7 @@ public class CompanyServiceImpl implements CompanyService {
         return companyRepo.findById(id).orElseThrow(() -> new EntityNotFoundException("Company not found with id: " + id));
     }
 
-    protected List<CompanyRole> createDefaultRoles(Company company) {
+    public List<CompanyRole> createDefaultRoles(Company company) {
         List<CompanyRole> roles = new ArrayList<>();
 
         CompanyRole employee = new CompanyRole();

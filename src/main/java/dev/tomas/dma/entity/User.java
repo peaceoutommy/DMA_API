@@ -48,9 +48,6 @@ public class User implements UserDetails {
     @Column(unique = true, nullable = false)
     private String username;
 
-    @Column(name = "balance")
-    private BigDecimal balance;
-
     @ManyToOne
     @JoinColumn(name = "company_role_id")
     private CompanyRole companyRole;
@@ -65,6 +62,9 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserRole role = UserRole.DONOR;
+
+    @OneToMany(mappedBy = "user")
+    private List<Donation> donations;
 
     // UserDetails Methods
 

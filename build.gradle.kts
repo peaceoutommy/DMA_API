@@ -49,6 +49,7 @@ dependencies {
 
     implementation("at.favre.lib:bcrypt:0.10.2")
     implementation("com.cloudinary:cloudinary-http44:1.39.0")
+    implementation("com.stripe:stripe-java:30.2.0")
 
     implementation("io.jsonwebtoken:jjwt-api:0.12.6")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")

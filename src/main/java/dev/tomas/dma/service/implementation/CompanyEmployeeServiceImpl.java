@@ -47,7 +47,7 @@ public class CompanyEmployeeServiceImpl implements CompanyEmployeeService {
         Company company = companyRepo.findById(request.getCompanyId()).orElseThrow(()  -> new EntityNotFoundException("Company not found with id: " + request.getCompanyId()));
         CompanyRole role = companyRoleRepo.findById(request.getRoleId()).orElseThrow(() -> new EntityNotFoundException("Company role not found with id: " + request.getRoleId()));
 
-        if(user.getCompany().getId().equals(request.getCompanyId())) {
+        if(user.getCompany() != null && user.getCompany().getId().equals(request.getCompanyId())) {
             throw new IllegalStateException("The user already belongs to the company with id: " + request.getCompanyId());
         }
 

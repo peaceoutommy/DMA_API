@@ -19,5 +19,4 @@ public class UserDTO {
     private Integer companyId;
     private Integer companyRoleId;
     private String companyRoleName;
-    private BigDecimal balance;
 }
