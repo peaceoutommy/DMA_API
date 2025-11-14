@@ -1,9 +1,10 @@
 package dev.tomas.dma.repository;
 
-import dev.tomas.dma.model.entity.CompanyTypeEntity;
+import dev.tomas.dma.entity.CompanyType;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface CompanyTypeRepo extends CrudRepository<CompanyTypeEntity, Integer> {
+public interface CompanyTypeRepo extends JpaRepository<CompanyType, Integer> {
 }

@@ -1,8 +1,11 @@
 package dev.tomas.dma.config;
 
-import dev.tomas.dma.model.entity.UserEntity;
-import dev.tomas.dma.service.implementation.JWTService;
+import dev.tomas.dma.entity.User;
+import dev.tomas.dma.service.JWTService;
+import dev.tomas.dma.service.implementation.JWTServiceImpl;
+
 import java.io.IOException;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,14 +26,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
 
     /**
-     * This filter intercepts EVERY incoming HTTP request BEFORE it reaches the controllers.
-     * Its job: Check if the request has a valid JWT and authenticate the user.
+     * This filter intercepts EVERY incoming HTTP request BEFORE it reaches the controllers
+     * to check if the request has a valid JWT and authenticate the user.
      */
     @Override
     protected void doFilterInternal(@NotNull HttpServletRequest request,
                                     @NotNull HttpServletResponse response,
                                     @NotNull FilterChain chain)
             throws ServletException, IOException {
+
+        String path = request.getServletPath();
+        if (path.equals("/api/auth/login") || path.equals("/api/auth/register")) {
+            chain.doFilter(request, response);
+            return;
+        }
 
         // Step 1: Extract the "Authorization" header from the request
         // Expected format: "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
@@ -54,7 +63,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // Step 5: If username exists AND user is not already authenticated in this request
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             // Step 6: Load the full user details from database using UserDetailsService
-            UserEntity user = (UserEntity) userDetailsService.loadUserByUsername(username);
+            User user = (User) userDetailsService.loadUserByUsername(username);
 
             // Step 7: Validate that the token is valid (not expired, matches the user)
             if (jwtService.validateToken(jwt, user)) {

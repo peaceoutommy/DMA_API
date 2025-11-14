@@ -1,11 +1,25 @@
 package dev.tomas.dma.controller;
 
-import dev.tomas.dma.dto.*;
+import dev.tomas.dma.dto.common.CompanyDTO;
+import dev.tomas.dma.dto.common.CompanyTypeDTO;
+import dev.tomas.dma.dto.common.UserDTO;
+import dev.tomas.dma.dto.request.AddUserToCompanyReq;
+import dev.tomas.dma.dto.request.CompanyCreateReq;
+import dev.tomas.dma.dto.request.CompanyTypeCreateReq;
+import dev.tomas.dma.dto.response.*;
+import dev.tomas.dma.entity.User;
+import dev.tomas.dma.service.CompanyEmployeeService;
 import dev.tomas.dma.service.CompanyService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @RestController
@@ -14,25 +28,46 @@ import java.util.Optional;
 public class CompanyController {
     private final CompanyService companyService;
 
+    @GetMapping
+    public ResponseEntity<CompanyGetAllRes> getAll() {
+        return ResponseEntity.ok(companyService.getAll());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<CompanyDTO> getById(@PathVariable Integer id ){
+        return ResponseEntity.ok(companyService.getById(id));
+    }
+
+    @PostMapping
+    public ResponseEntity<CompanyDTO> create(@Valid @RequestBody CompanyCreateReq request) {
+        return ResponseEntity.ok(companyService.save(request));
+    }
+
     @GetMapping("types")
-    public Optional<CompanyTypeGetAllRes> getAllTypes(){
-        return companyService.getAllTypes();
+    public ResponseEntity<CompanyTypeGetAllRes> getAllTypes() {
+        return ResponseEntity.ok(companyService.getAllTypes());
     }
 
     @GetMapping("types/{id}")
-    public Optional<CompanyTypeGetRes> getTypeById(@PathVariable Integer id){
-        return companyService.getTypeById(id);
+    public ResponseEntity<CompanyTypeGetRes> getTypeById(@PathVariable Integer id) {
+        return ResponseEntity.ok(companyService.getTypeById(id));
     }
 
     @PostMapping("types")
-    public CompanyTypeGetRes createType(@Valid @RequestBody CompanyTypeCreateReq request) {
-        return companyService.saveType(request);
+    public ResponseEntity<CompanyTypeGetRes> createType(@Valid @RequestBody CompanyTypeCreateReq request) {
+        return ResponseEntity.ok(companyService.saveType(request));
     }
 
-    // Endpoint for creating Company
-    @PostMapping
-    public CompanyCreateRes createCompany(@Valid @RequestBody CompanyCreateReq request) {
-        return companyService.saveCompany(request);
+    @PutMapping("types")
+    public ResponseEntity<CompanyTypeDTO> updateType(@Valid @RequestBody CompanyTypeDTO request) {
+        return ResponseEntity.ok(companyService.updateType(request));
     }
 
+    @DeleteMapping("types/{id}")
+    public Integer deleteType(@Positive @PathVariable Integer id) {
+        if (Objects.isNull(id)) {
+            throw new IllegalArgumentException("Company type id cannot be null");
+        }
+        return companyService.deleteType(id);
+    }
 }
