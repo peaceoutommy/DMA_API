@@ -4,11 +4,8 @@ build/
 out/
 bin/
 
-# Gradle
+# Gradle cache (keep gradle/ wrapper, ignore .gradle/ cache)
 .gradle/
-gradle/
-gradlew
-gradlew.bat
 
 # Maven
 .mvn/
