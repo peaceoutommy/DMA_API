@@ -1,0 +1,72 @@
+# Build outputs
+target/
+build/
+out/
+bin/
+
+# Gradle
+.gradle/
+gradle/
+gradlew
+gradlew.bat
+
+# Maven
+.mvn/
+mvnw
+mvnw.cmd
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings/
+
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Documentation
+README.md
+*.md
+docs/
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+Jenkinsfile
+
+# Logs
+*.log
+logs/
+
+# Test files
+**/test/
+**/*Test.java
+**/*Tests.java
+
+# Environment files
+.env
+.env.local
+*.env
+
+# Temporary files
+tmp/
+temp/
+*.tmp
