@@ -9,7 +9,7 @@ services:
       MYSQL_USER: ${DATASOURCE_USERNAME}
       MYSQL_PASSWORD: ${DATASOURCE_PASSWORD}
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - mysql-data:/var/lib/mysql
     healthcheck:
