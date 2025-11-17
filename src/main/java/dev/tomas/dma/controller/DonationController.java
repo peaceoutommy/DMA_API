@@ -60,7 +60,6 @@ public class DonationController {
             if (paymentIntent != null) {
                 Map<String, String> metadata = paymentIntent.getMetadata();
                 System.out.println(metadata);
-                // DONT FORGET TO STORE THIS IN THE DATABASE
             }
         }
 
