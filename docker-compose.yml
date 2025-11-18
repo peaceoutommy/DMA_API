@@ -22,7 +22,7 @@ services:
       mysql:
         condition: service_healthy
     env_file:
-      - .env
+      - .env.prod
     ports:
       - "8080:8080"
 
