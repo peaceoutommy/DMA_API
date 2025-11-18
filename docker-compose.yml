@@ -26,5 +26,14 @@ services:
     ports:
       - "8080:8080"
 
+  client:
+    image: peaceoutommy/dma-client:main
+    depends_on:
+      - api
+    ports:
+      - "3000:80"
+    environment:
+      - VITE_API_URL=http://localhost:8080
+
 volumes:
   mysql-data:
