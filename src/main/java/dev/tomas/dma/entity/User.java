@@ -64,7 +64,7 @@ public class User implements UserDetails {
     private UserRole role = UserRole.DONOR;
 
     @OneToMany(mappedBy = "user")
-    private List<Donation> donations;
+    private List<Donation> donations = new  ArrayList<>();
 
     // UserDetails Methods
 

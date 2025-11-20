@@ -7,6 +7,7 @@ import com.stripe.model.PaymentIntent;
 import com.stripe.net.Webhook;
 import dev.tomas.dma.dto.common.DonationDTO;
 import dev.tomas.dma.service.CampaignService;
+import dev.tomas.dma.service.DonationService;
 import dev.tomas.dma.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,6 +25,8 @@ import java.util.Objects;
 public class DonationController {
     private final PaymentService paymentService;
     private final CampaignService campaignService;
+    private final DonationService donationService;
+
     @Value("${stripe.webhook.private}")
     private String webhookSecret;
 
@@ -59,7 +62,21 @@ public class DonationController {
 
             if (paymentIntent != null) {
                 Map<String, String> metadata = paymentIntent.getMetadata();
-                System.out.println(metadata);
+                DonationDTO donationDTO = new DonationDTO();
+
+                if (Objects.nonNull(metadata)) {
+                    try {
+                        donationDTO.setCampaignId(Integer.parseInt(metadata.get("campaignId")));
+                        donationDTO.setUserId(Integer.parseInt(metadata.get("userId")));
+                        donationDTO.setAmount(paymentIntent.getAmount());
+                    } catch (NumberFormatException e) {
+                        throw new IllegalArgumentException("Campaign id or User id not valid");
+                    }
+                } else {
+                    throw new IllegalArgumentException("Payment intent is null");
+                }
+
+                donationService.save(donationDTO);
             }
         }
 
