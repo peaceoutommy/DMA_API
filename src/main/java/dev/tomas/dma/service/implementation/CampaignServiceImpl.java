@@ -25,6 +25,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.awt.*;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.Objects;
 
 @Service
@@ -69,6 +70,7 @@ public class CampaignServiceImpl implements CampaignService {
         toSave.setCompany(companyRepo.getReferenceById(request.getCompanyId()));
         toSave.setFundGoal(request.getFundGoal());
         toSave.setStatus(CampaignStatus.PENDING);
+        toSave.setRaisedFunds(BigDecimal.valueOf(0));
         if (request.getStartDate() != null) {
             toSave.setStartDate(request.getStartDate());
         }

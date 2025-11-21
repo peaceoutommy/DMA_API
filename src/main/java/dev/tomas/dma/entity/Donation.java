@@ -13,11 +13,13 @@ public class Donation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    @OneToOne
+
+    @ManyToOne
     private Campaign campaign;
-    @ManyToOne()
-    @JoinColumn(name = "user_id")
+
+    @ManyToOne
     private User user;
+
     private Long amount;
-    private LocalDateTime date;
+    private LocalDateTime date = LocalDateTime.now();
 }

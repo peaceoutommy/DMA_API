@@ -17,7 +17,7 @@ import java.util.List;
 @Entity
 @Setter
 @Getter
-@Table(name = "user")
+@Table(name = "users")
 public class User implements UserDetails {
 
     @Id
@@ -64,7 +64,7 @@ public class User implements UserDetails {
     private UserRole role = UserRole.DONOR;
 
     @OneToMany(mappedBy = "user")
-    private List<Donation> donations;
+    private List<Donation> donations = new  ArrayList<>();
 
     // UserDetails Methods
 
