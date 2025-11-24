@@ -1,5 +1,7 @@
 package dev.tomas.dma.entity;
 
+import dev.tomas.dma.enums.EntityType;
+import dev.tomas.dma.enums.FileType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,13 +13,13 @@ import lombok.Setter;
 @AllArgsConstructor
 @Setter
 @Getter
-@Table(name = "campaign_image")
-public class CampaignImage {
+@Table(name = "app_file")
+public class AppFile {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @ManyToOne
-    @JoinColumn(name = "campaign_id")
-    private Campaign campaign;
     private String url;
+    private Integer entityId;
+    private EntityType entityType;
+    private FileType fileType;
 }

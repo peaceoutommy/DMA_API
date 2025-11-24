@@ -4,26 +4,24 @@ import dev.tomas.dma.dto.request.CampaignCreateReq;
 import dev.tomas.dma.dto.response.CampaignGetAllRes;
 import dev.tomas.dma.dto.request.CampaignUpdateReq;
 import dev.tomas.dma.dto.common.CampaignDTO;
-import dev.tomas.dma.entity.CampaignImage;
+import dev.tomas.dma.entity.AppFile;
 import dev.tomas.dma.enums.CampaignStatus;
+import dev.tomas.dma.enums.EntityType;
+import dev.tomas.dma.enums.FileType;
 import dev.tomas.dma.mapper.CampaignMapper;
 import dev.tomas.dma.entity.Campaign;
-import dev.tomas.dma.repository.CampaignImageRepo;
+import dev.tomas.dma.repository.AppFileRepo;
 import dev.tomas.dma.repository.CampaignRepo;
 import dev.tomas.dma.repository.CompanyRepo;
 import dev.tomas.dma.service.CampaignService;
-import dev.tomas.dma.service.MediaService;
+import dev.tomas.dma.service.ExternalStorageService;
+import dev.tomas.dma.service.FileService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
-import org.apache.coyote.Response;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.awt.*;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Objects;
@@ -34,9 +32,10 @@ import java.util.Objects;
 public class CampaignServiceImpl implements CampaignService {
     private final CampaignRepo campaignRepo;
     private final CompanyRepo companyRepo;
-    private final CampaignImageRepo imageRepo;
     private final CampaignMapper campaignMapper;
-    private final MediaService mediaService;
+    private final ExternalStorageService externalStorageService;
+    private final FileService fileService;
+    private final AppFileRepo fileRepo;
 
     @Override
     public CampaignGetAllRes findAll() {
@@ -51,6 +50,8 @@ public class CampaignServiceImpl implements CampaignService {
     @Override
     public CampaignDTO findById(Integer id) {
         Campaign entity = campaignRepo.findById(id).orElseThrow(() -> new EntityNotFoundException("Campaign not found with id: " + id));
+
+
         return campaignMapper.convertToDTO(entity);
     }
 
@@ -71,6 +72,7 @@ public class CampaignServiceImpl implements CampaignService {
         toSave.setFundGoal(request.getFundGoal());
         toSave.setStatus(CampaignStatus.PENDING);
         toSave.setRaisedFunds(BigDecimal.valueOf(0));
+
         if (request.getStartDate() != null) {
             toSave.setStartDate(request.getStartDate());
         }
@@ -81,24 +83,34 @@ public class CampaignServiceImpl implements CampaignService {
         Campaign saved = campaignRepo.save(toSave);
 
         if (request.getImages() != null) {
-            for (MultipartFile file : request.getImages()) {
+            String directoryName = saved.getCompany().getName() + "/" + saved.getName();
+            externalStorageService.createFolder(directoryName);
+
+            if (request.getImages().size() == 1) {
+                String imgUrl = null;
                 try {
-                    String imgUrl = mediaService.uploadImage(file, request.getCompanyId().toString(), saved.getId().toString());
-
-                    CampaignImage image = new CampaignImage();
-                    image.setCampaign(saved);
-                    image.setUrl(imgUrl);
-                    imageRepo.save(image);
-
-                    // Add images to previously saved campaign
-                    saved.getImages().add(image);
+                    imgUrl = externalStorageService.uploadFile(request.getImages().get(1), directoryName, "1");
                 } catch (IOException e) {
-                    throw new RuntimeException("Failed to upload campaign images", e);
+                    throw new RuntimeException(e);
+                }
+                fileService.saveFile(saved.getId(), imgUrl, FileType.CAMPAIGN_IMAGE, EntityType.CAMPAIGN);
+            }
+
+            if (request.getImages().size() > 1) {
+                Integer imageCount = 1;
+                for (MultipartFile file : request.getImages()) {
+                    String imgUrl = null;
+                    try {
+                        imgUrl = externalStorageService.uploadFile(file, directoryName, imageCount.toString());
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    fileService.saveFile(saved.getId(), imgUrl, FileType.CAMPAIGN_IMAGE, EntityType.CAMPAIGN);
+                    imageCount++;
                 }
             }
-            // Save campaign again to include the images
-            campaignRepo.save(saved);
         }
+
         return campaignMapper.convertToDTO(saved);
     }
 

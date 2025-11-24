@@ -1,12 +1,11 @@
 package dev.tomas.dma.IntegrationTest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.tomas.dma.dto.request.CompanyCreateReq;
 import dev.tomas.dma.dto.request.CompanyTypeCreateReq;
 import dev.tomas.dma.dto.common.CompanyTypeDTO;
 import dev.tomas.dma.entity.*;
 import dev.tomas.dma.enums.UserRole;
-import dev.tomas.dma.service.MediaService;
+import dev.tomas.dma.service.FileService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -23,7 +22,7 @@ import static org.mockito.Mockito.*;
 class CompanyControllerIntegrationTest extends BaseIntegrationTest {
 
     @MockBean
-    private MediaService mediaService; // Mock external service
+    private FileService fileService; // Mock external service
 
     private CompanyType testCompanyType;
     private User testUser;
@@ -33,7 +32,7 @@ class CompanyControllerIntegrationTest extends BaseIntegrationTest {
         // Note: BaseIntegrationTest.setUp() already runs and cleans DB
 
         // Mock MediaService to avoid external dependencies
-        doNothing().when(mediaService).createFolder(anyString());
+        doNothing().when(fileService).createFolder(anyString());
 
         // Create test company type
         testCompanyType = new CompanyType();
@@ -143,7 +142,7 @@ class CompanyControllerIntegrationTest extends BaseIntegrationTest {
         assertEquals("Owner", updatedUser.getCompanyRole().getName());
 
         // Verify MediaService was called
-        verify(mediaService, times(1)).createFolder(savedCompany.getId().toString());
+        verify(fileService, times(1)).createFolder(savedCompany.getId().toString());
     }
 
     @Test

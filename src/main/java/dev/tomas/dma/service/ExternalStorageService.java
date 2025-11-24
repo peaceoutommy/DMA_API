@@ -4,8 +4,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
-public interface MediaService {
+public interface ExternalStorageService {
     void createFolder(String name);
 
-    String uploadImage(MultipartFile file, String folderName, String fileName) throws IOException;
+    String uploadFile(MultipartFile file, String directoryName, String fileName) throws IOException;
 }

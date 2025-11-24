@@ -1,9 +1,9 @@
 package dev.tomas.dma.repository;
 
-import dev.tomas.dma.entity.CampaignImage;
+import dev.tomas.dma.entity.AppFile;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface CampaignImageRepo extends JpaRepository<CampaignImage, Integer> {
+public interface AppFileRepo extends JpaRepository<AppFile, Long> {
 }

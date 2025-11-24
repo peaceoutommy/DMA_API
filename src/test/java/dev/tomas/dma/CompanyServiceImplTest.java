@@ -17,17 +17,15 @@ import dev.tomas.dma.repository.CompanyRoleRepo;
 import dev.tomas.dma.repository.CompanyTypeRepo;
 import dev.tomas.dma.repository.UserRepo;
 import dev.tomas.dma.service.CompanyRoleService;
-import dev.tomas.dma.service.MediaService;
+import dev.tomas.dma.service.FileService;
 import dev.tomas.dma.service.implementation.CompanyServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
@@ -56,7 +54,7 @@ class CompanyServiceImplTest {
     private CompanyRoleService roleService;
 
     @Mock
-    private MediaService mediaService;
+    private FileService fileService;
 
     @Mock
     private UserRepo userRepo;
@@ -187,7 +185,7 @@ class CompanyServiceImplTest {
         when(roleService.getAllPermissionsEntity()).thenReturn(new ArrayList<>());
         when(userRepo.save(any(User.class))).thenReturn(testUser);
         when(companyMapper.toDto(testCompany)).thenReturn(testCompanyDTO);
-        doNothing().when(mediaService).createFolder(anyString());
+        doNothing().when(fileService).createFolder(anyString());
 
         // Act
         CompanyDTO result = companyService.save(request);
@@ -197,7 +195,7 @@ class CompanyServiceImplTest {
         verify(companyTypeRepo, times(1)).findById(1);
         verify(userRepo, times(1)).findById(1);
         verify(companyRepo, times(1)).save(any(Company.class));
-        verify(mediaService, times(1)).createFolder(anyString());
+        verify(fileService, times(1)).createFolder(anyString());
         verify(companyRoleRepo, times(2)).save(any(CompanyRole.class));
         verify(userRepo, times(1)).save(testUser);
     }
