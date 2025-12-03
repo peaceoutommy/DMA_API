@@ -24,7 +24,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -42,7 +44,11 @@ public class CampaignServiceImpl implements CampaignService {
         CampaignGetAllRes response = new CampaignGetAllRes();
 
         for (Campaign entity : campaignRepo.findAll()) {
-            response.campaigns.add(campaignMapper.convertToDTO(entity));
+            CampaignDTO dto = campaignMapper.convertToDTO(entity);
+            List<AppFile> images = fileRepo.findByEntityTypeAndEntityIdAndFileType(EntityType.CAMPAIGN, dto.getId(), FileType.CAMPAIGN_IMAGE);
+
+            dto.setImages(images.stream().map(AppFile::getUrl).collect(Collectors.toList()));
+            response.campaigns.add(dto);
         }
         return response;
     }
@@ -50,9 +56,11 @@ public class CampaignServiceImpl implements CampaignService {
     @Override
     public CampaignDTO findById(Integer id) {
         Campaign entity = campaignRepo.findById(id).orElseThrow(() -> new EntityNotFoundException("Campaign not found with id: " + id));
+        List<AppFile> images = fileRepo.findByEntityTypeAndEntityIdAndFileType(EntityType.CAMPAIGN, id, FileType.CAMPAIGN_IMAGE);
 
-
-        return campaignMapper.convertToDTO(entity);
+        CampaignDTO dto = campaignMapper.convertToDTO(entity);
+        dto.setImages(images.stream().map(AppFile::getUrl).collect(Collectors.toList()));
+        return dto;
     }
 
     @Override
@@ -87,9 +95,9 @@ public class CampaignServiceImpl implements CampaignService {
             externalStorageService.createFolder(directoryName);
 
             if (request.getImages().size() == 1) {
-                String imgUrl = null;
+                String imgUrl;
                 try {
-                    imgUrl = externalStorageService.uploadFile(request.getImages().get(1), directoryName, "1");
+                    imgUrl = externalStorageService.uploadFile(request.getImages().getFirst(), directoryName, "1");
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -99,7 +107,7 @@ public class CampaignServiceImpl implements CampaignService {
             if (request.getImages().size() > 1) {
                 Integer imageCount = 1;
                 for (MultipartFile file : request.getImages()) {
-                    String imgUrl = null;
+                    String imgUrl;
                     try {
                         imgUrl = externalStorageService.uploadFile(file, directoryName, imageCount.toString());
                     } catch (IOException e) {
