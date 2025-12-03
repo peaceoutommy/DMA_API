@@ -87,6 +87,8 @@ public class User implements UserDetails {
         return authorities;
     }
 
+    public String getActualUsername(){return this.username;}
+
     @Override
     public String getPassword() {
         return this.password;

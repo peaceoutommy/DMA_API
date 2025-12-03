@@ -43,7 +43,7 @@ public class CompanyRoleController {
         return companyRoleService.delete(id);
     }
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'PERMISSION_List roles', 'PERMISSION_Modify role')")
     @GetMapping("/permissions")
     public ResponseEntity<CompanyRolePermissionGetAllRes> getPermissions() {
         return ResponseEntity.ok(companyRoleService.getAllPermissions());

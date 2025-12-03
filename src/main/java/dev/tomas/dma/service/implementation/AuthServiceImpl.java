@@ -105,7 +105,7 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
 
         res.setId(user.getId());
         res.setEmail(user.getEmail());
-        res.setUsername(user.getUsername());
+        res.setUsername(user.getActualUsername());
         res.setFirstName(user.getFirstName());
         res.setLastName(user.getLastName());
         if (user.getCompanyRole() != null) {

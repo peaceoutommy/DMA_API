@@ -58,8 +58,5 @@ public class Campaign {
     private BigDecimal raisedFunds;
 
     @OneToMany(mappedBy = "campaign")
-    private List<CampaignImage> images = new ArrayList<>();
-
-    @OneToMany(mappedBy = "campaign")
     private List<Donation> donations = new ArrayList<>();
 }
