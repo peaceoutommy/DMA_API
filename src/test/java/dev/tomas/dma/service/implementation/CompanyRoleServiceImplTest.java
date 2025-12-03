@@ -1,4 +1,4 @@
-package UnitTest;
+package dev.tomas.dma.service.implementation;
 
 import dev.tomas.dma.dto.common.CompanyPermissionDTO;
 import dev.tomas.dma.dto.common.CompanyRoleDTO;
@@ -18,7 +18,6 @@ import dev.tomas.dma.mapper.CompanyRoleMapper;
 import dev.tomas.dma.repository.CompanyPermissionRepo;
 import dev.tomas.dma.repository.CompanyRepo;
 import dev.tomas.dma.repository.CompanyRoleRepo;
-import dev.tomas.dma.service.implementation.CompanyRoleServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -38,7 +37,6 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)

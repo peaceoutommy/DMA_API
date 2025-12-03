@@ -1,4 +1,4 @@
-package UnitTest;
+package dev.tomas.dma.service.implementation;
 
 import dev.tomas.dma.dto.request.AuthReq;
 import dev.tomas.dma.dto.request.UserRegisterReq;
@@ -10,7 +10,6 @@ import dev.tomas.dma.entity.User;
 import dev.tomas.dma.enums.UserRole;
 import dev.tomas.dma.repository.UserRepo;
 import dev.tomas.dma.service.JWTService;
-import dev.tomas.dma.service.implementation.AuthServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
