@@ -48,6 +48,9 @@ public class Campaign {
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;
 
+    @Column(name = "create_date")
+    private LocalDate createDate = LocalDate.now();
+
     @NotNull
     @Min(1)
     @Max(999999999)

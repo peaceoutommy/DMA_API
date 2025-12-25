@@ -1,24 +1,18 @@
-package dev.tomas.dma.entity;
+package dev.tomas.dma.dto.common;
 
 import dev.tomas.dma.enums.EntityType;
 import dev.tomas.dma.enums.TicketStatus;
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-@Entity
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-public class Ticket {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class TicketDTO {
+    private long Id;
     private String name;
     @Enumerated(EnumType.STRING)
     private EntityType type;

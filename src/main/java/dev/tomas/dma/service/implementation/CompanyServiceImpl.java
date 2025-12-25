@@ -9,15 +9,13 @@ import dev.tomas.dma.entity.Company;
 import dev.tomas.dma.entity.CompanyRole;
 import dev.tomas.dma.entity.CompanyType;
 import dev.tomas.dma.entity.User;
+import dev.tomas.dma.enums.CompanyStatus;
 import dev.tomas.dma.mapper.CompanyMapper;
 import dev.tomas.dma.repository.CompanyRepo;
 import dev.tomas.dma.repository.CompanyRoleRepo;
 import dev.tomas.dma.repository.CompanyTypeRepo;
 import dev.tomas.dma.repository.UserRepo;
-import dev.tomas.dma.service.CompanyRoleService;
-import dev.tomas.dma.service.CompanyService;
-import dev.tomas.dma.service.ExternalStorageService;
-import dev.tomas.dma.service.FileService;
+import dev.tomas.dma.service.*;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -41,6 +39,7 @@ public class CompanyServiceImpl implements CompanyService {
     private final ExternalStorageService externalStorageService;
     private final UserRepo userRepo;
     private final CompanyMapper companyMapper;
+    private final TicketService  ticketService;
 
     public CompanyGetAllRes getAll() {
         CompanyGetAllRes response = new CompanyGetAllRes();
@@ -48,7 +47,7 @@ public class CompanyServiceImpl implements CompanyService {
 
         for (Company entity : companyRepo.findAll()) {
             CompanyType type = entity.getType();
-            dtos.add(new CompanyDTO(entity.getId(), entity.getName(), entity.getRegistrationNumber(), entity.getTaxId(), new CompanyTypeDTO(type.getId(), type.getName(), type.getDescription())));
+            dtos.add(new CompanyDTO(entity.getId(), entity.getName(), entity.getRegistrationNumber(), entity.getTaxId(), new CompanyTypeDTO(type.getId(), type.getName(), type.getDescription()), entity.getStatus().name()));
         }
 
         response.setCompanies(dtos);
@@ -64,12 +63,17 @@ public class CompanyServiceImpl implements CompanyService {
         CompanyType type = companyTypeRepo.findById(request.getTypeId()).orElseThrow(() -> new EntityNotFoundException("Type not found with id: " + request.getTypeId()));
         User user = userRepo.findById(request.getUserId()).orElseThrow(() -> new EntityNotFoundException("User not found with id: " + request.getUserId()));
 
-        Company companyToSave = new Company();
-        companyToSave.setName(request.getName());
-        companyToSave.setRegistrationNumber(request.getRegistrationNumber());
-        companyToSave.setTaxId(request.getTaxId());
-        companyToSave.setType(type);
-        Company savedCompany = companyRepo.save(companyToSave);
+        Company toSave = new Company();
+        toSave.setName(request.getName());
+        toSave.setRegistrationNumber(request.getRegistrationNumber());
+        toSave.setTaxId(request.getTaxId());
+        toSave.setType(type);
+        toSave.setStatus(CompanyStatus.PENDING);
+
+        Company savedCompany = companyRepo.save(toSave);
+
+        // Create a ticket
+        ticketService.save(savedCompany);
 
         externalStorageService.createFolder(savedCompany.getName());
 

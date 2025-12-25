@@ -8,6 +8,7 @@ import dev.tomas.dma.entity.AppFile;
 import dev.tomas.dma.enums.CampaignStatus;
 import dev.tomas.dma.enums.EntityType;
 import dev.tomas.dma.enums.FileType;
+import dev.tomas.dma.mapper.AppFileMapper;
 import dev.tomas.dma.mapper.CampaignMapper;
 import dev.tomas.dma.entity.Campaign;
 import dev.tomas.dma.repository.AppFileRepo;
@@ -16,6 +17,7 @@ import dev.tomas.dma.repository.CompanyRepo;
 import dev.tomas.dma.service.CampaignService;
 import dev.tomas.dma.service.ExternalStorageService;
 import dev.tomas.dma.service.FileService;
+import dev.tomas.dma.service.TicketService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,7 +28,6 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -37,17 +38,19 @@ public class CampaignServiceImpl implements CampaignService {
     private final CampaignMapper campaignMapper;
     private final ExternalStorageService externalStorageService;
     private final FileService fileService;
+    private final TicketService ticketService;
     private final AppFileRepo fileRepo;
+    private final AppFileMapper fileMapper;
 
     @Override
     public CampaignGetAllRes findAll() {
         CampaignGetAllRes response = new CampaignGetAllRes();
 
         for (Campaign entity : campaignRepo.findAll()) {
-            CampaignDTO dto = campaignMapper.convertToDTO(entity);
+            CampaignDTO dto = campaignMapper.entityToDTO(entity);
             List<AppFile> images = fileRepo.findByEntityTypeAndEntityIdAndFileType(EntityType.CAMPAIGN, dto.getId(), FileType.CAMPAIGN_IMAGE);
 
-            dto.setImages(images.stream().map(AppFile::getUrl).collect(Collectors.toList()));
+            dto.setFiles(fileMapper.entitiesToDTO(images));
             response.campaigns.add(dto);
         }
         return response;
@@ -58,8 +61,8 @@ public class CampaignServiceImpl implements CampaignService {
         Campaign entity = campaignRepo.findById(id).orElseThrow(() -> new EntityNotFoundException("Campaign not found with id: " + id));
         List<AppFile> images = fileRepo.findByEntityTypeAndEntityIdAndFileType(EntityType.CAMPAIGN, id, FileType.CAMPAIGN_IMAGE);
 
-        CampaignDTO dto = campaignMapper.convertToDTO(entity);
-        dto.setImages(images.stream().map(AppFile::getUrl).collect(Collectors.toList()));
+        CampaignDTO dto = campaignMapper.entityToDTO(entity);
+        dto.setFiles(fileMapper.entitiesToDTO(images));
         return dto;
     }
 
@@ -90,6 +93,8 @@ public class CampaignServiceImpl implements CampaignService {
 
         Campaign saved = campaignRepo.save(toSave);
 
+        ticketService.save(saved);
+
         if (request.getImages() != null) {
             String directoryName = saved.getCompany().getName() + "/" + saved.getName();
             externalStorageService.createFolder(directoryName);
@@ -105,11 +110,11 @@ public class CampaignServiceImpl implements CampaignService {
             }
 
             if (request.getImages().size() > 1) {
-                Integer imageCount = 1;
+                int imageCount = 1;
                 for (MultipartFile file : request.getImages()) {
                     String imgUrl;
                     try {
-                        imgUrl = externalStorageService.uploadFile(file, directoryName, imageCount.toString());
+                        imgUrl = externalStorageService.uploadFile(file, directoryName, Integer.toString(imageCount));
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
@@ -118,8 +123,7 @@ public class CampaignServiceImpl implements CampaignService {
                 }
             }
         }
-
-        return campaignMapper.convertToDTO(saved);
+        return campaignMapper.entityToDTO(saved);
     }
 
     @Override
@@ -134,13 +138,13 @@ public class CampaignServiceImpl implements CampaignService {
         original.setEndDate(request.getEndDate());
         original.setStatus(request.getStatus());
 
-        return campaignMapper.convertToDTO(campaignRepo.save(original));
+        return campaignMapper.entityToDTO(campaignRepo.save(original));
     }
 
     public CampaignDTO archive(Integer id) {
         Campaign campaign = campaignRepo.findById(id).orElseThrow(() -> new EntityNotFoundException("Campaign not found with id: " + id));
         campaign.setStatus(CampaignStatus.ARCHIVED);
-        return campaignMapper.convertToDTO(campaignRepo.save(campaign));
+        return campaignMapper.entityToDTO(campaignRepo.save(campaign));
     }
 
     @Override

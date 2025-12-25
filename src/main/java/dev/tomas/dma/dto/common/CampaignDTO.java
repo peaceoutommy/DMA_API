@@ -23,5 +23,5 @@ public class CampaignDTO {
     private LocalDate endDate;
     private CampaignStatus status;
     private Integer companyId;
-    private List<String> images = new ArrayList<>();
+    private List<AppFileDTO> files = new ArrayList<>();
 }

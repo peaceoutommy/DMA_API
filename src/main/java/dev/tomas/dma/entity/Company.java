@@ -1,11 +1,13 @@
 package dev.tomas.dma.entity;
 
+import dev.tomas.dma.enums.CompanyStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,4 +39,10 @@ public class Company {
     @ManyToOne()
     @JoinColumn(name = "company_type_id", nullable = false)
     private CompanyType type;
+
+    @Enumerated(EnumType.STRING)
+    private CompanyStatus status;
+
+    @Column(name = "create_date")
+    private LocalDate createDate = LocalDate.now();
 }
