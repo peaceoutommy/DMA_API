@@ -2,6 +2,7 @@ package dev.tomas.dma.service.implementation;
 
 import dev.tomas.dma.dto.common.AppFileDTO;
 import dev.tomas.dma.dto.common.TicketDTO;
+import dev.tomas.dma.dto.request.TicketCloseReq;
 import dev.tomas.dma.dto.request.TicketSaveReq;
 import dev.tomas.dma.dto.response.TicketDetailsGetRes;
 import dev.tomas.dma.dto.response.TicketGetAllRes;
@@ -46,6 +47,12 @@ public class TicketServiceImpl implements TicketService {
         return dto;
     }
 
+    public TicketGetAllRes getAll(){
+        TicketGetAllRes dto = new TicketGetAllRes();
+        dto.setTickets(ticketMapper.toDTOs(ticketRepo.findAll()));
+        return dto;
+    }
+
     public TicketDTO save(TicketSaveReq req) {
         Ticket ticket = new Ticket();
         ticket.setName(req.getName());
@@ -82,5 +89,13 @@ public class TicketServiceImpl implements TicketService {
         ticket.setCreateDate(LocalDateTime.now());
 
         return ticketMapper.toDTO(ticketRepo.save(ticket));
+    }
+
+    public void closeTicket(TicketCloseReq req){
+        Ticket ticket = ticketRepo.findById(req.getId()).orElseThrow(() -> new EntityNotFoundException("Ticket not found with id: " + req.getId()));
+        ticket.setStatus(req.getStatus());
+        ticket.setMessage(req.getMessage());
+        ticket.setCloseDate(LocalDateTime.now());
+        ticketRepo.save(ticket);
     }
 }

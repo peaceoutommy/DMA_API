@@ -1,6 +1,6 @@
 package dev.tomas.dma.controller;
 
-import dev.tomas.dma.dto.common.TicketDTO;
+import dev.tomas.dma.dto.request.TicketCloseReq;
 import dev.tomas.dma.dto.response.TicketDetailsGetRes;
 import dev.tomas.dma.dto.response.TicketGetAllRes;
 import dev.tomas.dma.service.TicketService;
@@ -14,13 +14,24 @@ import org.springframework.web.bind.annotation.*;
 public class TicketController {
     private TicketService ticketService;
 
-    @GetMapping()
+    @GetMapping("/open")
     public ResponseEntity<TicketGetAllRes> getAllOpenTickets() {
         return ResponseEntity.ok(ticketService.getAllOpen());
+    }
+
+    @GetMapping()
+    public ResponseEntity<TicketGetAllRes> getAll() {
+        return ResponseEntity.ok(ticketService.getAll());
     }
 
     @GetMapping("/{ticketId}")
     public ResponseEntity<TicketDetailsGetRes> getByTicketId(@PathVariable Integer ticketId) {
         return ResponseEntity.ok(ticketService.getByTicketId(Long.valueOf(ticketId)));
     }
+
+    @PutMapping("/close")
+    public void closeTicket(@RequestBody TicketCloseReq req){
+        ticketService.closeTicket(req);
+    }
+
 }

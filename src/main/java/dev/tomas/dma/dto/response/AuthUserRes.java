@@ -14,5 +14,7 @@ public class AuthUserRes {
     public Integer companyId;
     @Nullable
     public String companyRole;
+    @Nullable
+    public Boolean companyActive;
     public String role;
 }
