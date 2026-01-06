@@ -1,6 +1,5 @@
 package dev.tomas.dma.entity;
 
-import dev.tomas.dma.enums.EntityType;
 import dev.tomas.dma.enums.Status;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -8,24 +7,23 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.math.BigDecimal;
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Ticket {
+
+public class FundRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String name;
-    @Enumerated(EnumType.STRING)
-    private EntityType type;
-    private Integer entityId;
-    @Enumerated(EnumType.STRING)
-    private Status status;
     private String message;
-    private LocalDateTime closeDate;
-    private LocalDateTime createDate;
+    private BigDecimal amount;
+    private Status status;
+
+    @ManyToOne
+    @JoinColumn(name = "company_id", nullable = false)
+    private Company company;
 }

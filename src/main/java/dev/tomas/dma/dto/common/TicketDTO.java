@@ -1,7 +1,7 @@
 package dev.tomas.dma.dto.common;
 
 import dev.tomas.dma.enums.EntityType;
-import dev.tomas.dma.enums.TicketStatus;
+import dev.tomas.dma.enums.Status;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.Getter;
@@ -18,7 +18,7 @@ public class TicketDTO {
     private EntityType type;
     private Integer entityId;
     @Enumerated(EnumType.STRING)
-    private TicketStatus status;
+    private Status status;
     private String message;
     private LocalDateTime closeDate;
     private LocalDateTime createDate;

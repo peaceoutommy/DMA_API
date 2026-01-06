@@ -6,14 +6,13 @@ import dev.tomas.dma.dto.request.UserRegisterReq;
 import dev.tomas.dma.dto.request.AuthReq;
 import dev.tomas.dma.entity.User;
 import dev.tomas.dma.enums.EntityType;
-import dev.tomas.dma.enums.TicketStatus;
+import dev.tomas.dma.enums.Status;
 import dev.tomas.dma.enums.UserRole;
 import dev.tomas.dma.mapper.AuthResponseMapper;
 import dev.tomas.dma.repository.TicketRepo;
 import dev.tomas.dma.repository.UserRepo;
 import dev.tomas.dma.service.AuthService;
 import dev.tomas.dma.service.JWTService;
-import dev.tomas.dma.service.TicketService;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -95,7 +94,7 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
             if (user.getCompanyRole() != null) {
                 res.setCompanyId(user.getCompanyRole().getCompany().getId());
                 res.setCompanyRole(user.getCompanyRole().getName());
-                res.setCompanyActive(!ticketRepo.existsByEntityIdAndTypeAndStatus(res.getCompanyId(), EntityType.COMPANY, TicketStatus.PENDING));
+                res.setCompanyActive(!ticketRepo.existsByEntityIdAndTypeAndStatus(res.getCompanyId(), EntityType.COMPANY, Status.PENDING));
             }
             res.setRole(user.getRole().toString());
 
@@ -118,7 +117,7 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
         if (user.getCompanyRole() != null) {
             res.setCompanyId(user.getCompanyRole().getCompany().getId());
             res.setCompanyRole(user.getCompanyRole().getName());
-            res.setCompanyActive(!ticketRepo.existsByEntityIdAndTypeAndStatus(res.getCompanyId(), EntityType.COMPANY, TicketStatus.PENDING));
+            res.setCompanyActive(!ticketRepo.existsByEntityIdAndTypeAndStatus(res.getCompanyId(), EntityType.COMPANY, Status.PENDING));
         }
         res.setRole(user.getRole().toString());
 

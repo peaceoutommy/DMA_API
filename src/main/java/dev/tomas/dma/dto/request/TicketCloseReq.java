@@ -1,6 +1,6 @@
 package dev.tomas.dma.dto.request;
 
-import dev.tomas.dma.enums.TicketStatus;
+import dev.tomas.dma.enums.Status;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,5 +9,5 @@ import lombok.Setter;
 public class TicketCloseReq {
     private Long id;
     private String message;
-    private TicketStatus status;
+    private Status status;
 }

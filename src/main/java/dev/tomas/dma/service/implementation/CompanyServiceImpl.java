@@ -2,19 +2,17 @@ package dev.tomas.dma.service.implementation;
 
 import dev.tomas.dma.dto.common.CompanyDTO;
 import dev.tomas.dma.dto.common.CompanyTypeDTO;
+import dev.tomas.dma.dto.common.FundRequestDTO;
 import dev.tomas.dma.dto.request.CompanyCreateReq;
 import dev.tomas.dma.dto.request.CompanyTypeCreateReq;
+import dev.tomas.dma.dto.request.FundRequestCreateReq;
 import dev.tomas.dma.dto.response.*;
-import dev.tomas.dma.entity.Company;
-import dev.tomas.dma.entity.CompanyRole;
-import dev.tomas.dma.entity.CompanyType;
-import dev.tomas.dma.entity.User;
+import dev.tomas.dma.entity.*;
 import dev.tomas.dma.enums.CompanyStatus;
+import dev.tomas.dma.enums.Status;
 import dev.tomas.dma.mapper.CompanyMapper;
-import dev.tomas.dma.repository.CompanyRepo;
-import dev.tomas.dma.repository.CompanyRoleRepo;
-import dev.tomas.dma.repository.CompanyTypeRepo;
-import dev.tomas.dma.repository.UserRepo;
+import dev.tomas.dma.mapper.FundRequestMapper;
+import dev.tomas.dma.repository.*;
 import dev.tomas.dma.service.*;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
@@ -40,6 +38,8 @@ public class CompanyServiceImpl implements CompanyService {
     private final UserRepo userRepo;
     private final CompanyMapper companyMapper;
     private final TicketService  ticketService;
+    private final FundRequestRepo fundRequestRepo;
+    private final FundRequestMapper fundRequestMapper;
 
     public CompanyGetAllRes getAll() {
         CompanyGetAllRes response = new CompanyGetAllRes();
@@ -168,5 +168,15 @@ public class CompanyServiceImpl implements CompanyService {
         roles.add(savedEmployeeRole);
         roles.add(savedOwnerRole);
         return roles;
+    }
+
+    public FundRequestDTO submitFundRequest(FundRequestCreateReq req){
+        Company company = companyRepo.findById(req.getCompanyId()).orElseThrow(() -> new EntityNotFoundException("Company not found with id: " + req.getCompanyId()));
+        FundRequest toSave = new FundRequest();
+        toSave.setAmount(req.getAmount());
+        toSave.setCompany(company);
+        toSave.setStatus(Status.PENDING);
+        toSave.setMessage(req.getMessage());
+        return fundRequestMapper.toDTO(fundRequestRepo.save(toSave));
     }
 }

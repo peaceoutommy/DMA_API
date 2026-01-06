@@ -57,8 +57,17 @@ public class Campaign {
     @Column(name = "fund_goal")
     private BigDecimal fundGoal;
 
+    @Max(999999999)
     @Column(name = "raised_funds")
     private BigDecimal raisedFunds;
+
+    @Max(999999999)
+    @Column(name="available_funds")
+    private BigDecimal availableFunds;
+
+    @Max(999999999)
+    @Column(name = "remaining_funds")
+    private BigDecimal remainingFunds;
 
     @OneToMany(mappedBy = "campaign")
     private List<Donation> donations = new ArrayList<>();

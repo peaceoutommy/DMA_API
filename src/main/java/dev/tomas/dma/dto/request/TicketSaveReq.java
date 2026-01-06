@@ -1,7 +1,7 @@
 package dev.tomas.dma.dto.request;
 
 import dev.tomas.dma.enums.EntityType;
-import dev.tomas.dma.enums.TicketStatus;
+import dev.tomas.dma.enums.Status;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.Getter;
@@ -17,7 +17,7 @@ public class TicketSaveReq {
     private EntityType type;
     private Integer entityId;
     @Enumerated(EnumType.STRING)
-    private TicketStatus status;
+    private Status status;
     private String message;
     private LocalDateTime closeDate;
     private LocalDateTime createDate;

@@ -43,6 +43,9 @@ public class Company {
     @Enumerated(EnumType.STRING)
     private CompanyStatus status;
 
+    @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FundRequest> fundRequests;
+
     @Column(name = "create_date")
     private LocalDate createDate = LocalDate.now();
 }

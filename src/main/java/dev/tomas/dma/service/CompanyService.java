@@ -2,9 +2,11 @@ package dev.tomas.dma.service;
 
 import dev.tomas.dma.dto.common.CompanyDTO;
 import dev.tomas.dma.dto.common.CompanyTypeDTO;
+import dev.tomas.dma.dto.common.FundRequestDTO;
 import dev.tomas.dma.dto.request.AddUserToCompanyReq;
 import dev.tomas.dma.dto.request.CompanyCreateReq;
 import dev.tomas.dma.dto.request.CompanyTypeCreateReq;
+import dev.tomas.dma.dto.request.FundRequestCreateReq;
 import dev.tomas.dma.dto.response.*;
 import dev.tomas.dma.entity.Company;
 import dev.tomas.dma.entity.User;
@@ -30,6 +32,8 @@ public interface CompanyService {
     CompanyTypeDTO updateType(CompanyTypeDTO request);
 
     Integer deleteType(Integer id);
+
+    FundRequestDTO submitFundRequest(FundRequestCreateReq req);
 
     // Internal methods
     Company findCompanyEntityById(Integer id);

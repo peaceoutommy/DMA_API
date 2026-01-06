@@ -10,7 +10,7 @@ import dev.tomas.dma.entity.Campaign;
 import dev.tomas.dma.entity.Company;
 import dev.tomas.dma.entity.Ticket;
 import dev.tomas.dma.enums.EntityType;
-import dev.tomas.dma.enums.TicketStatus;
+import dev.tomas.dma.enums.Status;
 import dev.tomas.dma.mapper.AppFileMapper;
 import dev.tomas.dma.mapper.TicketMapper;
 import dev.tomas.dma.repository.AppFileRepo;
@@ -43,7 +43,7 @@ public class TicketServiceImpl implements TicketService {
 
     public TicketGetAllRes getAllOpen() {
         TicketGetAllRes dto = new TicketGetAllRes();
-        dto.setTickets(ticketMapper.toDTOs(ticketRepo.findAllByStatus(TicketStatus.PENDING)));
+        dto.setTickets(ticketMapper.toDTOs(ticketRepo.findAllByStatus(Status.PENDING)));
         return dto;
     }
 
@@ -72,7 +72,7 @@ public class TicketServiceImpl implements TicketService {
     public TicketDTO save(Company company) {
         Ticket ticket = new Ticket();
         ticket.setName(company.getName());
-        ticket.setStatus(TicketStatus.PENDING);
+        ticket.setStatus(Status.PENDING);
         ticket.setType(EntityType.COMPANY);
         ticket.setEntityId(company.getId());
         ticket.setCreateDate(LocalDateTime.now());
@@ -83,7 +83,7 @@ public class TicketServiceImpl implements TicketService {
     public TicketDTO save(Campaign campaign) {
         Ticket ticket = new Ticket();
         ticket.setName(campaign.getName());
-        ticket.setStatus(TicketStatus.PENDING);
+        ticket.setStatus(Status.PENDING);
         ticket.setType(EntityType.CAMPAIGN);
         ticket.setEntityId(campaign.getId());
         ticket.setCreateDate(LocalDateTime.now());

@@ -1,6 +1,6 @@
 package dev.tomas.dma.enums;
 
-public enum TicketStatus {
+public enum Status {
     APPROVED,
     REJECTED,
     PENDING
