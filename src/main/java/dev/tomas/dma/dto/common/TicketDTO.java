@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 public class TicketDTO {
     private long Id;
     private String name;
+    private String additionalInfo;
     @Enumerated(EnumType.STRING)
     private EntityType type;
     private Integer entityId;

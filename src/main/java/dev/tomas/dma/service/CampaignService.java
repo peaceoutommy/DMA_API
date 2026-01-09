@@ -18,4 +18,6 @@ public interface CampaignService {
     CampaignDTO archive(Integer id);
 
     Integer deleteById(Integer id);
+
+    CampaignGetAllRes findByCompanyId(Integer companyId);
 }

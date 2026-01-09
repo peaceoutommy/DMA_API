@@ -40,6 +40,7 @@ public class CompanyServiceImpl implements CompanyService {
     private final TicketService  ticketService;
     private final FundRequestRepo fundRequestRepo;
     private final FundRequestMapper fundRequestMapper;
+    private final CampaignRepo campaignRepo;
 
     public CompanyGetAllRes getAll() {
         CompanyGetAllRes response = new CompanyGetAllRes();
@@ -108,7 +109,7 @@ public class CompanyServiceImpl implements CompanyService {
         return new CompanyTypeGetRes(entity.getId(), entity.getName(), entity.getDescription());
     }
 
-
+    @Transactional
     public CompanyTypeGetRes saveType(@Valid CompanyTypeCreateReq request) {
         if (StringUtils.isBlank(request.getName())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Company type name can't be empty");
@@ -125,6 +126,7 @@ public class CompanyServiceImpl implements CompanyService {
         return new CompanyTypeGetRes(saved.getId(), saved.getName(), saved.getDescription());
     }
 
+    @Transactional
     public CompanyTypeDTO updateType(@Valid CompanyTypeDTO request) {
         if (StringUtils.isBlank(request.getName())) {
             throw new IllegalArgumentException("Company type name can't be empty");
@@ -151,6 +153,7 @@ public class CompanyServiceImpl implements CompanyService {
         return companyRepo.findById(id).orElseThrow(() -> new EntityNotFoundException("Company not found with id: " + id));
     }
 
+    @Transactional
     public List<CompanyRole> createDefaultRoles(Company company) {
         List<CompanyRole> roles = new ArrayList<>();
 
@@ -170,13 +173,21 @@ public class CompanyServiceImpl implements CompanyService {
         return roles;
     }
 
+    @Transactional
     public FundRequestDTO submitFundRequest(FundRequestCreateReq req){
         Company company = companyRepo.findById(req.getCompanyId()).orElseThrow(() -> new EntityNotFoundException("Company not found with id: " + req.getCompanyId()));
+        Campaign campaign = campaignRepo.findById(req.getCampaignId()).orElseThrow(() -> new EntityNotFoundException("Campaign not found with id: " + req.getCampaignId()));
+
         FundRequest toSave = new FundRequest();
         toSave.setAmount(req.getAmount());
         toSave.setCompany(company);
+        toSave.setCampaign(campaign);
         toSave.setStatus(Status.PENDING);
         toSave.setMessage(req.getMessage());
-        return fundRequestMapper.toDTO(fundRequestRepo.save(toSave));
+
+        FundRequest saved = fundRequestRepo.save(toSave);
+        ticketService.save(saved);
+
+        return fundRequestMapper.toDTO(saved);
     }
 }

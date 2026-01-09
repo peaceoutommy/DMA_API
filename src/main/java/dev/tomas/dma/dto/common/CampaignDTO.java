@@ -19,6 +19,8 @@ public class CampaignDTO {
     private String description;
     private BigDecimal fundGoal;
     private BigDecimal raisedFunds;
+    private BigDecimal availableFunds;
+    private BigDecimal remainingFunds;
     private LocalDate startDate;
     private LocalDate endDate;
     private CampaignStatus status;

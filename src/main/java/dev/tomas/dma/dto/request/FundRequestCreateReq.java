@@ -15,5 +15,6 @@ import java.math.BigDecimal;
 public class FundRequestCreateReq {
     private String message;
     private BigDecimal amount;
+    private Integer campaignId;
     private Integer companyId;
 }

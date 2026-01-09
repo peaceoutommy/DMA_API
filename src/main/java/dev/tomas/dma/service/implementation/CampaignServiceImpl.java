@@ -5,6 +5,7 @@ import dev.tomas.dma.dto.response.CampaignGetAllRes;
 import dev.tomas.dma.dto.request.CampaignUpdateReq;
 import dev.tomas.dma.dto.common.CampaignDTO;
 import dev.tomas.dma.entity.AppFile;
+import dev.tomas.dma.entity.Company;
 import dev.tomas.dma.enums.CampaignStatus;
 import dev.tomas.dma.enums.EntityType;
 import dev.tomas.dma.enums.FileType;
@@ -54,6 +55,19 @@ public class CampaignServiceImpl implements CampaignService {
             response.campaigns.add(dto);
         }
         return response;
+    }
+
+    public CampaignGetAllRes findByCompanyId(Integer companyId) {
+        Company company = companyRepo.findById(companyId).orElseThrow(() -> new EntityNotFoundException("Company not found with id: " + companyId));
+        CampaignGetAllRes dto = new CampaignGetAllRes();
+        dto.setCampaigns(campaignMapper.entitiesToDTO(campaignRepo.findAllByCompanyId(companyId)));
+
+        for(CampaignDTO campaignDTO : dto.campaigns){
+            List<AppFile> images = fileRepo.findByEntityTypeAndEntityIdAndFileType(EntityType.CAMPAIGN, campaignDTO.getId(), FileType.CAMPAIGN_IMAGE);
+            campaignDTO.setFiles(fileMapper.entitiesToDTO(images));
+        }
+
+        return dto;
     }
 
     @Override

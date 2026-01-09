@@ -8,6 +8,7 @@ import dev.tomas.dma.dto.response.TicketDetailsGetRes;
 import dev.tomas.dma.dto.response.TicketGetAllRes;
 import dev.tomas.dma.entity.Campaign;
 import dev.tomas.dma.entity.Company;
+import dev.tomas.dma.entity.FundRequest;
 import dev.tomas.dma.entity.Ticket;
 import dev.tomas.dma.enums.EntityType;
 import dev.tomas.dma.enums.Status;
@@ -86,6 +87,18 @@ public class TicketServiceImpl implements TicketService {
         ticket.setStatus(Status.PENDING);
         ticket.setType(EntityType.CAMPAIGN);
         ticket.setEntityId(campaign.getId());
+        ticket.setCreateDate(LocalDateTime.now());
+
+        return ticketMapper.toDTO(ticketRepo.save(ticket));
+    }
+
+    public TicketDTO save(FundRequest fundReq){
+        Ticket ticket = new Ticket();
+        ticket.setName("Fund_req_"+ fundReq.getCampaign().getName());
+        ticket.setStatus(Status.PENDING);
+        ticket.setType(EntityType.FUND_REQUEST);
+        ticket.setEntityId(Math.toIntExact(fundReq.getId()));
+        ticket.setAdditionalInfo(fundReq.getMessage());
         ticket.setCreateDate(LocalDateTime.now());
 
         return ticketMapper.toDTO(ticketRepo.save(ticket));

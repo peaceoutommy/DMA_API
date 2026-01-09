@@ -71,4 +71,7 @@ public class Campaign {
 
     @OneToMany(mappedBy = "campaign")
     private List<Donation> donations = new ArrayList<>();
+
+    @OneToMany(mappedBy = "campaign")
+    private List<FundRequest> fundRequests;
 }

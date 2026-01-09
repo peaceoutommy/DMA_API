@@ -29,6 +29,11 @@ public class CampaignController {
         return ResponseEntity.ok(campaignService.findAll());
     }
 
+    @GetMapping("/company/{companyId}")
+    public ResponseEntity<CampaignGetAllRes> getMine(@PathVariable Integer companyId) {
+        return ResponseEntity.ok(campaignService.findByCompanyId(companyId));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<CampaignDTO> getById(@PathVariable Integer id) {
         return ResponseEntity.ok(campaignService.findById(id));

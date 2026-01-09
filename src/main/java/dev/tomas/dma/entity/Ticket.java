@@ -20,12 +20,16 @@ public class Ticket {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    @Enumerated(EnumType.STRING)
-    private EntityType type;
     private Integer entityId;
-    @Enumerated(EnumType.STRING)
-    private Status status;
     private String message;
+    @Column(length = 10000)
+    private String additionalInfo;
     private LocalDateTime closeDate;
     private LocalDateTime createDate;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 15)
+    private EntityType type;
+    @Enumerated(EnumType.STRING)
+    private Status status;
 }
