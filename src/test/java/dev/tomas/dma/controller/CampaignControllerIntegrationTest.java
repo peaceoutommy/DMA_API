@@ -3,6 +3,7 @@ package dev.tomas.dma.controller;
 import dev.tomas.dma.dto.request.CampaignCreateReq;
 import dev.tomas.dma.entity.Campaign;
 import dev.tomas.dma.entity.Company;
+import dev.tomas.dma.entity.CompanyType;
 import dev.tomas.dma.enums.CampaignStatus;
 import dev.tomas.dma.enums.CompanyStatus;
 import dev.tomas.dma.repository.CampaignRepo;
@@ -22,6 +23,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import static org.hamcrest.Matchers.hasSize;
@@ -59,11 +61,19 @@ class CampaignControllerIntegrationTest {
 
     @BeforeEach
     void setUp() {
+        CompanyType type = new CompanyType();
+        type.setName("testType");
+        type.setCreateDate(LocalDate.now());
+        type.setDescription("test description");
+
         // Setup a Company entity because Campaign requires a CompanyID
         Company company = new Company();
         company.setName("Test Company");
         company.setStatus(CompanyStatus.APPROVED);
-        // Populate other required fields for Company entity...
+        company.setRegistrationNumber("123456");
+        company.setCreateDate(LocalDate.now());
+        company.setType(type);
+
         testCompany = companyRepo.save(company);
 
         // Mock storage service success
@@ -164,8 +174,14 @@ class CampaignControllerIntegrationTest {
         Campaign c = new Campaign();
         c.setName(name);
         c.setCompany(company);
-        c.setStatus(CampaignStatus.ACTIVE); // Assuming Enum exists
-        // Set other mandatory fields based on your Entity definition
+        c.setStatus(CampaignStatus.ACTIVE);
+        c.setCreateDate(LocalDate.now());
+        c.setDescription("test desc");
+        c.setEndDate(LocalDate.now().plusWeeks(1));
+        c.setStartDate(LocalDate.now());
+        c.setRemainingFunds(BigDecimal.ZERO);
+        c.setAvailableFunds(BigDecimal.ZERO);
+        c.setRaisedFunds(BigDecimal.ZERO);
         return campaignRepo.save(c);
     }
 }
