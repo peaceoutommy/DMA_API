@@ -48,7 +48,7 @@ public class CompanyServiceImpl implements CompanyService {
 
         for (Company entity : companyRepo.findAll()) {
             CompanyType type = entity.getType();
-            dtos.add(new CompanyDTO(entity.getId(), entity.getName(), entity.getRegistrationNumber(), entity.getTaxId(), new CompanyTypeDTO(type.getId(), type.getName(), type.getDescription()), entity.getStatus().name()));
+            dtos.add(new CompanyDTO(entity.getId(), entity.getName(), entity.getRegistrationNumber(), entity.getTaxId(), new CompanyTypeDTO(type.getId(), type.getName(), type.getDescription()), entity.getStatus().toString()));
         }
 
         response.setCompanies(dtos);

@@ -7,10 +7,8 @@ import dev.tomas.dma.dto.request.CompanyTypeCreateReq;
 import dev.tomas.dma.dto.response.CompanyGetAllRes;
 import dev.tomas.dma.dto.response.CompanyTypeGetAllRes;
 import dev.tomas.dma.dto.response.CompanyTypeGetRes;
-import dev.tomas.dma.entity.Company;
-import dev.tomas.dma.entity.CompanyRole;
-import dev.tomas.dma.entity.CompanyType;
-import dev.tomas.dma.entity.User;
+import dev.tomas.dma.entity.*;
+import dev.tomas.dma.enums.CompanyStatus;
 import dev.tomas.dma.mapper.CompanyMapper;
 import dev.tomas.dma.repository.CompanyRepo;
 import dev.tomas.dma.repository.CompanyRoleRepo;
@@ -18,6 +16,7 @@ import dev.tomas.dma.repository.CompanyTypeRepo;
 import dev.tomas.dma.repository.UserRepo;
 import dev.tomas.dma.service.CompanyRoleService;
 import dev.tomas.dma.service.ExternalStorageService;
+import dev.tomas.dma.service.TicketService;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -30,10 +29,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -58,6 +54,9 @@ class CompanyServiceImplTest {
 
     @Mock
     private ExternalStorageService externalStorageService;
+
+    @Mock
+    private TicketService ticketService;
 
     @Mock
     private UserRepo userRepo;
@@ -88,6 +87,7 @@ class CompanyServiceImplTest {
         testCompany.setRegistrationNumber("REG123456");
         testCompany.setTaxId("TAX12345678");
         testCompany.setType(testCompanyType);
+        testCompany.setStatus(CompanyStatus.PENDING);
 
         testUser = new User();
         testUser.setId(1);
@@ -115,13 +115,13 @@ class CompanyServiceImplTest {
         @Test
         @DisplayName("Should return all companies")
         void getAll_Success() {
-            when(companyRepo.findAll()).thenReturn(Arrays.asList(testCompany));
+            when(companyRepo.findAll()).thenReturn(Collections.singletonList(testCompany));
 
             CompanyGetAllRes result = companyService.getAll();
 
             assertThat(result).isNotNull();
             assertThat(result.getCompanies()).hasSize(1);
-            assertThat(result.getCompanies().get(0).getName()).isEqualTo("Test Company");
+            assertThat(result.getCompanies().getFirst().getName()).isEqualTo("Test Company");
         }
 
         @Test
@@ -236,13 +236,13 @@ class CompanyServiceImplTest {
         @Test
         @DisplayName("Should return all company types")
         void getAllTypes_Success() {
-            when(companyTypeRepo.findAll()).thenReturn(Arrays.asList(testCompanyType));
+            when(companyTypeRepo.findAll()).thenReturn(Collections.singletonList(testCompanyType));
 
             CompanyTypeGetAllRes result = companyService.getAllTypes();
 
             assertThat(result).isNotNull();
             assertThat(result.getTypes()).hasSize(1);
-            assertThat(result.getTypes().get(0).getName()).isEqualTo("Non-Profit");
+            assertThat(result.getTypes().getFirst().getName()).isEqualTo("Non-Profit");
         }
 
         @Test

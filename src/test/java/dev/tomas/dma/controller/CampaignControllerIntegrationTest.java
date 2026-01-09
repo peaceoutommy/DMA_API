@@ -8,6 +8,7 @@ import dev.tomas.dma.enums.CampaignStatus;
 import dev.tomas.dma.enums.CompanyStatus;
 import dev.tomas.dma.repository.CampaignRepo;
 import dev.tomas.dma.repository.CompanyRepo;
+import dev.tomas.dma.repository.CompanyTypeRepo;
 import dev.tomas.dma.service.ExternalStorageService;
 import dev.tomas.dma.service.TicketService;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,6 +50,9 @@ class CampaignControllerIntegrationTest {
     @Autowired
     private CompanyRepo companyRepo;
 
+    @Autowired
+    private CompanyTypeRepo companyTypeRepo;
+
     // We mock these because we only want to test the Campaign DB logic,
     // not S3 upload or external Ticket notifications.
     @MockitoBean
@@ -57,6 +61,7 @@ class CampaignControllerIntegrationTest {
     @MockitoBean
     private TicketService ticketService;
 
+    private CompanyType testType;
     private Company testCompany;
 
     @BeforeEach
@@ -66,12 +71,15 @@ class CampaignControllerIntegrationTest {
         type.setCreateDate(LocalDate.now());
         type.setDescription("test description");
 
+        testType = companyTypeRepo.save(type);
+
         // Setup a Company entity because Campaign requires a CompanyID
         Company company = new Company();
         company.setName("Test Company");
         company.setStatus(CompanyStatus.APPROVED);
         company.setRegistrationNumber("123456");
         company.setCreateDate(LocalDate.now());
+        company.setTaxId("123456");
         company.setType(type);
 
         testCompany = companyRepo.save(company);
@@ -104,6 +112,7 @@ class CampaignControllerIntegrationTest {
                         .param("companyId", testCompany.getId().toString())
                         .param("startDate", LocalDate.now().toString())
                         .param("endDate", LocalDate.now().plusDays(10).toString())
+                        .param("fundGoal", "10000.00")
                         .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name", is("Summer Sale 2026")))
@@ -176,12 +185,13 @@ class CampaignControllerIntegrationTest {
         c.setCompany(company);
         c.setStatus(CampaignStatus.ACTIVE);
         c.setCreateDate(LocalDate.now());
-        c.setDescription("test desc");
+        c.setDescription("test description!");
         c.setEndDate(LocalDate.now().plusWeeks(1));
         c.setStartDate(LocalDate.now());
         c.setRemainingFunds(BigDecimal.ZERO);
         c.setAvailableFunds(BigDecimal.ZERO);
         c.setRaisedFunds(BigDecimal.ZERO);
+        c.setFundGoal(new BigDecimal("10000"));
         return campaignRepo.save(c);
     }
 }

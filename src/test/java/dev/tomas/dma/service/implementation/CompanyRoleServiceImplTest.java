@@ -29,10 +29,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DuplicateKeyException;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -83,7 +80,7 @@ class CompanyRoleServiceImplTest {
         testRole.setId(1);
         testRole.setName("Manager");
         testRole.setCompany(testCompany);
-        testRole.setPermissions(Arrays.asList(testPermission));
+        testRole.setPermissions(Collections.singletonList(testPermission));
         testRole.setUsers(new ArrayList<>());
 
         testRoleDTO = new CompanyRoleDTO();
@@ -94,12 +91,12 @@ class CompanyRoleServiceImplTest {
         createRequest = new CompanyRoleCreateReq();
         createRequest.setCompanyId(1);
         createRequest.setName("New Role");
-        createRequest.setPermissionIds(Arrays.asList(1));
+        createRequest.setPermissionIds(List.of(1));
 
         updateRequest = new CompanyRoleUpdateReq();
         updateRequest.setId(1);
         updateRequest.setName("Updated Role");
-        updateRequest.setPermissionIds(Arrays.asList(1));
+        updateRequest.setPermissionIds(List.of(1));
     }
 
     @Nested
@@ -109,14 +106,14 @@ class CompanyRoleServiceImplTest {
         @Test
         @DisplayName("Should return all roles for company")
         void getAllByCompanyId_Success() {
-            when(companyRoleRepo.findAllByCompanyId(1)).thenReturn(Arrays.asList(testRole));
+            when(companyRoleRepo.findAllByCompanyId(1)).thenReturn(Collections.singletonList(testRole));
             when(permissionMapper.toDtos(any())).thenReturn(new ArrayList<>());
 
             CompanyRoleGetAllRes result = companyRoleService.getAllByCompanyId(1);
 
             assertThat(result).isNotNull();
             assertThat(result.getRoles()).hasSize(1);
-            assertThat(result.getRoles().get(0).getName()).isEqualTo("Manager");
+            assertThat(result.getRoles().getFirst().getName()).isEqualTo("Manager");
         }
 
         @Test
@@ -139,7 +136,7 @@ class CompanyRoleServiceImplTest {
         void create_Success() {
             when(companyRoleRepo.findByCompanyIdAndName(1, "New Role")).thenReturn(null);
             when(companyRepo.findById(1)).thenReturn(Optional.of(testCompany));
-            when(companyPermissionRepo.findAllById(anyList())).thenReturn(Arrays.asList(testPermission));
+            when(companyPermissionRepo.findAllById(anyList())).thenReturn(Collections.singletonList(testPermission));
             when(companyRoleRepo.save(any(CompanyRole.class))).thenAnswer(invocation -> {
                 CompanyRole role = invocation.getArgument(0);
                 role.setId(1);
@@ -213,7 +210,7 @@ class CompanyRoleServiceImplTest {
         @DisplayName("Should update role successfully")
         void update_Success() {
             when(companyRoleRepo.findById(1)).thenReturn(Optional.of(testRole));
-            when(companyPermissionRepo.findAllById(anyList())).thenReturn(Arrays.asList(testPermission));
+            when(companyPermissionRepo.findAllById(anyList())).thenReturn(Collections.singletonList(testPermission));
             when(companyRoleRepo.save(any(CompanyRole.class))).thenReturn(testRole);
             when(roleMapper.toDTO(any(CompanyRole.class))).thenReturn(testRoleDTO);
 
@@ -283,7 +280,7 @@ class CompanyRoleServiceImplTest {
         void delete_ThrowsException_WhenRoleHasUsers() {
             User user = new User();
             user.setId(1);
-            testRole.setUsers(Arrays.asList(user));
+            testRole.setUsers(List.of(user));
 
             when(companyRoleRepo.findById(1)).thenReturn(Optional.of(testRole));
 
@@ -300,24 +297,24 @@ class CompanyRoleServiceImplTest {
         @Test
         @DisplayName("Should return all permissions")
         void getAllPermissions_Success() {
-            when(companyPermissionRepo.findAll()).thenReturn(Arrays.asList(testPermission));
+            when(companyPermissionRepo.findAll()).thenReturn(Collections.singletonList(testPermission));
 
             CompanyRolePermissionGetAllRes result = companyRoleService.getAllPermissions();
 
             assertThat(result).isNotNull();
             assertThat(result.getPermissions()).hasSize(1);
-            assertThat(result.getPermissions().get(0).getName()).isEqualTo("Create Campaign");
+            assertThat(result.getPermissions().getFirst().getName()).isEqualTo("Create Campaign");
         }
 
         @Test
         @DisplayName("Should return all permissions as entities")
         void getAllPermissionsEntity_Success() {
-            when(companyPermissionRepo.findAll()).thenReturn(Arrays.asList(testPermission));
+            when(companyPermissionRepo.findAll()).thenReturn(Collections.singletonList(testPermission));
 
             List<CompanyPermission> result = companyRoleService.getAllPermissionsEntity();
 
             assertThat(result).hasSize(1);
-            assertThat(result.get(0).getName()).isEqualTo("Create Campaign");
+            assertThat(result.getFirst().getName()).isEqualTo("Create Campaign");
         }
 
         @Test
@@ -325,7 +322,7 @@ class CompanyRoleServiceImplTest {
         void createPermission_Success() {
             CompanyPermissionCreateReq request = new CompanyPermissionCreateReq();
             request.setName("New Permission");
-            request.setType("DONATION_REQUEST");
+            request.setType("DONATION_CAMPAIGN_MANAGEMENT");
             request.setDescription("New permission description");
 
             when(companyPermissionRepo.save(any(CompanyPermission.class))).thenAnswer(invocation -> {
@@ -343,7 +340,7 @@ class CompanyRoleServiceImplTest {
         @Test
         @DisplayName("Should update permission successfully")
         void updatePermission_Success() {
-            CompanyPermissionDTO request = new CompanyPermissionDTO(1, "Updated Permission", "DONATION_APPROVE", "Updated desc");
+            CompanyPermissionDTO request = new CompanyPermissionDTO(1, "Updated Permission", "EMPLOYEE_MANAGEMENT", "Updated desc");
 
             when(companyPermissionRepo.findById(1)).thenReturn(Optional.of(testPermission));
             when(companyPermissionRepo.save(any(CompanyPermission.class))).thenReturn(testPermission);
@@ -356,7 +353,7 @@ class CompanyRoleServiceImplTest {
         @Test
         @DisplayName("Should throw EntityNotFoundException when updating non-existent permission")
         void updatePermission_ThrowsException_WhenNotFound() {
-            CompanyPermissionDTO request = new CompanyPermissionDTO(999, "Test", "DONATION_REQUEST", "Desc");
+            CompanyPermissionDTO request = new CompanyPermissionDTO(999, "Test", "DONATION_CAMPAIGN_MANAGEMENT", "Desc");
 
             when(companyPermissionRepo.findById(999)).thenReturn(Optional.empty());
 
@@ -383,10 +380,9 @@ class CompanyRoleServiceImplTest {
 
             assertThat(result).isNotNull();
             assertThat(result.getTypes()).contains(
-                    "COMPANY_ROLE_MANAGEMENT",
                     "EMPLOYEE_MANAGEMENT",
-                    "DONATION_REQUEST",
-                    "DONATION_APPROVE"
+                    "DONATION_CAMPAIGN_MANAGEMENT",
+                    "FUNDING_MANAGEMENT"
             );
         }
     }
