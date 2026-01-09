@@ -5,8 +5,11 @@ import dev.tomas.dma.dto.response.AuthUserRes;
 import dev.tomas.dma.dto.request.UserRegisterReq;
 import dev.tomas.dma.dto.request.AuthReq;
 import dev.tomas.dma.entity.User;
+import dev.tomas.dma.enums.EntityType;
+import dev.tomas.dma.enums.Status;
 import dev.tomas.dma.enums.UserRole;
 import dev.tomas.dma.mapper.AuthResponseMapper;
+import dev.tomas.dma.repository.TicketRepo;
 import dev.tomas.dma.repository.UserRepo;
 import dev.tomas.dma.service.AuthService;
 import dev.tomas.dma.service.JWTService;
@@ -28,16 +31,18 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
     private final JWTService jwtService;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authManager;
+    private final TicketRepo ticketRepo;
 
     public AuthServiceImpl(UserRepo userRepo,
                            JWTService jwtService,
                            PasswordEncoder passwordEncoder,
-                           @Lazy AuthenticationManager authManager
+                           @Lazy AuthenticationManager authManager, TicketRepo ticketRepo
     ) {
         this.userRepo = userRepo;
         this.jwtService = jwtService;
         this.passwordEncoder = passwordEncoder;
         this.authManager = authManager;
+        this.ticketRepo = ticketRepo;
     }
 
     @Override
@@ -89,6 +94,7 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
             if (user.getCompanyRole() != null) {
                 res.setCompanyId(user.getCompanyRole().getCompany().getId());
                 res.setCompanyRole(user.getCompanyRole().getName());
+                res.setCompanyActive(!ticketRepo.existsByEntityIdAndTypeAndStatus(res.getCompanyId(), EntityType.COMPANY, Status.PENDING));
             }
             res.setRole(user.getRole().toString());
 
@@ -111,6 +117,7 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
         if (user.getCompanyRole() != null) {
             res.setCompanyId(user.getCompanyRole().getCompany().getId());
             res.setCompanyRole(user.getCompanyRole().getName());
+            res.setCompanyActive(!ticketRepo.existsByEntityIdAndTypeAndStatus(res.getCompanyId(), EntityType.COMPANY, Status.PENDING));
         }
         res.setRole(user.getRole().toString());
 

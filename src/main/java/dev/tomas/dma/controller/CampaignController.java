@@ -5,6 +5,7 @@ import dev.tomas.dma.dto.response.CampaignGetAllRes;
 import dev.tomas.dma.dto.request.CampaignUpdateReq;
 import dev.tomas.dma.dto.common.CampaignDTO;
 import dev.tomas.dma.service.CampaignService;
+import dev.tomas.dma.service.TicketService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
@@ -28,9 +29,13 @@ public class CampaignController {
         return ResponseEntity.ok(campaignService.findAll());
     }
 
+    @GetMapping("/company/{companyId}")
+    public ResponseEntity<CampaignGetAllRes> getMine(@PathVariable Integer companyId) {
+        return ResponseEntity.ok(campaignService.findByCompanyId(companyId));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<CampaignDTO> getById(@PathVariable Integer id) {
-
         return ResponseEntity.ok(campaignService.findById(id));
     }
 

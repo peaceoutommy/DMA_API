@@ -15,7 +15,10 @@ import java.util.stream.Collectors;
 public interface CampaignMapper {
 
     @Mapping(target = "companyId", source = "company", qualifiedByName = "companyToId")
-    CampaignDTO convertToDTO(Campaign campaign);
+    CampaignDTO entityToDTO(Campaign campaign);
+
+    @Mapping(target = "companyId", source = "company", qualifiedByName = "companyToId")
+    List<CampaignDTO> entitiesToDTO(List<Campaign> campaigns);
 
     @Named("companyToId")
     default Integer companyToId(Company company) {
