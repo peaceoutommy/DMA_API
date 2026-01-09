@@ -1,35 +1,35 @@
 package dev.tomas.dma.entity;
 
-import dev.tomas.dma.enums.EntityType;
 import dev.tomas.dma.enums.Status;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.math.BigDecimal;
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Ticket {
+
+public class FundRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String name;
-    private Integer entityId;
+    @Size(min = 30, max = 10000)
     private String message;
-    @Column(length = 10000)
-    private String additionalInfo;
-    private LocalDateTime closeDate;
-    private LocalDateTime createDate;
-
-    @Enumerated(EnumType.STRING)
-    @Column(length = 15)
-    private EntityType type;
-    @Enumerated(EnumType.STRING)
+    private BigDecimal amount;
     private Status status;
+
+    @ManyToOne
+    @JoinColumn(name = "campaign_id", nullable = false)
+    private Campaign campaign;
+
+    @ManyToOne
+    @JoinColumn(name = "company_id", nullable = false)
+    private Company company;
 }

@@ -6,9 +6,11 @@ import com.stripe.model.Event;
 import com.stripe.model.PaymentIntent;
 import com.stripe.net.Webhook;
 import dev.tomas.dma.dto.common.DonationDTO;
+import dev.tomas.dma.dto.response.DonationByUserGetAllRes;
 import dev.tomas.dma.service.CampaignService;
 import dev.tomas.dma.service.DonationService;
 import dev.tomas.dma.service.PaymentService;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -16,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -38,6 +41,11 @@ public class DonationController {
         response.put("clientSecret", paymentIntent.getClientSecret());
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<DonationByUserGetAllRes>> getAllByUserId(@PathVariable @Positive Integer userId){
+        return ResponseEntity.ok(donationService.getAllByUserId(userId));
     }
 
     @PostMapping("/webhook")

@@ -11,4 +11,5 @@ public class CompanyDTO {
     private String registrationNumber;
     private String taxId;
     private CompanyTypeDTO type;
+    private String status;
 }

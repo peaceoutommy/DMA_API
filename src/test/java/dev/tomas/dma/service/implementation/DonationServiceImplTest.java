@@ -1,4 +1,4 @@
-package UnitTest;
+package dev.tomas.dma.service.implementation;
 
 import dev.tomas.dma.dto.common.DonationDTO;
 import dev.tomas.dma.entity.Campaign;
@@ -10,7 +10,6 @@ import dev.tomas.dma.mapper.DonationMapper;
 import dev.tomas.dma.repository.CampaignRepo;
 import dev.tomas.dma.repository.DonationRepository;
 import dev.tomas.dma.repository.UserRepo;
-import dev.tomas.dma.service.implementation.DonationServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

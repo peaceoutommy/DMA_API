@@ -5,11 +5,17 @@ import dev.tomas.dma.entity.Donation;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring")
 public interface DonationMapper {
     @Mapping(source = "campaign.id", target = "campaignId")
     @Mapping(source = "user.id", target = "userId")
     DonationDTO toDTO(Donation entity);
+
+    @Mapping(source = "campaign.id", target = "campaignId")
+    @Mapping(source = "user.id", target = "userId")
+    List<DonationDTO> toDTOs(List<Donation> entities);
 
     @Mapping(source = "campaignId", target = "campaign.id")
     @Mapping(source = "userId", target = "user.id")

@@ -20,6 +20,8 @@ public class AppFile {
     private Long id;
     private String url;
     private Integer entityId;
+    @Enumerated(EnumType.STRING)
     private EntityType entityType;
+    @Enumerated(EnumType.STRING)
     private FileType fileType;
 }

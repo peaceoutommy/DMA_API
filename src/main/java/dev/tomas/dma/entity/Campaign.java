@@ -48,15 +48,30 @@ public class Campaign {
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;
 
+    @Column(name = "create_date")
+    private LocalDate createDate = LocalDate.now();
+
     @NotNull
     @Min(1)
     @Max(999999999)
     @Column(name = "fund_goal")
     private BigDecimal fundGoal;
 
+    @Max(999999999)
     @Column(name = "raised_funds")
     private BigDecimal raisedFunds;
 
+    @Max(999999999)
+    @Column(name="available_funds")
+    private BigDecimal availableFunds;
+
+    @Max(999999999)
+    @Column(name = "remaining_funds")
+    private BigDecimal remainingFunds;
+
     @OneToMany(mappedBy = "campaign")
     private List<Donation> donations = new ArrayList<>();
+
+    @OneToMany(mappedBy = "campaign")
+    private List<FundRequest> fundRequests;
 }

@@ -1,6 +1,7 @@
 package dev.tomas.dma.service.implementation;
 
 import dev.tomas.dma.dto.common.DonationDTO;
+import dev.tomas.dma.dto.response.DonationByUserGetAllRes;
 import dev.tomas.dma.entity.Campaign;
 import dev.tomas.dma.entity.Donation;
 import dev.tomas.dma.entity.User;
@@ -14,6 +15,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 
@@ -35,5 +38,23 @@ public class DonationServiceImpl implements DonationService {
 
         campaign.setRaisedFunds(campaign.getRaisedFunds().add(new BigDecimal(dto.getAmount() / 100)));
         campaignRepo.save(campaign);
+    }
+
+    public List<DonationByUserGetAllRes> getAllByUserId(Integer userId){
+        List<DonationByUserGetAllRes> dtoList = new ArrayList<>();
+
+        List<Donation> donations = new ArrayList<>(donationRepo.findAllByUserId(userId));
+        for(Donation entity : donations){
+            DonationByUserGetAllRes dto = new DonationByUserGetAllRes();
+            dto.setDate(entity.getDate());
+            dto.setAmount(entity.getAmount());
+            dto.setUserId(entity.getUser().getId());
+            dto.setCampaignId(entity.getCampaign().getId());
+            dto.setCompanyId(entity.getCampaign().getCompany().getId());
+            dto.setCampaignName(entity.getCampaign().getName());
+            dto.setCompanyName(entity.getCampaign().getCompany().getName());
+            dtoList.add(dto);
+        }
+        return dtoList;
     }
 }

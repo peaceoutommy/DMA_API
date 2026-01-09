@@ -1,10 +1,9 @@
-package UnitTest;
+package dev.tomas.dma.service.implementation;
 
 import dev.tomas.dma.entity.AppFile;
 import dev.tomas.dma.enums.EntityType;
 import dev.tomas.dma.enums.FileType;
 import dev.tomas.dma.repository.AppFileRepo;
-import dev.tomas.dma.service.implementation.FileServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

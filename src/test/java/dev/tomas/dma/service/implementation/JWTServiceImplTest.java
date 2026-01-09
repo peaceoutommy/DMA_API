@@ -1,9 +1,8 @@
-package UnitTest;
+package dev.tomas.dma.service.implementation;
 
 import dev.tomas.dma.entity.Company;
 import dev.tomas.dma.entity.CompanyRole;
 import dev.tomas.dma.entity.User;
-import dev.tomas.dma.service.implementation.JWTServiceImpl;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
