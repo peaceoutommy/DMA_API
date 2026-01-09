@@ -34,7 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@ActiveProfiles("test") // Points to application-test.yml
+@ActiveProfiles("test")
 @Transactional // Ensures DB is rolled back after every test
 class CampaignControllerIntegrationTest {
 
@@ -104,7 +104,8 @@ class CampaignControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser // Default user, usually needed for generic authenticated endpoints
+    @WithMockUser
+        // Default user, usually needed for generic authenticated endpoints
     void getAll_ShouldReturnListOfCampaigns() throws Exception {
         // 1. Manually save campaigns to H2
         createCampaignInDb("Campaign A", testCompany);
@@ -142,7 +143,8 @@ class CampaignControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser // No authority provided
+    @WithMockUser
+        // No authority provided
     void delete_WithoutAuthority_ShouldReturnForbidden() throws Exception {
         // Assuming delete might need permission, or if not, testing basic access
         // If delete is public in security config, this expects 200.
