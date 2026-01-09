@@ -76,7 +76,7 @@ class CompanyRoleServiceImplTest {
         testPermission = new CompanyPermission();
         testPermission.setId(1);
         testPermission.setName("Create Campaign");
-        testPermission.setType(PermissionType.DONATION_REQUEST);
+        testPermission.setType(PermissionType.DONATION_CAMPAIGN_MANAGEMENT);
         testPermission.setDescription("Permission to create campaigns");
 
         testRole = new CompanyRole();

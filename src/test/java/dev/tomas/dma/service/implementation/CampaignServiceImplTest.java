@@ -123,7 +123,7 @@ class CampaignServiceImplTest {
         void findAll_Success() {
             List<Campaign> campaigns = Arrays.asList(testCampaign);
             when(campaignRepo.findAll()).thenReturn(campaigns);
-            when(campaignMapper.convertToDTO(any(Campaign.class))).thenReturn(testCampaignDTO);
+            when(campaignMapper.entityToDTO(any(Campaign.class))).thenReturn(testCampaignDTO);
             when(fileRepo.findByEntityTypeAndEntityIdAndFileType(
                     eq(EntityType.CAMPAIGN), anyInt(), eq(FileType.CAMPAIGN_IMAGE)))
                     .thenReturn(new ArrayList<>());
@@ -142,14 +142,14 @@ class CampaignServiceImplTest {
             imageFile.setUrl("http://example.com/image.jpg");
 
             when(campaignRepo.findAll()).thenReturn(Arrays.asList(testCampaign));
-            when(campaignMapper.convertToDTO(any(Campaign.class))).thenReturn(testCampaignDTO);
+            when(campaignMapper.entityToDTO(any(Campaign.class))).thenReturn(testCampaignDTO);
             when(fileRepo.findByEntityTypeAndEntityIdAndFileType(
                     eq(EntityType.CAMPAIGN), anyInt(), eq(FileType.CAMPAIGN_IMAGE)))
                     .thenReturn(Arrays.asList(imageFile));
 
             CampaignGetAllRes result = campaignService.findAll();
 
-            assertThat(result.getCampaigns().get(0).getImages()).contains("http://example.com/image.jpg");
+            assertThat(result.getCampaigns().getFirst().getFiles().getFirst().getUrl()).contains("http://example.com/image.jpg");
         }
 
         @Test
@@ -171,7 +171,7 @@ class CampaignServiceImplTest {
         @DisplayName("Should return campaign by id")
         void findById_Success() {
             when(campaignRepo.findById(1)).thenReturn(Optional.of(testCampaign));
-            when(campaignMapper.convertToDTO(testCampaign)).thenReturn(testCampaignDTO);
+            when(campaignMapper.entityToDTO(testCampaign)).thenReturn(testCampaignDTO);
             when(fileRepo.findByEntityTypeAndEntityIdAndFileType(
                     eq(EntityType.CAMPAIGN), eq(1), eq(FileType.CAMPAIGN_IMAGE)))
                     .thenReturn(new ArrayList<>());
@@ -210,7 +210,7 @@ class CampaignServiceImplTest {
                 campaign.setCompany(testCompany);
                 return campaign;
             });
-            when(campaignMapper.convertToDTO(any(Campaign.class))).thenReturn(testCampaignDTO);
+            when(campaignMapper.entityToDTO(any(Campaign.class))).thenReturn(testCampaignDTO);
 
             CampaignDTO result = campaignService.save(createRequest);
 
@@ -235,7 +235,7 @@ class CampaignServiceImplTest {
             });
             when(externalStorageService.uploadFile(any(MultipartFile.class), anyString(), anyString()))
                     .thenReturn("http://example.com/image.jpg");
-            when(campaignMapper.convertToDTO(any(Campaign.class))).thenReturn(testCampaignDTO);
+            when(campaignMapper.entityToDTO(any(Campaign.class))).thenReturn(testCampaignDTO);
 
             CampaignDTO result = campaignService.save(createRequest);
 
@@ -263,7 +263,7 @@ class CampaignServiceImplTest {
             });
             when(externalStorageService.uploadFile(any(MultipartFile.class), anyString(), anyString()))
                     .thenReturn("http://example.com/image.jpg");
-            when(campaignMapper.convertToDTO(any(Campaign.class))).thenReturn(testCampaignDTO);
+            when(campaignMapper.entityToDTO(any(Campaign.class))).thenReturn(testCampaignDTO);
 
             CampaignDTO result = campaignService.save(createRequest);
 
@@ -312,7 +312,7 @@ class CampaignServiceImplTest {
         void update_Success() {
             when(campaignRepo.findById(1)).thenReturn(Optional.of(testCampaign));
             when(campaignRepo.save(any(Campaign.class))).thenReturn(testCampaign);
-            when(campaignMapper.convertToDTO(any(Campaign.class))).thenReturn(testCampaignDTO);
+            when(campaignMapper.entityToDTO(any(Campaign.class))).thenReturn(testCampaignDTO);
 
             CampaignDTO result = campaignService.update(updateRequest);
 
@@ -344,7 +344,7 @@ class CampaignServiceImplTest {
         void archive_Success() {
             when(campaignRepo.findById(1)).thenReturn(Optional.of(testCampaign));
             when(campaignRepo.save(any(Campaign.class))).thenReturn(testCampaign);
-            when(campaignMapper.convertToDTO(any(Campaign.class))).thenReturn(testCampaignDTO);
+            when(campaignMapper.entityToDTO(any(Campaign.class))).thenReturn(testCampaignDTO);
 
             CampaignDTO result = campaignService.archive(1);
 

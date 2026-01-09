@@ -94,7 +94,7 @@ class CompanyServiceImplTest {
         testUser.setEmail("owner@example.com");
 
         CompanyTypeDTO typeDTO = new CompanyTypeDTO(1, "Non-Profit", "Non-profit organization");
-        testCompanyDTO = new CompanyDTO(1, "Test Company", "REG123456", "TAX12345678", typeDTO);
+        testCompanyDTO = new CompanyDTO(1, "Test Company", "REG123456", "TAX12345678", typeDTO, "APPROVED");
 
         createRequest = new CompanyCreateReq();
         createRequest.setUserId(1);
