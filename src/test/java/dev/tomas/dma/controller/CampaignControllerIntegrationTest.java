@@ -53,8 +53,6 @@ class CampaignControllerIntegrationTest {
     @Autowired
     private CompanyTypeRepo companyTypeRepo;
 
-    // We mock these because we only want to test the Campaign DB logic,
-    // not S3 upload or external Ticket notifications.
     @MockitoBean
     private ExternalStorageService storageService;
 
@@ -124,7 +122,7 @@ class CampaignControllerIntegrationTest {
 
     @Test
     @WithMockUser
-        // Default user, usually needed for generic authenticated endpoints
+        // Default user, needed for generic authenticated endpoints
     void getAll_ShouldReturnListOfCampaigns() throws Exception {
         // 1. Manually save campaigns to H2
         createCampaignInDb("Campaign A", testCompany);
@@ -154,22 +152,17 @@ class CampaignControllerIntegrationTest {
 
         mockMvc.perform(post("/api/campaigns/archive/{id}", saved.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status", is("ARCHIVED"))); // Assuming Enum string value
+                .andExpect(jsonPath("$.status", is("ARCHIVED")));
 
         // Verify DB update
         Campaign updated = campaignRepo.findById(saved.getId()).orElseThrow();
-        // assert updated.getStatus() == CampaignStatus.ARCHIVED;
+        assert updated.getStatus() == CampaignStatus.ARCHIVED;
     }
 
     @Test
     @WithMockUser
         // No authority provided
     void delete_WithoutAuthority_ShouldReturnForbidden() throws Exception {
-        // Assuming delete might need permission, or if not, testing basic access
-        // If delete is public in security config, this expects 200.
-        // If restricted, expects 403.
-        // Based on your controller, delete has NO @PreAuthorize, so checking if it works:
-
         Campaign saved = createCampaignInDb("To Delete", testCompany);
 
         mockMvc.perform(delete("/api/campaigns/{id}", saved.getId()))

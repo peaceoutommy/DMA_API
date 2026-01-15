@@ -2,6 +2,7 @@ package dev.tomas.dma.controller;
 
 import dev.tomas.dma.dto.common.UserDTO;
 import dev.tomas.dma.dto.request.AddUserToCompanyReq;
+import dev.tomas.dma.dto.request.RemoveUserFromCompanyReq;
 import dev.tomas.dma.service.CompanyEmployeeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,5 +31,11 @@ public class CompanyEmployeeController {
     @PostMapping
     public ResponseEntity<UserDTO> addUserToCompany(@RequestBody AddUserToCompanyReq request) {
         return ResponseEntity.ok(companyEmployeeService.addUserToCompany(request));
+    }
+
+    @PreAuthorize("hasAuthority('PERMISSION_Remove employee')")
+    @PostMapping("/remove")
+    public ResponseEntity<UserDTO> removeUserFromCompany(@RequestBody RemoveUserFromCompanyReq request) {
+        return ResponseEntity.ok(companyEmployeeService.removeUserFromCompany(request));
     }
 }
