@@ -9,21 +9,26 @@ import dev.tomas.dma.entity.Company;
 import dev.tomas.dma.enums.CampaignStatus;
 import dev.tomas.dma.enums.EntityType;
 import dev.tomas.dma.enums.FileType;
+import dev.tomas.dma.enums.Status;
 import dev.tomas.dma.mapper.AppFileMapper;
 import dev.tomas.dma.mapper.CampaignMapper;
 import dev.tomas.dma.entity.Campaign;
 import dev.tomas.dma.repository.AppFileRepo;
 import dev.tomas.dma.repository.CampaignRepo;
 import dev.tomas.dma.repository.CompanyRepo;
+import dev.tomas.dma.repository.TicketRepo;
 import dev.tomas.dma.service.CampaignService;
 import dev.tomas.dma.service.ExternalStorageService;
 import dev.tomas.dma.service.FileService;
 import dev.tomas.dma.service.TicketService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.security.core.GrantedAuthority;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -37,6 +42,7 @@ public class CampaignServiceImpl implements CampaignService {
     private final CampaignRepo campaignRepo;
     private final CompanyRepo companyRepo;
     private final CampaignMapper campaignMapper;
+    private final TicketRepo ticketRepo;
     private final ExternalStorageService externalStorageService;
     private final FileService fileService;
     private final TicketService ticketService;
@@ -48,6 +54,43 @@ public class CampaignServiceImpl implements CampaignService {
         CampaignGetAllRes response = new CampaignGetAllRes();
 
         for (Campaign entity : campaignRepo.findAll()) {
+            CampaignDTO dto = campaignMapper.entityToDTO(entity);
+            List<AppFile> images = fileRepo.findByEntityTypeAndEntityIdAndFileType(EntityType.CAMPAIGN, dto.getId(), FileType.CAMPAIGN_IMAGE);
+
+            dto.setFiles(fileMapper.entitiesToDTO(images));
+            response.campaigns.add(dto);
+        }
+        return response;
+    }
+
+    @Override
+    public CampaignGetAllRes findAllApproved(){
+        CampaignGetAllRes response = new CampaignGetAllRes();
+
+        for (Campaign entity : campaignRepo.findAll()) {
+
+            boolean hasPendingOrRejectedTicket = ticketRepo.existsByEntityIdAndTypeAndStatus(entity.getId(), EntityType.CAMPAIGN, Status.PENDING)
+                    || ticketRepo.existsByEntityIdAndTypeAndStatus(entity.getId(), EntityType.CAMPAIGN, Status.REJECTED);
+
+            if (hasPendingOrRejectedTicket) {
+                continue;
+            }
+
+            CampaignDTO dto = campaignMapper.entityToDTO(entity);
+            List<AppFile> images = fileRepo.findByEntityTypeAndEntityIdAndFileType(EntityType.CAMPAIGN, dto.getId(), FileType.CAMPAIGN_IMAGE);
+
+            dto.setFiles(fileMapper.entitiesToDTO(images));
+            response.campaigns.add(dto);
+        }
+
+        return response;
+    }
+
+    @Override
+    public CampaignGetAllRes findAllByStatus(CampaignStatus status) {
+        CampaignGetAllRes response = new CampaignGetAllRes();
+
+        for (Campaign entity : campaignRepo.findAllByStatus(status)) {
             CampaignDTO dto = campaignMapper.entityToDTO(entity);
             List<AppFile> images = fileRepo.findByEntityTypeAndEntityIdAndFileType(EntityType.CAMPAIGN, dto.getId(), FileType.CAMPAIGN_IMAGE);
 

@@ -21,6 +21,7 @@ public class Ticket {
     private Long id;
     private String name;
     private Integer entityId;
+    @Column(length = 5000)
     private String message;
     @Column(length = 10000)
     private String additionalInfo;

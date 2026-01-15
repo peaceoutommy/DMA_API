@@ -11,4 +11,6 @@ import java.util.List;
 @Repository
 public interface CampaignRepo extends JpaRepository<Campaign, Integer> {
     List<Campaign> findAllByCompanyId(Integer companyId);
+
+    List<Campaign> findAllByStatus(CampaignStatus status);
 }
