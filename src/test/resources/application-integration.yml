@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: DMA-Integration-Test
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/dma_test?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: root
+    password: 1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+jwt:
+  secret: very-long-dummy-secret-key-for-integration-tests-only-123456789
+  expiration: 86400000
+
+cloudinary:
+  url: cloudinary://12345:dummysecret@dummycloud
+
+stripe:
+  public: pk_test_12345
+  private: sk_test_12345
+  webhook:
+    private: whsec_12345
