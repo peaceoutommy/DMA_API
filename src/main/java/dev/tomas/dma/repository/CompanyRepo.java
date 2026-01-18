@@ -12,4 +12,5 @@ import java.util.List;
 public interface CompanyRepo extends JpaRepository<Company, Integer> {
     Company getReferenceById(Integer id);
     List<Company> findCompaniesByStatus(CompanyStatus status);
+    boolean existsByTypeId(Integer typeId);
 }

@@ -241,8 +241,8 @@ class CompanyServiceImplTest {
             CompanyTypeGetAllRes result = companyService.getAllTypes();
 
             assertThat(result).isNotNull();
-            assertThat(result.getTypes()).hasSize(1);
-            assertThat(result.getTypes().getFirst().getName()).isEqualTo("Non-Profit");
+            assertThat(result.getCompanyTypes()).hasSize(1);
+            assertThat(result.getCompanyTypes().getFirst().getName()).isEqualTo("Non-Profit");
         }
 
         @Test
@@ -342,6 +342,8 @@ class CompanyServiceImplTest {
         @Test
         @DisplayName("Should delete company type successfully")
         void deleteType_Success() {
+            when(companyTypeRepo.existsById(1)).thenReturn(true);
+            when(companyRepo.existsByTypeId(1)).thenReturn(false);
             doNothing().when(companyTypeRepo).deleteById(1);
 
             Integer result = companyService.deleteType(1);

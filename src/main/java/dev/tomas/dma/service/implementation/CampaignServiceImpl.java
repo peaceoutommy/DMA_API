@@ -67,15 +67,7 @@ public class CampaignServiceImpl implements CampaignService {
     public CampaignGetAllRes findAllApproved(){
         CampaignGetAllRes response = new CampaignGetAllRes();
 
-        for (Campaign entity : campaignRepo.findAll()) {
-
-            boolean hasPendingOrRejectedTicket = ticketRepo.existsByEntityIdAndTypeAndStatus(entity.getId(), EntityType.CAMPAIGN, Status.PENDING)
-                    || ticketRepo.existsByEntityIdAndTypeAndStatus(entity.getId(), EntityType.CAMPAIGN, Status.REJECTED);
-
-            if (hasPendingOrRejectedTicket) {
-                continue;
-            }
-
+        for (Campaign entity : campaignRepo.findAllByStatus(CampaignStatus.APPROVED)) {
             CampaignDTO dto = campaignMapper.entityToDTO(entity);
             List<AppFile> images = fileRepo.findByEntityTypeAndEntityIdAndFileType(EntityType.CAMPAIGN, dto.getId(), FileType.CAMPAIGN_IMAGE);
 
@@ -188,12 +180,24 @@ public class CampaignServiceImpl implements CampaignService {
         Campaign original = campaignRepo.findById(request.getId())
                 .orElseThrow(() -> new EntityNotFoundException("Campaign not found with id: " + request.getId()));
 
-        original.setName(request.getName());
-        original.setDescription(request.getDescription());
-        original.setFundGoal(request.getFundGoal());
-        original.setStartDate(request.getStartDate());
-        original.setEndDate(request.getEndDate());
-        original.setStatus(request.getStatus());
+        if (request.getName() != null) {
+            original.setName(request.getName());
+        }
+        if (request.getDescription() != null) {
+            original.setDescription(request.getDescription());
+        }
+        if (request.getFundGoal() != null) {
+            original.setFundGoal(request.getFundGoal());
+        }
+        if (request.getStartDate() != null) {
+            original.setStartDate(request.getStartDate());
+        }
+        if (request.getEndDate() != null) {
+            original.setEndDate(request.getEndDate());
+        }
+        if (request.getStatus() != null) {
+            original.setStatus(request.getStatus());
+        }
 
         return campaignMapper.entityToDTO(campaignRepo.save(original));
     }
@@ -206,6 +210,9 @@ public class CampaignServiceImpl implements CampaignService {
 
     @Override
     public Integer deleteById(Integer id) {
+        if (!campaignRepo.existsById(id)) {
+            throw new EntityNotFoundException("Campaign not found with id: " + id);
+        }
         campaignRepo.deleteById(id);
         return id;
     }

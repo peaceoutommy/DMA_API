@@ -392,6 +392,7 @@ class CampaignServiceImplTest {
         @Test
         @DisplayName("Should delete campaign successfully")
         void deleteById_Success() {
+            when(campaignRepo.existsById(1)).thenReturn(true);
             doNothing().when(campaignRepo).deleteById(1);
 
             Integer result = campaignService.deleteById(1);

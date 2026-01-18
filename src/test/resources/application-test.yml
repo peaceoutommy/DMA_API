@@ -2,11 +2,10 @@ spring:
   application:
     name: DMA-Test
 
-  # 1. Override DB to use H2 (In-memory)
   datasource:
     url: jdbc:h2:mem:dma_test_db;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    username: sa
-    password:
+    username: root
+    password: root
     driver-class-name: org.h2.Driver
 
   jpa:
@@ -14,13 +13,6 @@ spring:
     hibernate:
       ddl-auto: create-drop
 
-  # 2. Provide a dummy Mongo URI (required if you have Mongo dependencies)
-  data:
-    mongodb:
-      uri: mongodb://localhost:27017/test-db
-
-# 3. Provide DUMMY values for all external services
-# These beans will load, but we won't use them (or we will mock them)
 jwt:
   secret: this-is-a-very-long-dummy-secret-key-for-tests-only-123456
   expiration: 86400000

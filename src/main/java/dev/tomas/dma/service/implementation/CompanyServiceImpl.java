@@ -96,7 +96,7 @@ public class CompanyServiceImpl implements CompanyService {
         CompanyTypeGetAllRes response = new CompanyTypeGetAllRes();
 
         for (CompanyType entity : companyTypeRepo.findAll()) {
-            response.getTypes().add(
+            response.getCompanyTypes().add(
                     new CompanyTypeGetRes(entity.getId(), entity.getName(), entity.getDescription())
             );
         }
@@ -145,6 +145,12 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     public Integer deleteType(@Positive Integer id) {
+        if (!companyTypeRepo.existsById(id)) {
+            throw new EntityNotFoundException("Company type not found with id: " + id);
+        }
+        if (companyRepo.existsByTypeId(id)) {
+            throw new IllegalArgumentException("Cannot delete company type that has associated companies");
+        }
         companyTypeRepo.deleteById(id);
         return id;
     }
