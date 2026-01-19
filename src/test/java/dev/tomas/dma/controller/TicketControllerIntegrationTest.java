@@ -63,7 +63,7 @@ class TicketControllerIntegrationTest {
         ticketRepo.deleteAll();
     }
 
-    // ==================== Get All Open Tickets Tests ====================
+    //  Get All Open Tickets Tests 
 
     @Test
     @WithMockUser
@@ -101,7 +101,7 @@ class TicketControllerIntegrationTest {
                 .andExpect(status().isUnauthorized());
     }
 
-    // ==================== Get All Tickets Tests ====================
+    //  Get All Tickets Tests 
 
     @Test
     @WithMockUser
@@ -130,7 +130,7 @@ class TicketControllerIntegrationTest {
                 .andExpect(status().isUnauthorized());
     }
 
-    // ==================== Get Ticket By ID Tests ====================
+    //  Get Ticket By ID Tests 
 
     @Test
     @WithMockUser
@@ -158,7 +158,7 @@ class TicketControllerIntegrationTest {
                 .andExpect(status().isUnauthorized());
     }
 
-    // ==================== Close Ticket Tests ====================
+    //  Close Ticket Tests 
 
     @Test
     @WithMockUser
@@ -213,7 +213,7 @@ class TicketControllerIntegrationTest {
                 .andExpect(status().isUnauthorized());
     }
 
-    // ==================== Ticket Entity Type Tests ====================
+    //  Ticket Entity Type Tests 
 
     @Test
     @WithMockUser
@@ -229,7 +229,7 @@ class TicketControllerIntegrationTest {
                 .andExpect(jsonPath("$.tickets[*].type", hasItems("CAMPAIGN", "COMPANY", "USER", "FUND_REQUEST")));
     }
 
-    // ==================== Helper Methods ====================
+    //  Helper Methods 
 
     private Ticket createTicketInDb(String name, Status status, EntityType type) {
         Ticket ticket = new Ticket();

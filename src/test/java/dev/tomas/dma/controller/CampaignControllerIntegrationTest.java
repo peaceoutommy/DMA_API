@@ -106,7 +106,7 @@ class CampaignControllerIntegrationTest {
 
         // Mock storage service success
         try {
-            when(storageService.uploadFile(any(), any(), any())).thenReturn("https://s3-bucket/test.jpg");
+            when(storageService.uploadFile(any(), any(), any())).thenReturn("https://res.cloudinary.com/demo/image/upload/sample.jpg");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -129,7 +129,7 @@ class CampaignControllerIntegrationTest {
         companyTypeRepo.deleteAll();
     }
 
-    // ==================== Create Campaign Tests ====================
+    //  Create Campaign Tests 
 
     @Test
     @WithMockUser(authorities = "PERMISSION_Create campaign")
@@ -180,7 +180,7 @@ class CampaignControllerIntegrationTest {
                 .andExpect(status().isForbidden());
     }
 
-    // ==================== Get All Campaigns Tests ====================
+    //  Get All Campaigns Tests 
 
     @Test
     @WithMockUser
@@ -216,7 +216,7 @@ class CampaignControllerIntegrationTest {
                 .andExpect(status().isOk());
     }
 
-    // ==================== Get Campaign By ID Tests ====================
+    //  Get Campaign By ID Tests 
 
     @Test
     @WithMockUser
@@ -238,7 +238,7 @@ class CampaignControllerIntegrationTest {
                 .andExpect(status().isNotFound());
     }
 
-    // ==================== Get Campaigns By Status Tests ====================
+    //  Get Campaigns By Status Tests 
 
     @Test
     @WithMockUser
@@ -254,7 +254,7 @@ class CampaignControllerIntegrationTest {
                 .andExpect(jsonPath("$.campaigns[*].status", everyItem(is("ACTIVE"))));
     }
 
-    // ==================== Get Campaigns By Company Tests ====================
+    //  Get Campaigns By Company Tests 
 
     @Test
     @WithMockUser
@@ -287,7 +287,7 @@ class CampaignControllerIntegrationTest {
                 .andExpect(jsonPath("$.campaigns", hasSize(0)));
     }
 
-    // ==================== Update Campaign Tests ====================
+    //  Update Campaign Tests 
 
     @Test
     @WithMockUser(authorities = "PERMISSION_Update campaign")
@@ -324,7 +324,7 @@ class CampaignControllerIntegrationTest {
                 .andExpect(status().isForbidden());
     }
 
-    // ==================== Archive Campaign Tests ====================
+    //  Archive Campaign Tests 
 
     @Test
     @WithMockUser(authorities = "PERMISSION_Archive campaign")
@@ -351,7 +351,7 @@ class CampaignControllerIntegrationTest {
                 .andExpect(status().isForbidden());
     }
 
-    // ==================== Delete Campaign Tests ====================
+    //  Delete Campaign Tests 
 
     @Test
     @WithMockUser
@@ -374,7 +374,7 @@ class CampaignControllerIntegrationTest {
                 .andExpect(status().isNotFound());
     }
 
-    // ==================== Helper Methods ====================
+    //  Helper Methods 
 
     private Campaign createCampaignInDb(String name, Company company, CampaignStatus status) {
         Campaign c = new Campaign();

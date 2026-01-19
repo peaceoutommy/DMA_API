@@ -172,7 +172,7 @@ class DonationControllerIntegrationTest {
                 .forEach(userRepo::delete);
     }
 
-    // ==================== Create Donation (Payment Intent) Tests ====================
+    //  Create Donation (Payment Intent) Tests 
 
     @Test
     @WithMockUser
@@ -204,7 +204,7 @@ class DonationControllerIntegrationTest {
                 .andExpect(status().isUnauthorized());
     }
 
-    // ==================== Get Donations By User Tests ====================
+    //  Get Donations By User Tests 
 
     @Test
     @WithMockUser
@@ -252,7 +252,7 @@ class DonationControllerIntegrationTest {
                 .andExpect(status().isUnauthorized());
     }
 
-    // ==================== Multiple Users Donations Tests ====================
+    //  Multiple Users Donations Tests 
 
     @Test
     @WithMockUser
@@ -290,7 +290,7 @@ class DonationControllerIntegrationTest {
                 .andExpect(jsonPath("$[0].userId", is(anotherUser.getId())));
     }
 
-    // ==================== Webhook Tests ====================
+    //  Webhook Tests 
 
     @Test
     @DisplayName("POST /api/donations/webhook - Should return 400 for invalid signature")
@@ -305,7 +305,7 @@ class DonationControllerIntegrationTest {
                 .andExpect(content().string("Invalid signature"));
     }
 
-    // ==================== Helper Methods ====================
+    //  Helper Methods 
 
     private Donation createDonationInDb(User user, Campaign campaign, Long amount) {
         Donation donation = new Donation();

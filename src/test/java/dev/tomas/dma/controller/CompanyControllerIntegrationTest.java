@@ -148,7 +148,7 @@ class CompanyControllerIntegrationTest {
                 .forEach(userRepo::delete);
     }
 
-    // ==================== Company Endpoints ====================
+    //  Company Endpoints 
 
     @Test
     @WithMockUser
@@ -255,7 +255,7 @@ class CompanyControllerIntegrationTest {
                 .andExpect(status().isBadRequest());
     }
 
-    // ==================== CompanyType Endpoints ====================
+    //  CompanyType Endpoints 
 
     @Test
     @WithMockUser
@@ -381,7 +381,7 @@ class CompanyControllerIntegrationTest {
                 .andExpect(status().isBadRequest());
     }
 
-    // ==================== Funding Request Endpoint ====================
+    //  Funding Request Endpoint 
 
     @Test
     @WithMockUser(authorities = "PERMISSION_Submit funding")
@@ -434,7 +434,7 @@ class CompanyControllerIntegrationTest {
                 .andExpect(status().isForbidden());
     }
 
-    // ==================== Authentication Tests ====================
+    //  Authentication Tests 
 
     @Test
     @DisplayName("GET /api/companies - Should return 401 without authentication")
