@@ -7,5 +7,5 @@ import java.util.List;
 
 @Data
 public class CompanyTypeGetAllRes {
-    private List<CompanyTypeGetRes> types = new ArrayList<>();
+    private List<CompanyTypeGetRes> companyTypes = new ArrayList<>();
 }

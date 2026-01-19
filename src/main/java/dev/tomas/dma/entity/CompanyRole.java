@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,4 +36,7 @@ public class CompanyRole {
             inverseJoinColumns = @JoinColumn(name = "company_permission_id")
     )
     private List<CompanyPermission> permissions = new ArrayList<>();
+
+    @Column(name = "create_date")
+    private LocalDate createDate = LocalDate.now();
 }

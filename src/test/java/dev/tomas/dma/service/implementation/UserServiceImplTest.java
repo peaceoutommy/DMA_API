@@ -1,4 +1,4 @@
-package UnitTest;
+package dev.tomas.dma.service.implementation;
 
 import dev.tomas.dma.dto.common.UserDTO;
 import dev.tomas.dma.entity.Company;
@@ -6,7 +6,6 @@ import dev.tomas.dma.entity.CompanyRole;
 import dev.tomas.dma.entity.User;
 import dev.tomas.dma.mapper.UserMapper;
 import dev.tomas.dma.repository.UserRepo;
-import dev.tomas.dma.service.implementation.UserServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

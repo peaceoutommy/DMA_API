@@ -2,22 +2,18 @@ package dev.tomas.dma.service.implementation;
 
 import dev.tomas.dma.dto.common.CompanyDTO;
 import dev.tomas.dma.dto.common.CompanyTypeDTO;
+import dev.tomas.dma.dto.common.FundRequestDTO;
 import dev.tomas.dma.dto.request.CompanyCreateReq;
 import dev.tomas.dma.dto.request.CompanyTypeCreateReq;
+import dev.tomas.dma.dto.request.FundRequestCreateReq;
 import dev.tomas.dma.dto.response.*;
-import dev.tomas.dma.entity.Company;
-import dev.tomas.dma.entity.CompanyRole;
-import dev.tomas.dma.entity.CompanyType;
-import dev.tomas.dma.entity.User;
+import dev.tomas.dma.entity.*;
+import dev.tomas.dma.enums.CompanyStatus;
+import dev.tomas.dma.enums.Status;
 import dev.tomas.dma.mapper.CompanyMapper;
-import dev.tomas.dma.repository.CompanyRepo;
-import dev.tomas.dma.repository.CompanyRoleRepo;
-import dev.tomas.dma.repository.CompanyTypeRepo;
-import dev.tomas.dma.repository.UserRepo;
-import dev.tomas.dma.service.CompanyRoleService;
-import dev.tomas.dma.service.CompanyService;
-import dev.tomas.dma.service.ExternalStorageService;
-import dev.tomas.dma.service.FileService;
+import dev.tomas.dma.mapper.FundRequestMapper;
+import dev.tomas.dma.repository.*;
+import dev.tomas.dma.service.*;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -41,6 +37,10 @@ public class CompanyServiceImpl implements CompanyService {
     private final ExternalStorageService externalStorageService;
     private final UserRepo userRepo;
     private final CompanyMapper companyMapper;
+    private final TicketService  ticketService;
+    private final FundRequestRepo fundRequestRepo;
+    private final FundRequestMapper fundRequestMapper;
+    private final CampaignRepo campaignRepo;
 
     public CompanyGetAllRes getAll() {
         CompanyGetAllRes response = new CompanyGetAllRes();
@@ -48,7 +48,7 @@ public class CompanyServiceImpl implements CompanyService {
 
         for (Company entity : companyRepo.findAll()) {
             CompanyType type = entity.getType();
-            dtos.add(new CompanyDTO(entity.getId(), entity.getName(), entity.getRegistrationNumber(), entity.getTaxId(), new CompanyTypeDTO(type.getId(), type.getName(), type.getDescription())));
+            dtos.add(new CompanyDTO(entity.getId(), entity.getName(), entity.getRegistrationNumber(), entity.getTaxId(), new CompanyTypeDTO(type.getId(), type.getName(), type.getDescription()), entity.getStatus().toString()));
         }
 
         response.setCompanies(dtos);
@@ -64,12 +64,17 @@ public class CompanyServiceImpl implements CompanyService {
         CompanyType type = companyTypeRepo.findById(request.getTypeId()).orElseThrow(() -> new EntityNotFoundException("Type not found with id: " + request.getTypeId()));
         User user = userRepo.findById(request.getUserId()).orElseThrow(() -> new EntityNotFoundException("User not found with id: " + request.getUserId()));
 
-        Company companyToSave = new Company();
-        companyToSave.setName(request.getName());
-        companyToSave.setRegistrationNumber(request.getRegistrationNumber());
-        companyToSave.setTaxId(request.getTaxId());
-        companyToSave.setType(type);
-        Company savedCompany = companyRepo.save(companyToSave);
+        Company toSave = new Company();
+        toSave.setName(request.getName());
+        toSave.setRegistrationNumber(request.getRegistrationNumber());
+        toSave.setTaxId(request.getTaxId());
+        toSave.setType(type);
+        toSave.setStatus(CompanyStatus.PENDING);
+
+        Company savedCompany = companyRepo.save(toSave);
+
+        // Create a ticket
+        ticketService.save(savedCompany);
 
         externalStorageService.createFolder(savedCompany.getName());
 
@@ -91,7 +96,7 @@ public class CompanyServiceImpl implements CompanyService {
         CompanyTypeGetAllRes response = new CompanyTypeGetAllRes();
 
         for (CompanyType entity : companyTypeRepo.findAll()) {
-            response.getTypes().add(
+            response.getCompanyTypes().add(
                     new CompanyTypeGetRes(entity.getId(), entity.getName(), entity.getDescription())
             );
         }
@@ -104,7 +109,7 @@ public class CompanyServiceImpl implements CompanyService {
         return new CompanyTypeGetRes(entity.getId(), entity.getName(), entity.getDescription());
     }
 
-
+    @Transactional
     public CompanyTypeGetRes saveType(@Valid CompanyTypeCreateReq request) {
         if (StringUtils.isBlank(request.getName())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Company type name can't be empty");
@@ -121,6 +126,7 @@ public class CompanyServiceImpl implements CompanyService {
         return new CompanyTypeGetRes(saved.getId(), saved.getName(), saved.getDescription());
     }
 
+    @Transactional
     public CompanyTypeDTO updateType(@Valid CompanyTypeDTO request) {
         if (StringUtils.isBlank(request.getName())) {
             throw new IllegalArgumentException("Company type name can't be empty");
@@ -139,6 +145,12 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     public Integer deleteType(@Positive Integer id) {
+        if (!companyTypeRepo.existsById(id)) {
+            throw new EntityNotFoundException("Company type not found with id: " + id);
+        }
+        if (companyRepo.existsByTypeId(id)) {
+            throw new IllegalArgumentException("Cannot delete company type that has associated companies");
+        }
         companyTypeRepo.deleteById(id);
         return id;
     }
@@ -147,6 +159,7 @@ public class CompanyServiceImpl implements CompanyService {
         return companyRepo.findById(id).orElseThrow(() -> new EntityNotFoundException("Company not found with id: " + id));
     }
 
+    @Transactional
     public List<CompanyRole> createDefaultRoles(Company company) {
         List<CompanyRole> roles = new ArrayList<>();
 
@@ -164,5 +177,23 @@ public class CompanyServiceImpl implements CompanyService {
         roles.add(savedEmployeeRole);
         roles.add(savedOwnerRole);
         return roles;
+    }
+
+    @Transactional
+    public FundRequestDTO submitFundRequest(FundRequestCreateReq req){
+        Company company = companyRepo.findById(req.getCompanyId()).orElseThrow(() -> new EntityNotFoundException("Company not found with id: " + req.getCompanyId()));
+        Campaign campaign = campaignRepo.findById(req.getCampaignId()).orElseThrow(() -> new EntityNotFoundException("Campaign not found with id: " + req.getCampaignId()));
+
+        FundRequest toSave = new FundRequest();
+        toSave.setAmount(req.getAmount());
+        toSave.setCompany(company);
+        toSave.setCampaign(campaign);
+        toSave.setStatus(Status.PENDING);
+        toSave.setMessage(req.getMessage());
+
+        FundRequest saved = fundRequestRepo.save(toSave);
+        ticketService.save(saved);
+
+        return fundRequestMapper.toDTO(saved);
     }
 }

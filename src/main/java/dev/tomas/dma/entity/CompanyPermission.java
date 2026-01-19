@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,4 +31,7 @@ public class CompanyPermission {
 
     @ManyToMany(mappedBy = "permissions")
     private List<CompanyRole> companyRoles = new ArrayList<>();
+
+    @Column(name = "create_date")
+    private LocalDate createDate = LocalDate.now();
 }

@@ -1,4 +1,4 @@
-package UnitTest;
+package dev.tomas.dma.service.implementation;
 
 import dev.tomas.dma.dto.request.AuthReq;
 import dev.tomas.dma.dto.request.UserRegisterReq;
@@ -8,9 +8,10 @@ import dev.tomas.dma.entity.Company;
 import dev.tomas.dma.entity.CompanyRole;
 import dev.tomas.dma.entity.User;
 import dev.tomas.dma.enums.UserRole;
+import dev.tomas.dma.repository.TicketRepo;
 import dev.tomas.dma.repository.UserRepo;
 import dev.tomas.dma.service.JWTService;
-import dev.tomas.dma.service.implementation.AuthServiceImpl;
+import dev.tomas.dma.service.TicketService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -49,6 +50,12 @@ class AuthServiceImplTest {
 
     @Mock
     private AuthenticationManager authManager;
+
+    @Mock
+    private TicketService ticketService;
+
+    @Mock
+    private TicketRepo ticketRepo;
 
     @InjectMocks
     private AuthServiceImpl authService;

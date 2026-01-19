@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,4 +29,7 @@ public class CompanyType {
 
     @OneToMany(mappedBy = "type", orphanRemoval = true)
     private List<Company> companies = new ArrayList<>();
+
+    @Column(name = "create_date")
+    private LocalDate createDate = LocalDate.now();
 }

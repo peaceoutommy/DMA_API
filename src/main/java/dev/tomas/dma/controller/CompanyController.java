@@ -2,10 +2,12 @@ package dev.tomas.dma.controller;
 
 import dev.tomas.dma.dto.common.CompanyDTO;
 import dev.tomas.dma.dto.common.CompanyTypeDTO;
+import dev.tomas.dma.dto.common.FundRequestDTO;
 import dev.tomas.dma.dto.common.UserDTO;
 import dev.tomas.dma.dto.request.AddUserToCompanyReq;
 import dev.tomas.dma.dto.request.CompanyCreateReq;
 import dev.tomas.dma.dto.request.CompanyTypeCreateReq;
+import dev.tomas.dma.dto.request.FundRequestCreateReq;
 import dev.tomas.dma.dto.response.*;
 import dev.tomas.dma.entity.User;
 import dev.tomas.dma.service.CompanyEmployeeService;
@@ -15,6 +17,7 @@ import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -69,5 +72,11 @@ public class CompanyController {
             throw new IllegalArgumentException("Company type id cannot be null");
         }
         return companyService.deleteType(id);
+    }
+
+    @PreAuthorize("hasAuthority('PERMISSION_Submit funding')")
+    @PostMapping("funding")
+    public ResponseEntity<FundRequestDTO> submitFundingRequest(@RequestBody FundRequestCreateReq req){
+        return ResponseEntity.ok(companyService.submitFundRequest(req));
     }
 }

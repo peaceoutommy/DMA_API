@@ -1,4 +1,4 @@
-package UnitTest;
+package dev.tomas.dma.service.implementation;
 
 import dev.tomas.dma.dto.common.CampaignDTO;
 import dev.tomas.dma.dto.request.CampaignCreateReq;
@@ -10,13 +10,14 @@ import dev.tomas.dma.entity.Company;
 import dev.tomas.dma.enums.CampaignStatus;
 import dev.tomas.dma.enums.EntityType;
 import dev.tomas.dma.enums.FileType;
+import dev.tomas.dma.mapper.AppFileMapper;
 import dev.tomas.dma.mapper.CampaignMapper;
 import dev.tomas.dma.repository.AppFileRepo;
 import dev.tomas.dma.repository.CampaignRepo;
 import dev.tomas.dma.repository.CompanyRepo;
 import dev.tomas.dma.service.ExternalStorageService;
 import dev.tomas.dma.service.FileService;
-import dev.tomas.dma.service.implementation.CampaignServiceImpl;
+import dev.tomas.dma.service.TicketService;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -28,14 +29,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
+import dev.tomas.dma.dto.common.AppFileDTO;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -61,10 +60,17 @@ class CampaignServiceImplTest {
     private FileService fileService;
 
     @Mock
+    private TicketService ticketService;
+
+    @Mock
     private AppFileRepo fileRepo;
+
+    @Mock
+    AppFileMapper fileMapper;
 
     @InjectMocks
     private CampaignServiceImpl campaignService;
+
 
     private Campaign testCampaign;
     private Company testCompany;
@@ -122,9 +128,9 @@ class CampaignServiceImplTest {
         @Test
         @DisplayName("Should return all campaigns")
         void findAll_Success() {
-            List<Campaign> campaigns = Arrays.asList(testCampaign);
+            List<Campaign> campaigns = Collections.singletonList(testCampaign);
             when(campaignRepo.findAll()).thenReturn(campaigns);
-            when(campaignMapper.convertToDTO(any(Campaign.class))).thenReturn(testCampaignDTO);
+            when(campaignMapper.entityToDTO(any(Campaign.class))).thenReturn(testCampaignDTO);
             when(fileRepo.findByEntityTypeAndEntityIdAndFileType(
                     eq(EntityType.CAMPAIGN), anyInt(), eq(FileType.CAMPAIGN_IMAGE)))
                     .thenReturn(new ArrayList<>());
@@ -139,18 +145,31 @@ class CampaignServiceImplTest {
         @Test
         @DisplayName("Should return campaigns with images")
         void findAll_WithImages() {
+            // 1. Prepare the Entity (Database side)
             AppFile imageFile = new AppFile();
             imageFile.setUrl("http://example.com/image.jpg");
 
-            when(campaignRepo.findAll()).thenReturn(Arrays.asList(testCampaign));
-            when(campaignMapper.convertToDTO(any(Campaign.class))).thenReturn(testCampaignDTO);
+            // 2. Prepare the DTO (API response side)
+            AppFileDTO imageFileDTO = new AppFileDTO();
+            imageFileDTO.setUrl("http://example.com/image.jpg");
+
+            // 3. Stub the Repo
+            when(campaignRepo.findAll()).thenReturn(Collections.singletonList(testCampaign));
+            when(campaignMapper.entityToDTO(any(Campaign.class))).thenReturn(testCampaignDTO);
             when(fileRepo.findByEntityTypeAndEntityIdAndFileType(
                     eq(EntityType.CAMPAIGN), anyInt(), eq(FileType.CAMPAIGN_IMAGE)))
-                    .thenReturn(Arrays.asList(imageFile));
+                    .thenReturn(List.of(imageFile));
 
+            // The service uses this to convert the Entity list to DTO list
+            when(fileMapper.entitiesToDTO(anyList())).thenReturn(List.of(imageFileDTO));
+
+            // 5. Execute
             CampaignGetAllRes result = campaignService.findAll();
 
-            assertThat(result.getCampaigns().get(0).getImages()).contains("http://example.com/image.jpg");
+            // 6. Assert
+            assertThat(result.getCampaigns().getFirst().getFiles()).isNotEmpty(); // Check list isn't empty first
+            assertThat(result.getCampaigns().getFirst().getFiles().getFirst().getUrl())
+                    .contains("http://example.com/image.jpg");
         }
 
         @Test
@@ -172,7 +191,7 @@ class CampaignServiceImplTest {
         @DisplayName("Should return campaign by id")
         void findById_Success() {
             when(campaignRepo.findById(1)).thenReturn(Optional.of(testCampaign));
-            when(campaignMapper.convertToDTO(testCampaign)).thenReturn(testCampaignDTO);
+            when(campaignMapper.entityToDTO(testCampaign)).thenReturn(testCampaignDTO);
             when(fileRepo.findByEntityTypeAndEntityIdAndFileType(
                     eq(EntityType.CAMPAIGN), eq(1), eq(FileType.CAMPAIGN_IMAGE)))
                     .thenReturn(new ArrayList<>());
@@ -211,7 +230,7 @@ class CampaignServiceImplTest {
                 campaign.setCompany(testCompany);
                 return campaign;
             });
-            when(campaignMapper.convertToDTO(any(Campaign.class))).thenReturn(testCampaignDTO);
+            when(campaignMapper.entityToDTO(any(Campaign.class))).thenReturn(testCampaignDTO);
 
             CampaignDTO result = campaignService.save(createRequest);
 
@@ -225,7 +244,7 @@ class CampaignServiceImplTest {
         void save_Success_WithSingleImage() throws IOException {
             MockMultipartFile image = new MockMultipartFile(
                     "image", "test.jpg", "image/jpeg", "test image content".getBytes());
-            createRequest.setImages(Arrays.asList(image));
+            createRequest.setImages(List.of(image));
 
             when(companyRepo.getReferenceById(1)).thenReturn(testCompany);
             when(campaignRepo.save(any(Campaign.class))).thenAnswer(invocation -> {
@@ -236,7 +255,7 @@ class CampaignServiceImplTest {
             });
             when(externalStorageService.uploadFile(any(MultipartFile.class), anyString(), anyString()))
                     .thenReturn("http://example.com/image.jpg");
-            when(campaignMapper.convertToDTO(any(Campaign.class))).thenReturn(testCampaignDTO);
+            when(campaignMapper.entityToDTO(any(Campaign.class))).thenReturn(testCampaignDTO);
 
             CampaignDTO result = campaignService.save(createRequest);
 
@@ -264,7 +283,7 @@ class CampaignServiceImplTest {
             });
             when(externalStorageService.uploadFile(any(MultipartFile.class), anyString(), anyString()))
                     .thenReturn("http://example.com/image.jpg");
-            when(campaignMapper.convertToDTO(any(Campaign.class))).thenReturn(testCampaignDTO);
+            when(campaignMapper.entityToDTO(any(Campaign.class))).thenReturn(testCampaignDTO);
 
             CampaignDTO result = campaignService.save(createRequest);
 
@@ -313,7 +332,7 @@ class CampaignServiceImplTest {
         void update_Success() {
             when(campaignRepo.findById(1)).thenReturn(Optional.of(testCampaign));
             when(campaignRepo.save(any(Campaign.class))).thenReturn(testCampaign);
-            when(campaignMapper.convertToDTO(any(Campaign.class))).thenReturn(testCampaignDTO);
+            when(campaignMapper.entityToDTO(any(Campaign.class))).thenReturn(testCampaignDTO);
 
             CampaignDTO result = campaignService.update(updateRequest);
 
@@ -345,7 +364,7 @@ class CampaignServiceImplTest {
         void archive_Success() {
             when(campaignRepo.findById(1)).thenReturn(Optional.of(testCampaign));
             when(campaignRepo.save(any(Campaign.class))).thenReturn(testCampaign);
-            when(campaignMapper.convertToDTO(any(Campaign.class))).thenReturn(testCampaignDTO);
+            when(campaignMapper.entityToDTO(any(Campaign.class))).thenReturn(testCampaignDTO);
 
             CampaignDTO result = campaignService.archive(1);
 
@@ -373,6 +392,7 @@ class CampaignServiceImplTest {
         @Test
         @DisplayName("Should delete campaign successfully")
         void deleteById_Success() {
+            when(campaignRepo.existsById(1)).thenReturn(true);
             doNothing().when(campaignRepo).deleteById(1);
 
             Integer result = campaignService.deleteById(1);
