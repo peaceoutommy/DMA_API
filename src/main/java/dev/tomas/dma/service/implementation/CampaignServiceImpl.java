@@ -63,13 +63,26 @@ public class CampaignServiceImpl implements CampaignService {
         return response;
     }
 
-    @Override
-    public CampaignGetAllRes findAllApproved(){
+    public CampaignGetAllRes findAllApproved() {
         CampaignGetAllRes response = new CampaignGetAllRes();
+        List<CampaignStatus> campaignStatuses = List.of(CampaignStatus.PENDING, CampaignStatus.APPROVED);
+        List<Status> excludeTicketStatuses = List.of(Status.REJECTED, Status.PENDING);
 
-        for (Campaign entity : campaignRepo.findAllByStatus(CampaignStatus.APPROVED)) {
+        for (Campaign entity : campaignRepo.findAllByStatusIn(campaignStatuses)) {
+            // Skip campaigns that have PENDING or REJECTED tickets
+            if (ticketRepo.existsByEntityIdAndTypeAndStatusIn(
+                    entity.getId(),
+                    EntityType.CAMPAIGN,
+                    excludeTicketStatuses)) {
+                continue;  // Skip this campaign
+            }
+
             CampaignDTO dto = campaignMapper.entityToDTO(entity);
-            List<AppFile> images = fileRepo.findByEntityTypeAndEntityIdAndFileType(EntityType.CAMPAIGN, dto.getId(), FileType.CAMPAIGN_IMAGE);
+            List<AppFile> images = fileRepo.findByEntityTypeAndEntityIdAndFileType(
+                    EntityType.CAMPAIGN,
+                    dto.getId(),
+                    FileType.CAMPAIGN_IMAGE
+            );
 
             dto.setFiles(fileMapper.entitiesToDTO(images));
             response.campaigns.add(dto);

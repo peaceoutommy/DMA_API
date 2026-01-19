@@ -9,5 +9,8 @@ import java.util.List;
 
 public interface TicketRepo extends JpaRepository<Ticket, Long> {
     List<Ticket> findAllByStatus(Status status);
+
     boolean existsByEntityIdAndTypeAndStatus(Integer entityId, EntityType type, Status status);
+
+    boolean existsByEntityIdAndTypeAndStatusIn(Integer entityId, EntityType entityType, List<Status> statuses);
 }
