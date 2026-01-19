@@ -106,7 +106,11 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
     }
 
     public AuthUserRes authMe(Authentication authentication) {
-        User user = (User) authentication.getPrincipal();
+        if (authentication == null || !authentication.isAuthenticated() ||
+                !(authentication.getPrincipal() instanceof User user)) {
+            throw new BadCredentialsException("User not authenticated");
+        }
+
         AuthUserRes res = new AuthUserRes();
 
         res.setId(user.getId());
