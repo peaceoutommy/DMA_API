@@ -187,8 +187,8 @@ class CompanyControllerIntegrationTest {
         CompanyCreateReq request = new CompanyCreateReq(
                 testUser.getId(),
                 "New Company " + System.currentTimeMillis(),
-                "REG" + System.currentTimeMillis(),
-                "TAXID" + System.currentTimeMillis(),
+                "84127641249",
+                "NL123481721",
                 testType.getId()
         );
 
