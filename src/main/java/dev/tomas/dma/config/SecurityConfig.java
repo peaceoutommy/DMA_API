@@ -58,6 +58,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/register").permitAll()
                         .requestMatchers("/api/auth/login").permitAll()
+                        .requestMatchers("/api/auth/me").permitAll()
                         .requestMatchers("/api/donations/webhook").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/campaigns").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/campaigns/{id}").permitAll()
