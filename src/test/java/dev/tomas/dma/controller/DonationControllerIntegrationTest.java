@@ -1,7 +1,10 @@
 package dev.tomas.dma.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.stripe.model.Event;
+import com.stripe.model.EventDataObjectDeserializer;
 import com.stripe.model.PaymentIntent;
+import com.stripe.net.Webhook;
 import dev.tomas.dma.dto.common.DonationDTO;
 import dev.tomas.dma.entity.*;
 import dev.tomas.dma.enums.CampaignStatus;
@@ -11,6 +14,7 @@ import dev.tomas.dma.repository.*;
 import dev.tomas.dma.service.ExternalStorageService;
 import dev.tomas.dma.service.PaymentService;
 import dev.tomas.dma.service.TicketService;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -25,11 +29,15 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
+
+import org.mockito.MockedStatic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -59,6 +67,9 @@ class DonationControllerIntegrationTest {
 
     @Autowired
     private UserRepo userRepo;
+
+    @Autowired
+    private EntityManager entityManager;
 
     @MockitoBean
     private PaymentService paymentService;
@@ -305,7 +316,55 @@ class DonationControllerIntegrationTest {
                 .andExpect(content().string("Invalid signature"));
     }
 
-    //  Helper Methods 
+    @Test
+    @DisplayName("POST /api/donations/webhook - Should create donation on successful payment")
+    void handleWebhook_SuccessfulPayment_ShouldCreateDonation() throws Exception {
+        String payload = "{\"type\": \"payment_intent.succeeded\"}";
+        Long donationAmount = 5000L;
+
+        // Mock PaymentIntent with metadata
+        PaymentIntent mockPaymentIntent = mock(PaymentIntent.class);
+        when(mockPaymentIntent.getMetadata()).thenReturn(Map.of(
+                "campaignId", testCampaign.getId().toString(),
+                "userId", testUser.getId().toString()
+        ));
+        when(mockPaymentIntent.getAmount()).thenReturn(donationAmount);
+
+        // Mock EventDataObjectDeserializer
+        EventDataObjectDeserializer mockDeserializer = mock(EventDataObjectDeserializer.class);
+        when(mockDeserializer.getObject()).thenReturn(Optional.of(mockPaymentIntent));
+
+        // Mock Event
+        Event mockEvent = mock(Event.class);
+        when(mockEvent.getType()).thenReturn("payment_intent.succeeded");
+        when(mockEvent.getDataObjectDeserializer()).thenReturn(mockDeserializer);
+
+        try (MockedStatic<Webhook> webhookMock = mockStatic(Webhook.class)) {
+            webhookMock.when(() -> Webhook.constructEvent(anyString(), anyString(), anyString()))
+                    .thenReturn(mockEvent);
+
+            mockMvc.perform(post("/api/donations/webhook")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(payload)
+                            .header("Stripe-Signature", "valid_signature"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string("Success"));
+        }
+
+        entityManager.clear();
+        List<Donation> donations = entityManager
+                .createQuery("SELECT d FROM Donation d WHERE d.user.id = :userId", Donation.class)
+                .setParameter("userId", testUser.getId())
+                .getResultList();
+
+        Assertions.assertEquals(1, donations.size());
+        Donation dbDonation = donations.get(0);
+        Assertions.assertEquals(donationAmount, dbDonation.getAmount());
+        Assertions.assertEquals(testUser.getId(), dbDonation.getUser().getId());
+        Assertions.assertEquals(testCampaign.getId(), dbDonation.getCampaign().getId());
+    }
+
+    //  Helper Methods
 
     private Donation createDonationInDb(User user, Campaign campaign, Long amount) {
         Donation donation = new Donation();

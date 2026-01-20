@@ -7,6 +7,7 @@ import dev.tomas.dma.enums.EntityType;
 import dev.tomas.dma.enums.Status;
 import dev.tomas.dma.repository.TicketRepo;
 import dev.tomas.dma.service.ExternalStorageService;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -37,6 +38,9 @@ class TicketControllerIntegrationTest {
 
     @Autowired
     private TicketRepo ticketRepo;
+
+    @Autowired
+    private EntityManager entityManager;
 
     @MockitoBean
     private ExternalStorageService storageService;
@@ -174,10 +178,12 @@ class TicketControllerIntegrationTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
 
-        // Verify ticket was closed
-        Ticket updated = ticketRepo.findById(openTicket.getId()).orElseThrow();
-        Assertions.assertEquals(Status.APPROVED, updated.getStatus());
-        Assertions.assertNotNull(updated.getCloseDate());
+        entityManager.clear();
+        Ticket dbTicket = entityManager.find(Ticket.class, openTicket.getId());
+
+        Assertions.assertNotNull(dbTicket);
+        Assertions.assertEquals(Status.APPROVED, dbTicket.getStatus());
+        Assertions.assertNotNull(dbTicket.getCloseDate());
     }
 
     @Test
@@ -194,9 +200,12 @@ class TicketControllerIntegrationTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
 
-        // Verify ticket was closed
-        Ticket updated = ticketRepo.findById(openTicket.getId()).orElseThrow();
-        Assertions.assertEquals(Status.REJECTED, updated.getStatus());
+        entityManager.clear();
+        Ticket dbTicket = entityManager.find(Ticket.class, openTicket.getId());
+
+        Assertions.assertNotNull(dbTicket);
+        Assertions.assertEquals(Status.REJECTED, dbTicket.getStatus());
+        Assertions.assertNotNull(dbTicket.getCloseDate());
     }
 
     @Test

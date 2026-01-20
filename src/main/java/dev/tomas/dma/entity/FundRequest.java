@@ -20,7 +20,7 @@ public class FundRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Size(min = 30, max = 10000)
+    @Size(max = 10000)
     private String message;
     private BigDecimal amount;
     private Status status;

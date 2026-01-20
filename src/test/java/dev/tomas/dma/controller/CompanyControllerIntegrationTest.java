@@ -12,6 +12,7 @@ import dev.tomas.dma.enums.UserRole;
 import dev.tomas.dma.repository.*;
 import dev.tomas.dma.service.ExternalStorageService;
 import dev.tomas.dma.service.TicketService;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -57,6 +58,9 @@ class CompanyControllerIntegrationTest {
 
     @Autowired
     private FundRequestRepo fundRequestRepo;
+
+    @Autowired
+    private EntityManager entityManager;
 
     @MockitoBean
     private ExternalStorageService storageService;
@@ -184,21 +188,35 @@ class CompanyControllerIntegrationTest {
     @WithMockUser
     @DisplayName("POST /api/companies - Should create new company")
     void create_ShouldReturnSavedCompany() throws Exception {
+        String companyName = "New Company " + System.currentTimeMillis();
         CompanyCreateReq request = new CompanyCreateReq(
                 testUser.getId(),
-                "New Company " + System.currentTimeMillis(),
+                companyName,
                 "84127641249",
                 "NL123481721",
                 testType.getId()
         );
 
-        mockMvc.perform(post("/api/companies")
+        String response = mockMvc.perform(post("/api/companies")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name", is(request.getName())))
                 .andExpect(jsonPath("$.registrationNumber", is(request.getRegistrationNumber())))
-                .andExpect(jsonPath("$.taxId", is(request.getTaxId())));
+                .andExpect(jsonPath("$.taxId", is(request.getTaxId())))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        Integer createdId = objectMapper.readTree(response).get("id").asInt();
+
+        entityManager.clear();
+        Company dbCompany = entityManager.find(Company.class, createdId);
+
+        Assertions.assertNotNull(dbCompany);
+        Assertions.assertEquals(companyName, dbCompany.getName());
+        Assertions.assertEquals("84127641249", dbCompany.getRegistrationNumber());
+        Assertions.assertEquals("NL123481721", dbCompany.getTaxId());
     }
 
     @Test
@@ -290,17 +308,30 @@ class CompanyControllerIntegrationTest {
     @WithMockUser
     @DisplayName("POST /api/companies/types - Should create new company type")
     void createType_ShouldReturnSavedType() throws Exception {
+        String typeName = "New Type " + System.currentTimeMillis();
         CompanyTypeCreateReq request = new CompanyTypeCreateReq(
-                "New Type " + System.currentTimeMillis(),
+                typeName,
                 "Description for the new company type"
         );
 
-        mockMvc.perform(post("/api/companies/types")
+        String response = mockMvc.perform(post("/api/companies/types")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name", is(request.getName())))
-                .andExpect(jsonPath("$.description", is(request.getDescription())));
+                .andExpect(jsonPath("$.description", is(request.getDescription())))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        Integer createdId = objectMapper.readTree(response).get("id").asInt();
+
+        entityManager.clear();
+        CompanyType dbType = entityManager.find(CompanyType.class, createdId);
+
+        Assertions.assertNotNull(dbType);
+        Assertions.assertEquals(typeName, dbType.getName());
+        Assertions.assertEquals("Description for the new company type", dbType.getDescription());
     }
 
     @Test
@@ -335,6 +366,13 @@ class CompanyControllerIntegrationTest {
                 .andExpect(jsonPath("$.id", is(testType.getId())))
                 .andExpect(jsonPath("$.name", is("Updated Type Name")))
                 .andExpect(jsonPath("$.description", is("Updated description")));
+
+        entityManager.clear();
+        CompanyType dbType = entityManager.find(CompanyType.class, testType.getId());
+
+        Assertions.assertNotNull(dbType);
+        Assertions.assertEquals("Updated Type Name", dbType.getName());
+        Assertions.assertEquals("Updated description", dbType.getDescription());
     }
 
     @Test
@@ -364,12 +402,16 @@ class CompanyControllerIntegrationTest {
         typeToDelete.setDescription("This type will be deleted");
         typeToDelete = companyTypeRepo.save(typeToDelete);
 
-        mockMvc.perform(delete("/api/companies/types/{id}", typeToDelete.getId()))
-                .andExpect(status().isOk())
-                .andExpect(content().string(typeToDelete.getId().toString()));
+        Integer typeId = typeToDelete.getId();
 
-        // Verify deletion
-        Assertions.assertTrue(companyTypeRepo.findById(typeToDelete.getId()).isEmpty());
+        mockMvc.perform(delete("/api/companies/types/{id}", typeId))
+                .andExpect(status().isOk())
+                .andExpect(content().string(typeId.toString()));
+
+        entityManager.clear();
+        CompanyType dbType = entityManager.find(CompanyType.class, typeId);
+
+        Assertions.assertNull(dbType);
     }
 
     @Test
@@ -402,19 +444,34 @@ class CompanyControllerIntegrationTest {
         campaign.setFundGoal(new BigDecimal("10000"));
         Campaign savedCampaign = campaignRepo.save(campaign);
 
+        String fundingMessage = "This is a detailed message explaining why funds are needed for this campaign. It must be at least 30 characters.";
         FundRequestCreateReq request = new FundRequestCreateReq(
-                "This is a detailed message explaining why funds are needed for this campaign. It must be at least 30 characters.",
+                fundingMessage,
                 new BigDecimal("1000.00"),
                 savedCampaign.getId(),
                 testCompany.getId()
         );
 
-        mockMvc.perform(post("/api/companies/funding")
+        String response = mockMvc.perform(post("/api/companies/funding")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.amount", is(1000.0)))
-                .andExpect(jsonPath("$.message", notNullValue()));
+                .andExpect(jsonPath("$.message", notNullValue()))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        Long createdId = objectMapper.readTree(response).get("id").asLong();
+
+        entityManager.clear();
+        FundRequest dbFundRequest = entityManager.find(FundRequest.class, createdId);
+
+        Assertions.assertNotNull(dbFundRequest);
+        Assertions.assertEquals(fundingMessage, dbFundRequest.getMessage());
+        Assertions.assertEquals(new BigDecimal("1000.00"), dbFundRequest.getAmount());
+        Assertions.assertEquals(savedCampaign.getId(), dbFundRequest.getCampaign().getId());
+        Assertions.assertEquals(testCompany.getId(), dbFundRequest.getCompany().getId());
     }
 
     @Test
