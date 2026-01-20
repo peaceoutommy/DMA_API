@@ -254,6 +254,7 @@ class AuthServiceImplTest {
         @DisplayName("Should return current user info")
         void authMe_Success() {
             Authentication authentication = mock(Authentication.class);
+            when(authentication.isAuthenticated()).thenReturn(true);
             when(authentication.getPrincipal()).thenReturn(testUser);
 
             AuthUserRes result = authService.authMe(authentication);
@@ -281,6 +282,7 @@ class AuthServiceImplTest {
             testUser.setCompanyRole(companyRole);
 
             Authentication authentication = mock(Authentication.class);
+            when(authentication.isAuthenticated()).thenReturn(true);
             when(authentication.getPrincipal()).thenReturn(testUser);
 
             AuthUserRes result = authService.authMe(authentication);
