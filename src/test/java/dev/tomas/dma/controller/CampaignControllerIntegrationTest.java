@@ -5,13 +5,17 @@ import dev.tomas.dma.dto.request.CampaignUpdateReq;
 import dev.tomas.dma.entity.Campaign;
 import dev.tomas.dma.entity.Company;
 import dev.tomas.dma.entity.CompanyType;
+import dev.tomas.dma.entity.Ticket;
 import dev.tomas.dma.entity.User;
 import dev.tomas.dma.enums.CampaignStatus;
 import dev.tomas.dma.enums.CompanyStatus;
+import dev.tomas.dma.enums.EntityType;
+import dev.tomas.dma.enums.Status;
 import dev.tomas.dma.enums.UserRole;
 import dev.tomas.dma.repository.CampaignRepo;
 import dev.tomas.dma.repository.CompanyRepo;
 import dev.tomas.dma.repository.CompanyTypeRepo;
+import dev.tomas.dma.repository.TicketRepo;
 import dev.tomas.dma.repository.UserRepo;
 import dev.tomas.dma.service.ExternalStorageService;
 import dev.tomas.dma.service.TicketService;
@@ -25,6 +29,8 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+
+import jakarta.persistence.EntityManager;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -60,6 +66,12 @@ class CampaignControllerIntegrationTest {
     @Autowired
     private UserRepo userRepo;
 
+    @Autowired
+    private TicketRepo ticketRepo;
+
+    @Autowired
+    private EntityManager entityManager;
+
     @MockitoBean
     private ExternalStorageService storageService;
 
@@ -72,6 +84,7 @@ class CampaignControllerIntegrationTest {
     @BeforeEach
     void setUp() {
         // Clean up in reverse order of dependencies
+        ticketRepo.deleteAll();
         campaignRepo.deleteAll();
 
         // Remove user-company associations before deleting companies
@@ -114,6 +127,7 @@ class CampaignControllerIntegrationTest {
 
     @AfterEach
     void tearDown() {
+        ticketRepo.deleteAll();
         campaignRepo.deleteAll();
 
         List<User> usersWithCompany = userRepo.findAll().stream()
@@ -135,6 +149,7 @@ class CampaignControllerIntegrationTest {
     @WithMockUser(authorities = "PERMISSION_Create campaign")
     @DisplayName("POST /api/campaigns - Should create campaign with valid data")
     void createCampaign_ShouldReturnSavedCampaign() throws Exception {
+        String campaignName = "Summer Sale " + System.currentTimeMillis();
         MockMultipartFile imageFile = new MockMultipartFile(
                 "image",
                 "banner.jpg",
@@ -142,9 +157,9 @@ class CampaignControllerIntegrationTest {
                 "test image content".getBytes()
         );
 
-        mockMvc.perform(multipart("/api/campaigns")
+        String response = mockMvc.perform(multipart("/api/campaigns")
                         .file(imageFile)
-                        .param("name", "Summer Sale " + System.currentTimeMillis())
+                        .param("name", campaignName)
                         .param("description", "Big discounts for everyone")
                         .param("companyId", testCompany.getId().toString())
                         .param("startDate", LocalDate.now().toString())
@@ -154,7 +169,21 @@ class CampaignControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name", containsString("Summer Sale")))
                 .andExpect(jsonPath("$.companyId", is(testCompany.getId())))
-                .andExpect(jsonPath("$.status", is("PENDING")));
+                .andExpect(jsonPath("$.status", is("PENDING")))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        Integer createdId = objectMapper.readTree(response).get("id").asInt();
+
+        entityManager.clear();
+        Campaign dbCampaign = entityManager.find(Campaign.class, createdId);
+
+        Assertions.assertNotNull(dbCampaign);
+        Assertions.assertEquals(campaignName, dbCampaign.getName());
+        Assertions.assertEquals("Big discounts for everyone", dbCampaign.getDescription());
+        Assertions.assertEquals(testCompany.getId(), dbCampaign.getCompany().getId());
+        Assertions.assertEquals(CampaignStatus.PENDING, dbCampaign.getStatus());
     }
 
     @Test
@@ -186,14 +215,31 @@ class CampaignControllerIntegrationTest {
     @WithMockUser
     @DisplayName("GET /api/campaigns - Should return approved campaigns for regular user")
     void getAll_AsRegularUser_ShouldReturnApprovedCampaigns() throws Exception {
-        // Create approved and pending campaigns
-        createCampaignInDb("Approved Campaign", testCompany, CampaignStatus.APPROVED);
-        createCampaignInDb("Pending Campaign", testCompany, CampaignStatus.PENDING);
+        // Campaign with no ticket - should be included
+        Campaign noTicketCampaign = createCampaignInDb("No Ticket Campaign", testCompany, CampaignStatus.APPROVED);
+
+        // Campaign with APPROVED ticket - should be included
+        Campaign approvedTicketCampaign = createCampaignInDb("Approved Ticket Campaign", testCompany, CampaignStatus.PENDING);
+        createTicketForCampaign(approvedTicketCampaign, Status.APPROVED);
+
+        // Campaign with REJECTED ticket - should be excluded
+        Campaign rejectedTicketCampaign = createCampaignInDb("Rejected Ticket Campaign", testCompany, CampaignStatus.APPROVED);
+        createTicketForCampaign(rejectedTicketCampaign, Status.REJECTED);
+
+        // Campaign with PENDING ticket - should be excluded
+        Campaign pendingTicketCampaign = createCampaignInDb("Pending Ticket Campaign", testCompany, CampaignStatus.PENDING);
+        createTicketForCampaign(pendingTicketCampaign, Status.PENDING);
+
+        // Campaign with non-approved status (ARCHIVED) - should be excluded regardless of tickets
+        createCampaignInDb("Archived Campaign", testCompany, CampaignStatus.ARCHIVED);
 
         mockMvc.perform(get("/api/campaigns"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.campaigns", hasSize(1)))
-                .andExpect(jsonPath("$.campaigns[0].status", is("APPROVED")));
+                .andExpect(jsonPath("$.campaigns", hasSize(2)))
+                .andExpect(jsonPath("$.campaigns[*].name", containsInAnyOrder(
+                        "No Ticket Campaign",
+                        "Approved Ticket Campaign"
+                )));
     }
 
     @Test
@@ -306,6 +352,13 @@ class CampaignControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name", is("Updated Name")))
                 .andExpect(jsonPath("$.description", is("Updated description")));
+
+        entityManager.clear();
+        Campaign dbCampaign = entityManager.find(Campaign.class, saved.getId());
+
+        Assertions.assertNotNull(dbCampaign);
+        Assertions.assertEquals("Updated Name", dbCampaign.getName());
+        Assertions.assertEquals("Updated description", dbCampaign.getDescription());
     }
 
     @Test
@@ -336,9 +389,11 @@ class CampaignControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status", is("ARCHIVED")));
 
-        // Verify DB update
-        Campaign updated = campaignRepo.findById(saved.getId()).orElseThrow();
-        Assertions.assertEquals(CampaignStatus.ARCHIVED, updated.getStatus());
+        entityManager.clear();
+        Campaign dbCampaign = entityManager.find(Campaign.class, saved.getId());
+
+        Assertions.assertNotNull(dbCampaign);
+        Assertions.assertEquals(CampaignStatus.ARCHIVED, dbCampaign.getStatus());
     }
 
     @Test
@@ -363,7 +418,10 @@ class CampaignControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string(saved.getId().toString()));
 
-        Assertions.assertTrue(campaignRepo.findById(saved.getId()).isEmpty());
+        entityManager.clear();
+        Campaign dbCampaign = entityManager.find(Campaign.class, saved.getId());
+
+        Assertions.assertNull(dbCampaign);
     }
 
     @Test
@@ -390,5 +448,16 @@ class CampaignControllerIntegrationTest {
         c.setRaisedFunds(BigDecimal.ZERO);
         c.setFundGoal(new BigDecimal("10000"));
         return campaignRepo.save(c);
+    }
+
+    private Ticket createTicketForCampaign(Campaign campaign, Status status) {
+        Ticket ticket = new Ticket();
+        ticket.setName("Ticket for " + campaign.getName());
+        ticket.setEntityId(campaign.getId());
+        ticket.setType(EntityType.CAMPAIGN);
+        ticket.setStatus(status);
+        ticket.setCreateDate(java.time.LocalDateTime.now());
+        ticket.setMessage("Test ticket message");
+        return ticketRepo.save(ticket);
     }
 }
